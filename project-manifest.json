@@ -13,7 +13,7 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "verification_in_progress"
+    "status": "live"
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -113,7 +113,8 @@
     "xlsxStructureChecked": true,
     "date": "2026-11-05",
     "cloudSmokeChecked": true,
-    "pagesLiveChecked": false
+    "pagesLiveChecked": true,
+    "pagesCommit": "1ca8fa166d6c68352470cea4eacbcc30a89e3e0d"
   },
   "brandName": "CCBABY",
   "testData": {

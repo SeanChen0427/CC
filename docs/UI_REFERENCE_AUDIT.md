@@ -1,5 +1,7 @@
 # 參考網站 UI 研究紀錄
 
+研究截圖只保留本機 docs/reference-ui，不隨公開 GitHub 儲存庫發布；本文件文字紀錄可公開。
+
 查閱日期：2026-11-05（Asia/Taipei）
 
 參考：[Pawscorner 韓國連線下單頁面](https://liff.line.me/2012275055-yxwegxrc)。
