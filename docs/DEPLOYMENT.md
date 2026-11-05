@@ -24,7 +24,7 @@
 ```text
 GitHub Pages
 ├─ /CC/                  客戶頁 → 商品目錄、LINE 待啟用
-└─ /CC/admin/            店主頁 → 唯一帳號 owner
+└─ /CC/admin/            店主頁 → 唯一帳號 hannah
         │ HTTPS / JSON / 各角色 bearer session
         ▼
 Supabase ccbaby-api
@@ -55,7 +55,7 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 
 ## 登入與權限
 
-- 唯一帳號為 owner；伺服器映射到固定內部信箱，Supabase Auth 保存密碼雜湊。
+- 唯一帳號為 hannah；伺服器映射到固定內部信箱，Supabase Auth 保存密碼雜湊。
 - 初始密碼保存在本機私有 `.local/admin-credentials.txt`，不在 GitHub、網頁、文件、匯出或日誌。
 - 沒有註冊／新增管理員功能；任何其他 Supabase Auth 使用者都不會成為店主。
 - 前端只取得隨機應用程式 session，不取得 service_role key 或 Supabase Auth refresh token。
@@ -102,3 +102,5 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 後續正式商品、價格、尺寸與日期由店主填入，不再自動加入範例。
 
 正式網址驗證（2026-11-05）：兩個入口與關鍵資源 HTTP 200，Pages build 為 built；正式前台讀取雲端空目錄、店主管理登入成功。資料仍為商品／客戶／預購／明細零筆，唯一管理員一位。
+
+帳密更新驗證（0.3.1）：hannah 與新密碼登入成功，舊帳號、舊密碼及舊管理工作階段均被拒絕；本機帳號與私有登入檔同步，維持新密碼至少 12 碼。

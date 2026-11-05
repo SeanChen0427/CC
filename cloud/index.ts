@@ -66,7 +66,7 @@ Deno.serve(async req=>{
     if(path==='admin/login'&&method==='POST'){
       const ip=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
       if(!await rpc('ccbaby_login_attempt',{p_bucket:await digest('admin:'+ip)}))throw new AppError('登入嘗試較多，請五分鐘後再試',429);
-      if(body.username!=='owner'||typeof body.password!=='string'||body.password.length>128)throw new AppError('帳號或密碼不正確',401);
+      if(body.username!=='hannah'||typeof body.password!=='string'||body.password.length>128)throw new AppError('帳號或密碼不正確',401);
       const auth=await passwordLogin(body.password);
       if(!state.owner_id||auth.user.id!==state.owner_id)throw new AppError('此帳號沒有管理權限',403);
       return json({ok:true,token:await session('admin',auth.user.id)});

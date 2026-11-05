@@ -142,9 +142,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
   if (!store.get('SELECT id FROM admin')) {
     const secret = password || randomBytes(12).toString('base64url');
     const salt = randomBytes(16).toString('hex');
-    store.run('INSERT INTO admin VALUES(1,?,?,?)', 'owner', salt, scryptSync(secret, salt, 64).toString('hex'));
+    store.run('INSERT INTO admin VALUES(1,?,?,?)', 'hannah', salt, scryptSync(secret, salt, 64).toString('hex'));
     if (credentialPath) writeFileSync(credentialPath,
-      `僅供本機測試\n後台：http://127.0.0.1:4174\n帳號：owner\n密碼：${secret}\n\n正式上線前請更換密碼，勿將本檔上傳。\n`,
+      `僅供本機測試\n後台：http://127.0.0.1:4174\n帳號：hannah\n密碼：${secret}\n\n正式上線前請更換密碼，勿將本檔上傳。\n`,
       { mode: 0o600 });
   }
   if (!store.get('SELECT id FROM campaign')) {

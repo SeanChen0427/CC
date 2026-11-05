@@ -1,6 +1,6 @@
 # 最新交接狀態
 
-更新：2026-11-05｜版本 0.3.0｜品牌 CCBABY
+更新：2026-11-05｜版本 0.3.1｜品牌 CCBABY
 
 ## 已確認部署
 
@@ -11,7 +11,7 @@ LINE channel 尚未建立，指示先完成部署與串接準備；不要重問�
 - 管理：https://seanchen0427.github.io/CC/admin/
 - 原始碼：https://github.com/SeanChen0427/CC
 - Supabase ref：tukluknvmbsbsdzawmjf，Edge：ccbaby-api。
-- 唯一帳號 owner，初始密碼只在私有 .local/admin-credentials.txt，不轉錄聊天或文件。
+- 唯一帳號 hannah，初始密碼只在私有 .local/admin-credentials.txt，不轉錄聊天或文件。
 - 詳細部署、資料樹、發布與 LINE 設定：[DEPLOYMENT.md](DEPLOYMENT.md)。
 
 ## 已完成
@@ -45,3 +45,7 @@ LINE channel 尚未建立，指示先完成部署與串接準備；不要重問�
 參考站只實測主要前台，未取得後台權限；本案後台為自行設計。
 
 正式網址驗證（2026-11-05）：兩個入口與關鍵資源 HTTP 200，Pages build 為 built；正式前台讀取雲端空目錄、店主管理登入成功。資料仍為商品／客戶／預購／明細零筆，唯一管理員一位。
+
+0.3.1：依店主要求將唯一管理帳號由 owner 改為 hannah，維持至少 12 碼密碼規則；密碼不寫入此文件。
+
+帳密更新驗證（0.3.1）：hannah 與新密碼登入成功，舊帳號、舊密碼及舊管理工作階段均被拒絕；本機帳號與私有登入檔同步，維持新密碼至少 12 碼。

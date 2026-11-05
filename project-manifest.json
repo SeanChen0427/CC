@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.0",
+  "documentVersion": "0.3.1",
   "updatedAt": "2026-11-05",
   "timezone": "Asia/Taipei",
   "phase": "deployed_line_setup_pending",
@@ -49,8 +49,9 @@
       "plannedDirectory": "apps/admin-web",
       "localUrl": "http://127.0.0.1:4174/",
       "directory": "apps/admin-web",
-      "localUsername": "owner",
-      "credentialFile": ".local/admin-credentials.txt"
+      "localUsername": "hannah",
+      "credentialFile": ".local/admin-credentials.txt",
+      "username": "hannah"
     },
     "separateOrigins": false,
     "separateFrontendBuilds": true,

@@ -1,6 +1,6 @@
 # CCBABY 韓國年度預購網站
 
-版本：0.3.0｜更新：2026-11-05（Asia/Taipei）
+版本：0.3.1｜更新：2026-11-05（Asia/Taipei）
 
 跨 AI 接手先讀 [AI_INDEX.md](AI_INDEX.md)，最新工作狀態見 [HANDOFF.md](docs/HANDOFF.md)。
 
@@ -13,7 +13,7 @@ LINE 尚未建立，程式已準備串接，活動保留「準備中」，不接
 - 管理端：https://seanchen0427.github.io/CC/admin/
 - 原始碼：https://github.com/SeanChen0427/CC
 - 啟動：在根目錄執行 `npm start`（Node.js 24 以上，無需安裝 npm 依賴）。
-- 唯一管理帳號為 `owner`，初始密碼位於私有 `.local/admin-credentials.txt`，不放 GitHub。
+- 唯一管理帳號為 `hannah`，初始密碼位於私有 `.local/admin-credentials.txt`，不放 GitHub。
 - [部署與 LINE 啟用說明](docs/DEPLOYMENT.md)；後台上架商品不需要重新發布網站。
 - 本機備用版：客戶 4173／管理 4174，預設不產生範例或開啟測試會員登入。
 - `npm run build` 建置公開成品，`npm run publish:pages` 發布 gh-pages。

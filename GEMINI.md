@@ -5,7 +5,7 @@
 
 ## 範圍與現況
 
-本專案品牌為 CCBABY，版本 0.3.0。使用者已明確授權清空測試資料、部署 GitHub
+本專案品牌為 CCBABY，版本 0.3.1。使用者已明確授權清空測試資料、部署 GitHub
 SeanChen0427/CC 與 Supabase，確認客戶 /CC/、管理 /CC/admin/ 同源不同路徑。
 詳見 docs/DEPLOYMENT.md；請勿重問已授權的發布與基本架構。
 LINE 尚未建立，活動 draft；不得用示範會員冒充正式驗證。

@@ -33,7 +33,7 @@ npm start
 
 ## 3. 管理員帳密
 
-- 唯一管理帳號是 `owner`。
+- 唯一管理帳號是 `hannah`。
 - 首次啟動時產生隨機測試密碼，存放於根目錄 `.local/admin-credentials.txt`。
 - 該目錄及檔案限制本機存取，且已被 .gitignore 排除。
 - Markdown、前端與公開設定不保存密碼。

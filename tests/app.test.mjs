@@ -47,8 +47,8 @@ test('two local applications, durable preorders and buying reports', async t => 
       assert.equal((await request('admin','customer/login',{method:'POST',body:{profile:'demo-visitor'}})).status,403);
     });
     await t.test('independent admin password login and customer test session', async () => {
-      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'owner',password:'wrong'}})).status,401);
-      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'owner',password}})).status,200);
+      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'hannah',password:'wrong'}})).status,401);
+      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'hannah',password}})).status,200);
       assert.equal((await request('customer','customer/login',{method:'POST',body:{profile:'demo-visitor'}})).status,200);
       assert.equal((await request('admin','admin/state',{jar:'customer'})).status,401);
       assert.equal((await request('customer','customer/orders',{jar:'admin'})).status,401);
@@ -182,7 +182,7 @@ test('two local applications, durable preorders and buying reports', async t => 
       const changed=await request('admin','admin/password',{method:'POST',body:{current:password,password:randomUUID()+'new-password'}});
       assert.equal(changed.status,200);
       assert.equal((await request('admin','admin/state')).status,401);
-      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'owner',password}})).status,401);
+      assert.equal((await request('admin','admin/login',{method:'POST',body:{username:'hannah',password}})).status,401);
     });
   }finally{
     await app.close();
