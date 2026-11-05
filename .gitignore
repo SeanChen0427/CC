@@ -1,0 +1,23 @@
+# Browser research may contain login callback parameters.
+.playwright-mcp/
+.local/
+
+# Local secrets and private business data.
+.env
+.env.*
+!.env.example
+private/
+exports/
+backups/
+*.log
+
+# Future build output.
+node_modules/
+dist/
+build/
+coverage/
+.DS_Store
+
+# Reference UI and local screenshots are not public site assets.
+docs/reference-ui/
+docs/preview-ui/

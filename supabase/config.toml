@@ -1,0 +1,3 @@
+[functions.ccbaby-api]
+verify_jwt = false
+entrypoint = "../cloud/index.ts"

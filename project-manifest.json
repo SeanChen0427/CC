@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "projectName": "CCBABY 韓國年度預購網站",
+  "documentVersion": "0.3.0",
+  "updatedAt": "2026-11-05",
+  "timezone": "Asia/Taipei",
+  "phase": "deployed_line_setup_pending",
+  "implementationStarted": true,
+  "deployment": {
+    "provider": "GitHub Pages + Supabase",
+    "repository": "https://github.com/SeanChen0427/CC",
+    "sourceBranch": "main",
+    "pagesBranch": "gh-pages",
+    "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
+    "edgeFunction": "ccbaby-api",
+    "status": "verification_in_progress"
+  },
+  "entryDocuments": [
+    "AI_INDEX.md",
+    "docs/HANDOFF.md",
+    "project-manifest.json",
+    "docs/AI_START_HERE.md"
+  ],
+  "aiToolEntrypoints": {
+    "sharedIndex": "AI_INDEX.md",
+    "latestHandoff": "docs/HANDOFF.md",
+    "identicalInstructionFiles": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      "GEMINI.md"
+    ],
+    "otherTools": "explicitly_read_AI_INDEX.md",
+    "automaticLoadingVerified": false
+  },
+  "entrypoints": {
+    "customer": {
+      "url": "https://seanchen0427.github.io/CC/",
+      "authentication": "LINE",
+      "plannedDirectory": "apps/customer-web",
+      "localUrl": "http://127.0.0.1:4173/",
+      "directory": "apps/customer-web",
+      "localAuthentication": "disabled_by_default",
+      "productionLineConfigured": false
+    },
+    "admin": {
+      "url": "https://seanchen0427.github.io/CC/admin/",
+      "authentication": "single_username_password",
+      "accountCount": 1,
+      "plannedDirectory": "apps/admin-web",
+      "localUrl": "http://127.0.0.1:4174/",
+      "directory": "apps/admin-web",
+      "localUsername": "owner",
+      "credentialFile": ".local/admin-credentials.txt"
+    },
+    "separateOrigins": false,
+    "separateFrontendBuilds": true,
+    "separateAuthentication": true,
+    "sharedBackendData": true
+  },
+  "scope": {
+    "annualTrips": 1,
+    "productCountRange": [
+      100,
+      200
+    ],
+    "merchantClassification": false,
+    "checkout": false,
+    "onlinePayments": false,
+    "paymentTiming": "after_arrival_in_taiwan",
+    "paymentCommunication": "manual_LINE",
+    "automatedPush": "deferred"
+  },
+  "documents": {
+    "crossAiIndex": "AI_INDEX.md",
+    "handoff": "docs/HANDOFF.md",
+    "requirements": "SPEC.md",
+    "architecture": "docs/ARCHITECTURE_MAP.md",
+    "dataModel": "docs/DATA_MODEL.md",
+    "decisions": "docs/DECISION_LOG.md",
+    "openDecisions": "docs/OPEN_DECISIONS.md",
+    "referenceAudit": "docs/UI_REFERENCE_AUDIT.md",
+    "startHere": "docs/AI_START_HERE.md",
+    "changelog": "CHANGELOG.md",
+    "localPreview": "docs/LOCAL_PREVIEW.md",
+    "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
+    "deployment": "docs/DEPLOYMENT.md"
+  },
+  "nextStep": "configure_own_line_channel_then_acceptance_and_real_products",
+  "runtime": {
+    "node": "24+ (verified 24.14.1)",
+    "frontend": "separate native HTML/CSS/JS applications",
+    "backend": "Node.js HTTP",
+    "database": "SQLite via node:sqlite (experimental API)",
+    "dataDirectory": ".local",
+    "startCommand": "npm start",
+    "developmentCommand": "npm run dev",
+    "bindAddress": "127.0.0.1",
+    "externalDependencies": [],
+    "cloud": {
+      "frontend": "GitHub Pages static HTML/CSS/JS",
+      "backend": "Supabase Edge Function",
+      "database": "private single-period Postgres JSONB + atomic revision",
+      "authentication": "fixed Supabase Auth owner + opaque sessions; customer LINE pending",
+      "storage": "public product photos only"
+    }
+  },
+  "verification": {
+    "syntax": "npm run check",
+    "integration": "npm test",
+    "integrationTestsPassed": 29,
+    "browserChecked": true,
+    "mobileViewport": 390,
+    "xlsxStructureChecked": true,
+    "date": "2026-11-05",
+    "cloudSmokeChecked": true,
+    "pagesLiveChecked": false
+  },
+  "brandName": "CCBABY",
+  "testData": {
+    "localCleared": true,
+    "productionProducts": 0,
+    "productionCustomers": 0,
+    "productionPreorders": 0,
+    "automaticSeed": false
+  }
+}
