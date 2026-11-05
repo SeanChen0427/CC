@@ -1,5 +1,12 @@
 # 變更紀錄
 
+## LINE Login 啟用 — 2026-11-05
+
+- 使用自有 LINE Login Channel 2012401105 與官方帳號 @445yxcey，Secrets 僅保存在 Supabase。
+- Callback、Linked LINE Official Account 與真實 LINE 登入／後端驗證／重新整理保存通過。
+- 依使用者於發布前的明確確認，Channel 已由 Developing 切為 Published。
+- 沒有修改前端或後端業務程式，沒有虛構商品或訂單，活動保持 draft 等待正式上架。
+
 ## 0.3.2 — 2026-11-05
 
 - 移除前後台所有靜態文案強制斷行與多餘句點，縮短頁面及彈窗標題。

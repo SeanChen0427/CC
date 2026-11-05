@@ -7,7 +7,7 @@
 ## 目前狀態
 
 已依指定部署 GitHub Pages 與 Supabase，測試商品、客戶及預購資料已清空。
-LINE 尚未建立，程式已準備串接，活動保留「準備中」，不接受正式送單。
+LINE Login 已設定並發布，已用真實 LINE 帳號完成登入測試。活動保留「準備中」，待店主上架商品與設定日期。
 
 - 客戶端：https://ccbaby.beecharge.live/
 - 管理端：https://ccbaby.beecharge.live/admin/

@@ -10,7 +10,7 @@
 
 CCBABY 本機 0.2.1 已建立：兩個原生前端、Node.js 24 後端、SQLite 與管理測試帳號。
 目前已授權 GitHub Pages 與 Supabase；先讀 DEPLOYMENT.md。
-正式 LINE 登入未串接，不能把示範會員當正式身分驗證。
+正式 LINE Login 已設定並發布，真實帳號登入已驗證，不能用示範會員取代本人驗證。
 
 ## 閱讀順序
 

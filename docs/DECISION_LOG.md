@@ -62,3 +62,7 @@
 | D-19 | 尚無 LINE channel，先部署與準備，草稿不可正式送單 | 使用者回答先完成網站部署與串接準備 |
 | D-20 | main 原始碼、gh-pages 靜態成品；Supabase Auth / 私有資料 / Edge / Storage | 參考副主席正式平台分工 |
 | D-21 | 雲端單期 JSONB + revision 原子提交，本機 SQLite 保留且不自動同步 | 低頻 100～200 款實作選擇；跨年度獨立活動仍待做 |
+
+## LINE Login 啟用 — 2026-11-05
+
+D-22：使用店主自建的 CCbaby Provider、官方帳號 @445yxcey 與 LINE Login Channel 2012401105，Callback 固定 https://ccbaby.beecharge.live/。使用者明確授權存入兩筆 Supabase Secrets，真實登入成功後再於本次確認將 Channel 發布為 Published。未開放當期預購，活動仍為 draft。

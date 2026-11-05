@@ -78,7 +78,7 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 請接手「韓國年度預購網站」。
 先閱讀根目錄 AI_INDEX.md，依索引讀最新交接、project-manifest.json、
 SPEC.md 與這次任務相關文件，並確認實際存在的檔案。
-現階段 0.3.0：GitHub Pages + Supabase，資料已清空，LINE 待設定。先讀 docs/DEPLOYMENT.md。
+目前 GitHub Pages + Supabase 與 LINE Login 已啟用，活動 draft。先讀 docs/DEPLOYMENT.md，勿重做既有設定。
 請以文件中的已確認需求為準，依我這次的指示工作，
 不要把規劃當成已完成，也不要重問已定的基本需求。
 完成後同步交接、變更紀錄與受影響的主文件。

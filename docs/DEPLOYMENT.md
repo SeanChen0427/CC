@@ -77,17 +77,26 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 發布腳本使用忽略的 `.local/pages` 工作副本，不上傳專案根目錄。一般後台上架商品不用重新發布 GitHub。
 沒有自動發佈排程；主機、repo 或網址異動需同步 CORS、LINE callback、deployment.json、manifest 及本文件。
 
-## LINE 啟用清單（尚未執行）
+## LINE Login 已啟用（2026-11-05）
 
-1. 店主建立自己的 LINE 官方帳號與 Provider / LINE Login channel，不沿用參考站資源。
-2. Web callback 固定為 `https://ccbaby.beecharge.live/`；勾選 profile、openid 權限。
-3. 在 Supabase Edge Function Secrets 設定 `LINE_CHANNEL_ID`、`LINE_CHANNEL_SECRET`，不能貼入 GitHub 或聊天。
-4. 確認 channel 可供目標客戶使用。重新部署 / 確認函式已讀到設定。
-5. 用真實 LINE 測試登入、手機返回、取消、到期、追加、兩位客戶互相不可見及管理權限隔離。
-6. 完成實測後才從活動設定開放預購。後端在 LINE 未設定時會拒絕開團。
+| 項目 | 設定 |
+|---|---|
+| Provider | CCbaby（官方帳號與 LINE Login 共用） |
+| 官方帳號 | CCbaby，@445yxcey |
+| LINE Login Channel | CCBABY 網站登入，2012401105 |
+| 發布狀態 | Published，使用者於本次明確確認發布 |
+| Callback URL | https://ccbaby.beecharge.live/ |
+| 後端 Secrets | LINE_CHANNEL_ID、LINE_CHANNEL_SECRET 已存 Supabase |
+| Scope | 網站請求 profile、openid |
 
-程式已準備 state、nonce、PKCE S256、一次性 callback 檢查與 LINE 官方 token / verify 呼叫，
-目前沒有自有 channel，不能宣稱正式 LINE 登入已驗收。LINE Login 能辨識誰預購；人工私訊聯絡還需客戶加入官方帳號及對應營運流程，網站不會自動推播。
+Secrets 原文不在 GitHub、前端或文件。平台發布與 Secret 設定已完成，無須重新建立 Channel。
+已驗證：登入頁啟用、LINE 帳號登入／授權、授權碼交換、後端身分驗證、建立本人 session、回到網站顯示會員名稱，以及重新整理仍保持登入。
+發布後已確認 Channel 顯示 Published。只有一位真實帳號完成實測，尚未用第二位客戶驗收完整送單。
+此次沒有建立虛構預購；資料庫新增的是第一次真實 LINE 登入的會員，保留不刪除。
+
+下次變更設定：從 LINE Login 的 Basic settings 取值，直接更新 Supabase Edge Functions → Secrets，再以 health / catalog 確認 lineConfigured=true。
+LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播、聊天機器人或自動分貨。
+下一步由店主上架真實商品與設定截止時間，完成實際預購驗收後才把活動從 draft 改為 open。
 
 ## 清空與驗證紀錄
 

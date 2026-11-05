@@ -4,7 +4,7 @@
   "documentVersion": "0.3.2",
   "updatedAt": "2026-11-05",
   "timezone": "Asia/Taipei",
-  "phase": "deployed_line_setup_pending",
+  "phase": "live_line_login_enabled",
   "implementationStarted": true,
   "deployment": {
     "provider": "GitHub Pages + Supabase",
@@ -41,7 +41,10 @@
       "localUrl": "http://127.0.0.1:4173/",
       "directory": "apps/customer-web",
       "localAuthentication": "disabled_by_default",
-      "productionLineConfigured": false
+      "productionLineConfigured": true,
+      "lineLoginChannelId": "2012401105",
+      "lineLoginStatus": "Published",
+      "officialAccountId": "@445yxcey"
     },
     "admin": {
       "url": "https://ccbaby.beecharge.live/admin/",
@@ -87,7 +90,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "configure_own_line_channel_then_acceptance_and_real_products",
+  "nextStep": "upload_real_products_set_campaign_dates_and_verify_customer_preorders",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -102,7 +105,7 @@
       "frontend": "GitHub Pages static HTML/CSS/JS",
       "backend": "Supabase Edge Function",
       "database": "private single-period Postgres JSONB + atomic revision",
-      "authentication": "fixed Supabase Auth owner + opaque sessions; customer LINE pending",
+      "authentication": "fixed Supabase Auth owner + opaque sessions; verified LINE customer login",
       "storage": "public product photos only"
     }
   },
@@ -125,13 +128,16 @@
       768,
       1440
     ],
-    "liveTypographyChecked": true
+    "liveTypographyChecked": true,
+    "realLineLoginChecked": true,
+    "lineSessionPersistsAfterReload": true,
+    "linePublished": true
   },
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
     "productionProducts": 0,
-    "productionCustomers": 0,
+    "productionCustomers": 1,
     "productionPreorders": 0,
     "automaticSeed": false
   },
