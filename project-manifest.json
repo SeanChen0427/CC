@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.1",
+  "documentVersion": "0.3.2",
   "updatedAt": "2026-11-05",
   "timezone": "Asia/Taipei",
   "phase": "deployed_line_setup_pending",
@@ -117,7 +117,14 @@
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
     "pagesCommit": "77c89eb9594f432d7f6544e5013446af67a2407a",
-    "adminCredentialsChangedAndVerified": true
+    "adminCredentialsChangedAndVerified": true,
+    "typographyViewports": [
+      320,
+      390,
+      430,
+      768,
+      1440
+    ]
   },
   "brandName": "CCBABY",
   "testData": {
@@ -126,5 +133,11 @@
     "productionCustomers": 0,
     "productionPreorders": 0,
     "automaticSeed": false
+  },
+  "uiPreferences": {
+    "conciseHeadings": true,
+    "forcedSentenceBreaks": false,
+    "decorativeFullStops": false,
+    "mobileActionsBelowHeading": true
   }
 }
