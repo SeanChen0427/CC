@@ -28,7 +28,8 @@ GitHub Pages
         │ HTTPS / JSON / 各角色 bearer session
         ▼
 Supabase ccbaby-api
-├─ 公開：health、catalog、me（沒有本人憑證時不傳私人資料）
+├─ 公開：health、customer/line/config、me（未登入不傳私人資料）
+├─ 客戶：catalog 及自己的預購，需有效客戶 session
 ├─ 登入：管理帳密 → Supabase Auth → 固定 owner_id 比對
 ├─ 客戶：LINE code + PKCE → LINE 官方端點驗證 ID token / nonce
 ├─ 授權：每次由 PostgreSQL 核對 session hash、角色及到期
@@ -96,6 +97,8 @@ Secrets 原文不在 GitHub、前端或文件。平台發布與 Secret 設定已
 
 下次變更設定：從 LINE Login 的 Basic settings 取值，直接更新 Supabase Edge Functions → Secrets，再以 health / catalog 確認 lineConfigured=true。
 LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播、聊天機器人或自動分貨。
+0.3.3 客戶入口：先檢查本人 session，未登入只取公開 LINE 設定並立即跳登入，不讀取商品。取消／失敗停在重試畫面，登入成功後才取受保護 catalog；保留 #cart／#orders 的回站位置。有效登入直接續用。
+
 下一步由店主上架真實商品與設定截止時間，完成實際預購驗收後才把活動從 draft 改為 open。
 
 ## 清空與驗證紀錄

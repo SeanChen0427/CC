@@ -1,5 +1,7 @@
 # 架構地圖與樹狀圖
 
+0.3.3 入口更新：未登入 → 公開 LINE 設定 → 自動 LINE 登入 → 後端驗證／本人 session → 受保護 catalog → 商品頁。客戶取消／失敗停在重試頁，有效工作階段直接續用。此流程取代先瀏覽目錄的舊版實作。
+
 > 0.3.0 最新狀態：使用者已授權 GitHub Pages /CC/、/CC/admin/ 與 Supabase，測試資料已清空，LINE 待設定，活動 draft。下方舊版本／完整目標保留供對照，以 [DEPLOYMENT.md](DEPLOYMENT.md) 與 HANDOFF.md 為目前實作依據。
 
 

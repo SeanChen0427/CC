@@ -4,10 +4,10 @@
 
 | 項目 | 現況 |
 |---|---|
-| 雙入口 | GitHub Pages /CC/、/CC/admin/，各自 HTML／登入／授權 |
+| 雙入口 | 自訂網域 /、/admin/，各自 HTML／登入／授權；客戶未登入先自動跳 LINE |
 | 後端 | Supabase Auth 唯一 owner、私有 Postgres JSONB、Edge API、商品 Storage |
 | 資料 | 商品／預購為零，已有一位真實 LINE 登入會員；活動 draft，預設不自動 seed |
-| LINE | 自有 Channel 2012401105 已 Published，真實登入、授權、後端驗證與登入保存已通過 |
+| LINE | Channel 2012401105 已 Published；入口先驗證再取商品，取消／失敗不循環，catalog 拒絕匿名 |
 | 管理 | 商品、CSV、圖片、活動、客戶明細、採買、人工分貨、Excel、JSON 已串接雲端 |
 | 預購業務 | 雲端核心隔離測試通過；待真實商品、日期及不同客戶完整送單驗收 |
 | 後續 | 跨年度、直接 XLSX 匯入、批次／刪圖排序、店主改客單、完整圖片備份還原 |

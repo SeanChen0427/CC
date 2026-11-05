@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.2",
+  "documentVersion": "0.3.3",
   "updatedAt": "2026-11-05",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -40,11 +40,14 @@
       "plannedDirectory": "apps/customer-web",
       "localUrl": "http://127.0.0.1:4173/",
       "directory": "apps/customer-web",
-      "localAuthentication": "disabled_by_default",
+      "localAuthentication": "explicit_demo_only_production_gate_enforced",
       "productionLineConfigured": true,
       "lineLoginChannelId": "2012401105",
       "lineLoginStatus": "Published",
-      "officialAccountId": "@445yxcey"
+      "officialAccountId": "@445yxcey",
+      "loginBeforeBrowsing": true,
+      "automaticLineRedirect": true,
+      "catalogRequiresCustomerSession": true
     },
     "admin": {
       "url": "https://ccbaby.beecharge.live/admin/",
@@ -112,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 29,
+    "integrationTestsPassed": 37,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -131,7 +134,8 @@
     "liveTypographyChecked": true,
     "realLineLoginChecked": true,
     "lineSessionPersistsAfterReload": true,
-    "linePublished": true
+    "linePublished": true,
+    "customerEntryGateChecked": true
   },
   "brandName": "CCBABY",
   "testData": {

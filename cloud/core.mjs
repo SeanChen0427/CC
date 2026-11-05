@@ -68,7 +68,10 @@ export function upsertCustomer(s, identity) {
 
 // All mutations run on a private copy. The caller commits via an atomic revision check.
 export function operate(s, path, method, body, session, imagePrefix) {
-  if (path === 'catalog' && method === 'GET') return { campaign: s.campaign, products: catalog(s), localOnly: false };
+  if (path === 'catalog' && method === 'GET') {
+    required(session,'customer');
+    return { campaign: s.campaign, products: catalog(s), localOnly: false };
+  }
   if (path === 'me' && method === 'GET') return { authenticated: Boolean(session), role: session?.role, localOnly: false, profiles: [], user: session?.role === 'customer' ? s.customers.find(c => c.id === session.subject) || null : null };
   const role = path.startsWith('admin/') ? 'admin' : 'customer'; required(session, role);
   if (path === 'customer/orders' && method === 'GET') return { campaign: s.campaign, orders: orders(s, session.subject) };

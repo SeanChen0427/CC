@@ -8,6 +8,11 @@ const imagePrefix='https://example.supabase.co/storage/v1/object/public/ccbaby-p
 function fixture(){const s=emptyState();operate(s,'admin/products','POST',product,owner,imagePrefix);s.campaign.status='open';s.campaign.closesAt=new Date(Date.now()+86400000).toISOString();upsertCustomer(s,{id:anna.subject,display_name:'A'});upsertCustomer(s,{id:bob.subject,display_name:'B'});return s;}
 const submit=(s,user=anna,extra={})=>operate(s,'customer/preorders','POST',{requestId:crypto.randomUUID(),name:'測試',phone:'0912345678',items:[{variantId:1,quantity:2,expectedPrice:590}],...extra},user,imagePrefix);
 test('production store starts empty and closed',()=>{const s=emptyState();assert.equal(s.campaign.status,'draft');assert.deepEqual(s.products,[]);assert.deepEqual(s.customers,[]);assert.throws(()=>operate(s,'admin/state','GET',{},null),e=>e.status===401);});
+test('product catalog requires a customer session and rejects anonymous or admin sessions',()=>{
+  const s=fixture();
+  for(const session of [null,owner])assert.throws(()=>operate(s,'catalog','GET',{},session),e=>e.status===401);
+  assert.equal(operate(s,'catalog','GET',{},anna).products.length,1);
+});
 test('customer sessions cannot read or mutate admin routes',()=>{const s=fixture();assert.throws(()=>operate(s,'admin/state','GET',{},anna),e=>e.status===401);assert.throws(()=>operate(s,'admin/products','POST',product,anna),e=>e.status===401);});
 test('preorders are isolated, additive and idempotent',()=>{const s=fixture();submit(s,anna,{requestId:'a'});submit(s,anna,{requestId:'a'});assert.equal(s.items[0].quantity,2);assert.throws(()=>submit(s,anna,{requestId:'a',name:'別名'}),e=>e.status===409);submit(s);assert.equal(s.items[0].quantity,4);assert.equal(orders(s,bob.subject).length,0);assert.throws(()=>operate(s,'customer/items/1','PATCH',{quantity:0},bob),e=>e.status===404);});
 test('product price snapshots are immutable and stale cart prices rejected',()=>{const s=fixture();submit(s);operate(s,'admin/products','POST',{...product,id:1,price:690},owner,imagePrefix);assert.equal(s.items[0].price,590);assert.throws(()=>submit(s),e=>e.status===409);submit(s,anna,{items:[{variantId:1,quantity:1,expectedPrice:690}]});assert.equal(s.items.length,2);assert.equal(report(s)[0].demand,3);assert.equal(orders(s)[0].total,1870);});

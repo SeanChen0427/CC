@@ -1,4 +1,8 @@
 @import url('./base.css');
+.auth-pending #header,.auth-pending #bottom-nav {display:none!important;}
+.auth-gate {max-width:420px;min-height:75dvh;margin:auto;padding:40px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;}
+.auth-gate h1 {font-size:24px;font-weight:400;margin:0;}
+.auth-gate p {font-size:13px;line-height:1.8;color:#7c8575;margin:0;}
 :root {
   --bg:#f8f7f3;
   --paper:#fffefa;

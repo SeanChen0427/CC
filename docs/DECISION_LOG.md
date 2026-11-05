@@ -66,3 +66,7 @@
 ## LINE Login 啟用 — 2026-11-05
 
 D-22：使用店主自建的 CCbaby Provider、官方帳號 @445yxcey 與 LINE Login Channel 2012401105，Callback 固定 https://ccbaby.beecharge.live/。使用者明確授權存入兩筆 Supabase Secrets，真實登入成功後再於本次確認將 Channel 發布為 Published。未開放當期預購，活動仍為 draft。
+
+## 客戶入口先登入 — 2026-11-05
+
+D-23：依店主補充的參考站入口行為，取代先瀏覽再點會員登入的實作。正式客戶入口未登入即自動轉往 LINE；驗證成功後才請求商品目錄與顯示頁面。有效工作階段直接續用，取消／失敗提供手動重試避免循環，保留合法購物車／預購 hash 返回位置。

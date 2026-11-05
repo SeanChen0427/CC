@@ -60,6 +60,7 @@ Deno.serve(async req=>{
     }
     if(path==='health'&&method==='GET')return json({ok:true,database:'supabase',localOnly:false,lineConfigured});
     if((path.startsWith('admin/')&&role!=='admin')||(path.startsWith('customer/')&&role!=='customer'))throw new AppError('請使用對應入口',403);
+    if(path==='customer/line/config'&&method==='GET')return json({lineConfigured,lineChannelId:lineConfigured?lineId:null,requiresLogin:true});
     const token=(req.headers.get('authorization')||'').replace(/^Bearer /,'');
     const hash=await digest(token);
     let state=await rpc('ccbaby_load',{p_hash:hash,p_role:role});
@@ -83,7 +84,7 @@ Deno.serve(async req=>{
       await rpc('ccbaby_line_customer',{p_id:'line:'+identity.sub,p_name:String(identity.name||'LINE 會員').slice(0,80)});
       return json({ok:true,token:await session('customer','line:'+identity.sub)});
     }
-    if(path==='catalog'&&method==='GET')return json({...operate(state.data,path,method,body,null,imagePrefix),lineConfigured,lineChannelId:lineConfigured?lineId:null});
+    if(path==='catalog'&&method==='GET')return json({...operate(state.data,path,method,body,state.session,imagePrefix),lineConfigured,lineChannelId:lineConfigured?lineId:null});
     if(path==='me'&&method==='GET')return json(operate(state.data,path,method,body,state.session,imagePrefix));
     if(!state.session)throw new AppError('請先登入',401);
     if(path==='logout'&&method==='POST'){await rpc('ccbaby_revoke',{p_hash:hash,p_all_admin:false});return json({ok:true});}

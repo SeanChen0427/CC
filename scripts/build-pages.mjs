@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, readdirSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 const root=resolve(import.meta.dirname,'..'),dist=join(root,'dist');
 const deployment=JSON.parse(readFileSync(join(root,'deployment.json'),'utf8'));
@@ -12,6 +12,10 @@ for(const role of ['customer','admin']){
   writeFileSync(index,readFileSync(index,'utf8').replace('src="./app.js"',`src="./app.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`));
   cpSync(join(root,'shared/runtime.js'),join(target,'runtime.js'));
   cpSync(join(root,'server/art.mjs'),join(target,'product-art.js'));
+  for(const name of readdirSync(target).filter(name=>name.endsWith('.js'))){
+    const path=join(target,name);
+    writeFileSync(path,readFileSync(path,'utf8').replace(/(from\s+['"]|import\s*['"])(\.\/[^'"]+\.js)(['"])/g,`$1$2?v=${version}$3`));
+  }
   writeFileSync(join(target,'config.json'),JSON.stringify({...deployment,mode:'cloud',role},null,2)+'\n');
 }
 writeFileSync(join(dist,'.nojekyll'),'');
