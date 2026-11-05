@@ -1,5 +1,6 @@
-import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js';
-import { art } from './product-art.js';
+import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.3';
+import { art } from './product-art.js?v=0.3.3';
+import { enterCustomerSite } from './entry.js?v=0.3.3';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -21,10 +22,35 @@ const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] 
 const state = { products: [], campaign: null, user: null, profiles: [], category: '全部選物', search: '', limit: 24, cart: [], orders: [], selection: null, submitting: false, pending: null, contactDraft: null, lineConfigured: false, lineChannelId: null };
 const modal = $('#modal');
 let toastTimer;
+state.ready=false;
+state.authRedirecting=false;
 
 async function api(path, options = {}) {
   try { return await request(path, options); }
-  catch(error) { if(error.status===401){state.user=null;renderHeader();} throw error; }
+  catch(error) {
+    if(error.status===401){
+      state.user=null;
+      if(cloud)renderAuthGate('登入已到期，請重新使用 LINE 登入');else renderHeader();
+    }
+    throw error;
+  }
+}
+
+function renderAuthGate(message, { loading=false, reload=false } = {}) {
+  state.ready=false;
+  document.body.classList.add('auth-pending');
+  if(modal.open)modal.close();
+  $('#header').innerHTML='';$('#bottom-nav').innerHTML='';
+  const description=message||'登入後即可進入本期選物';
+  $('#main').innerHTML=`<section class="auth-gate"><div class="eyebrow">CCBABY</div><h1>${loading?'正在開啟 LINE 登入':'請先使用 LINE 登入'}</h1><p>${esc(description||'登入後即可進入本期選物')}</p>${!loading&&state.lineConfigured?'<button class="primary-button" data-action="line-login">使用 LINE 登入</button>':''}${reload?'<button class="secondary-button" data-action="reload">重新載入</button>':''}</section>`;
+}
+
+async function startLineLogin(channelId=state.lineChannelId, { replace=false } = {}) {
+  if(state.authRedirecting)return;
+  state.authRedirecting=true;
+  renderAuthGate('正在為你開啟 LINE 登入', {loading:true});
+  try { await lineLogin(channelId,{replace}); }
+  catch(error){state.authRedirecting=false;renderAuthGate(error.message);}
 }
 
 function toast(message) {
@@ -198,10 +224,11 @@ async function renderOrders() {
       ${orders.length?orders.map(o=>`<article class="order-card"><div class="order-card-head"><div><div class="order-code">${esc(o.code)}</div><div class="order-time">${date(o.created_at)} 建立 · 最近更新 ${date(o.updated_at)}</div></div><span class="status-chip">${labels[state.campaign.status]||'已預購'}</span></div>
       ${o.items.map(i=>`<div class="order-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>${i.bought?`已分配買到 ${i.bought} 件`:'等待採購／分配'}${i.shortage?` · 確認缺貨 ${i.shortage} 件`:''}</small></div><div class="order-item-side"><span>${money(i.price*i.quantity)}</span>${openForOrders()?` <button class="text-button" data-action="edit-item" data-id="${i.id}">修改數量</button>`:''}</div></div>`).join('')}<div class="order-card-foot"><span>共 ${o.quantity} 件・預估商品小計</span><strong>${money(o.total)}</strong></div></article>`).join(''):`<div class="empty-state">${icon('list')}<h2>尚未送出預購</h2><p>你還沒有送出本期預購，去挑幾件喜歡的吧</p><a href="#shop" class="primary-button">查看本期選物 ${icon('arrow')}</a></div>`}
       <div class="contact-card"><div><h3>聯絡與收件資料</h3><p>${esc(state.user.name||'聯絡姓名尚未填寫')}${state.user.phone?' · '+esc(state.user.phone):''}</p><p>${esc(state.user.delivery||'收件資訊可以稍後再補齊')}</p></div><button class="text-button" data-action="profile">編輯資料</button></div><p class="fine-print">預購不代表保證供貨，實際採購結果將顯示於品項下方，付款由店主於到台後另行聯絡</p>${footer()}</div>`;
-  }catch(error){$('#main').innerHTML=`<div class="empty-state"><h2>暫時無法讀取預購</h2><p>${esc(error.message)}</p><button class="secondary-button" data-action="retry">再試一次</button></div>`;}
+  }catch(error){if(cloud&&!state.user)return;$('#main').innerHTML=`<div class="empty-state"><h2>暫時無法讀取預購</h2><p>${esc(error.message)}</p><button class="secondary-button" data-action="retry">再試一次</button></div>`;}
 }
 
 function render() {
+  if(cloud&&(!state.ready||!state.user))return;
   renderHeader();
   if(route()==='cart')renderCart();
   else if(route()==='orders')renderOrders();
@@ -223,7 +250,8 @@ document.addEventListener('click', async event => {
     if(action==='option'){state.selection[target.dataset.option]=target.dataset.value;showProduct(state.selection.id,true);return;}
     if(action==='detail-qty'){state.selection.quantity=Math.min(99,Math.max(1,state.selection.quantity+Number(target.dataset.delta)));showProduct(state.selection.id,true);return;}
     if(action==='login'){showLogin();return;}
-    if(action==='line-login'){await lineLogin(state.lineChannelId);return;}
+    if(action==='line-login'){await startLineLogin();return;}
+    if(action==='reload'){location.reload();return;}
     if(action==='demo-login'){
       target.disabled=true;
       const data=await api('customer/login',{method:'POST',body:{profile:target.dataset.id}});
@@ -233,7 +261,7 @@ document.addEventListener('click', async event => {
     if(action==='account'){
       setModal(`<div class="modal-copy"><div class="eyebrow">YOUR ACCOUNT</div><h2>你好，${esc(state.user.display_name)}</h2><p>${config.demoMode?'目前為本機測試會員':'已使用 LINE 身分登入'}你的預購與購物車會分開保存</p><div class="form-actions"><button class="secondary-button" data-action="logout">登出</button><button class="primary-button" data-action="view-orders">我的預購</button></div></div>`,'modal-small');return;
     }
-    if(action==='logout'){await api('logout',{method:'POST',body:{}});state.user=null;state.cart=[];state.contactDraft=null;modal.close();render();toast('已登出，購物車草稿仍保留在原會員帳下');return;}
+    if(action==='logout'){await api('logout',{method:'POST',body:{}});state.user=null;state.cart=[];state.contactDraft=null;modal.close();if(cloud)renderAuthGate('你已登出，請使用 LINE 登入後繼續');else render();return;}
     if(action==='add'){
       if(state.submitting)return;
       if(!state.user){showLogin();return;}
@@ -291,13 +319,22 @@ document.addEventListener('keydown',event=>{
 });
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
 window.addEventListener('hashchange',()=>{modal.close();render();window.scrollTo(0,0);});
+window.addEventListener('pageshow',event=>{
+  if(event.persisted&&cloud&&!state.user){state.authRedirecting=false;renderAuthGate('請使用 LINE 登入後繼續');}
+});
 
 try {
-  try { await finishLineLogin(); } catch(error) { toast(error.message); }
-  const [catalog,me]=await Promise.all([api('catalog'),api('me')]);
-  state.products=catalog.products;state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
-  loadCart();render();
+  const query=new URLSearchParams(location.search);
+  await enterCustomerSite({
+    cloud,returningFromLine:query.has('code')||query.has('error'),
+    finishLogin:finishLineLogin,request:api,
+    showGate:(auth,message)=>{state.lineConfigured=auth.lineConfigured;state.lineChannelId=auth.lineChannelId;renderAuthGate(message);},
+    login:channelId=>startLineLogin(channelId,{replace:true}),
+    ready:(catalog,me)=>{
+      state.products=catalog.products;state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
+      state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();
+    },
+  });
 }catch(error){
-  $('#main').innerHTML=`<div class="empty-state"><h2>選物目錄暫時無法載入</h2><p>${esc(error.message)}</p><button class="secondary-button" data-action="reload">重新載入</button></div>`;
-  document.querySelector('[data-action="reload"]').addEventListener('click',()=>location.reload());
+  renderAuthGate(error.message,{reload:true});
 }

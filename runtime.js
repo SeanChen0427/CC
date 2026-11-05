@@ -25,13 +25,15 @@ export async function download(path, filename) {
 }
 const b64=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const random=()=>b64(crypto.getRandomValues(new Uint8Array(32)));
-export async function lineLogin(channelId) {
+export async function lineLogin(channelId, { replace = false } = {}) {
   if(!cloud||!channelId)throw new Error('LINE 登入準備中，開放時間將另行公告');
   const verifier=random(),state=random(),nonce=random();
   const challenge=b64(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier))));
-  sessionStorage.setItem('ccbaby.line.pending',JSON.stringify({verifier,state,nonce,at:Date.now()}));
+  const returnHash=['#shop','#cart','#orders'].includes(location.hash)?location.hash:'';
+  sessionStorage.setItem('ccbaby.line.pending',JSON.stringify({verifier,state,nonce,returnHash,at:Date.now()}));
   const query=new URLSearchParams({response_type:'code',client_id:channelId,redirect_uri:config.customerURL,state,nonce,scope:'profile openid',code_challenge:challenge,code_challenge_method:'S256'});
-  location.assign('https://access.line.me/oauth2/v2.1/authorize?'+query);
+  const url='https://access.line.me/oauth2/v2.1/authorize?'+query;
+  if(replace)location.replace(url);else location.assign(url);
 }
 export async function finishLineLogin() {
   if(!cloud||config.role!=='customer')return;
@@ -43,4 +45,6 @@ export async function finishLineLogin() {
   if(q.has('error'))throw new Error('LINE 登入已取消，請再試一次');
   if(!pending||q.get('state')!==pending.state||Date.now()-pending.at>600000)throw new Error('LINE 登入驗證已失效，請重新登入');
   await request('customer/line/exchange',{method:'POST',body:{code:q.get('code'),verifier:pending.verifier,nonce:pending.nonce}});
+  const returnHash=['#shop','#cart','#orders'].includes(pending.returnHash)?pending.returnHash:'';
+  history.replaceState(null,'',location.pathname+returnHash);
 }

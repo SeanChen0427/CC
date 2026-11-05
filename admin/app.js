@@ -1,5 +1,5 @@
-import { request, config, cloud, download } from './runtime.js';
-import { art } from './product-art.js';
+import { request, config, cloud, download } from './runtime.js?v=0.3.3';
+import { art } from './product-art.js?v=0.3.3';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
