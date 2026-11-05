@@ -9,8 +9,8 @@
 已依指定部署 GitHub Pages 與 Supabase，測試商品、客戶及預購資料已清空。
 LINE 尚未建立，程式已準備串接，活動保留「準備中」，不接受正式送單。
 
-- 客戶端：https://seanchen0427.github.io/CC/
-- 管理端：https://seanchen0427.github.io/CC/admin/
+- 客戶端：https://ccbaby.beecharge.live/
+- 管理端：https://ccbaby.beecharge.live/admin/
 - 原始碼：https://github.com/SeanChen0427/CC
 - 啟動：在根目錄執行 `npm start`（Node.js 24 以上，無需安裝 npm 依賴）。
 - 唯一管理帳號為 `hannah`，初始密碼位於私有 `.local/admin-credentials.txt`，不放 GitHub。

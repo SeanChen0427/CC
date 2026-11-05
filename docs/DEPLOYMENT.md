@@ -6,8 +6,8 @@
 
 | 項目 | 位置 |
 |---|---|
-| 客戶選物入口 | https://seanchen0427.github.io/CC/ |
-| 店主管理入口 | https://seanchen0427.github.io/CC/admin/ |
+| 客戶選物入口 | https://ccbaby.beecharge.live/ |
+| 店主管理入口 | https://ccbaby.beecharge.live/admin/ |
 | GitHub 原始碼 | https://github.com/SeanChen0427/CC ，main 分支 |
 | Pages 成品 | 同儲存庫 gh-pages 分支，根目錄發布 |
 | Supabase | tukluknvmbsbsdzawmjf，ap-northeast-2 |
@@ -80,7 +80,7 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 ## LINE 啟用清單（尚未執行）
 
 1. 店主建立自己的 LINE 官方帳號與 Provider / LINE Login channel，不沿用參考站資源。
-2. Web callback 固定為 `https://seanchen0427.github.io/CC/`；勾選 profile、openid 權限。
+2. Web callback 固定為 `https://ccbaby.beecharge.live/`；勾選 profile、openid 權限。
 3. 在 Supabase Edge Function Secrets 設定 `LINE_CHANNEL_ID`、`LINE_CHANNEL_SECRET`，不能貼入 GitHub 或聊天。
 4. 確認 channel 可供目標客戶使用。重新部署 / 確認函式已讀到設定。
 5. 用真實 LINE 測試登入、手機返回、取消、到期、追加、兩位客戶互相不可見及管理權限隔離。
@@ -104,3 +104,5 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 正式網址驗證（2026-11-05）：兩個入口與關鍵資源 HTTP 200，Pages build 為 built；正式前台讀取雲端空目錄、店主管理登入成功。資料仍為商品／客戶／預購／明細零筆，唯一管理員一位。
 
 帳密更新驗證（0.3.1）：hannah 與新密碼登入成功，舊帳號、舊密碼及舊管理工作階段均被拒絕；本機帳號與私有登入檔同步，維持新密碼至少 12 碼。
+
+自訂網域更新（0.3.1）：發布時偵測 gh-pages 新增 CNAME=ccbaby.beecharge.live，保留設定。正式入口為根目錄 / 與 /admin/；原 GitHub Pages /CC/ 網址會轉址。已同步 CORS、LINE callback 預備網址與公開設定，建置保留 CNAME，後續發布前先整合遠端更新。

@@ -7,8 +7,8 @@
 使用者明確要求清空測試資料、GitHub SeanChen0427/CC + Supabase，並確認同源不同目錄。
 LINE channel 尚未建立，指示先完成部署與串接準備；不要重問以上決策。
 
-- 客戶：https://seanchen0427.github.io/CC/
-- 管理：https://seanchen0427.github.io/CC/admin/
+- 客戶：https://ccbaby.beecharge.live/
+- 管理：https://ccbaby.beecharge.live/admin/
 - 原始碼：https://github.com/SeanChen0427/CC
 - Supabase ref：tukluknvmbsbsdzawmjf，Edge：ccbaby-api。
 - 唯一帳號 hannah，初始密碼只在私有 .local/admin-credentials.txt，不轉錄聊天或文件。

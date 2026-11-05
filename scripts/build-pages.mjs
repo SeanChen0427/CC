@@ -12,4 +12,5 @@ for(const role of ['customer','admin']){
   writeFileSync(join(target,'config.json'),JSON.stringify({...deployment,mode:'cloud',role},null,2)+'\n');
 }
 writeFileSync(join(dist,'.nojekyll'),'');
+if(deployment.customDomain)writeFileSync(join(dist,'CNAME'),deployment.customDomain+'\n');
 console.log('Built GitHub Pages: /CC/ and /CC/admin/ (static public assets only)');

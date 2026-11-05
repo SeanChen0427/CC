@@ -13,7 +13,8 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "live"
+    "status": "live",
+    "customDomain": "ccbaby.beecharge.live"
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -34,7 +35,7 @@
   },
   "entrypoints": {
     "customer": {
-      "url": "https://seanchen0427.github.io/CC/",
+      "url": "https://ccbaby.beecharge.live/",
       "authentication": "LINE",
       "plannedDirectory": "apps/customer-web",
       "localUrl": "http://127.0.0.1:4173/",
@@ -43,7 +44,7 @@
       "productionLineConfigured": false
     },
     "admin": {
-      "url": "https://seanchen0427.github.io/CC/admin/",
+      "url": "https://ccbaby.beecharge.live/admin/",
       "authentication": "single_username_password",
       "accountCount": 1,
       "plannedDirectory": "apps/admin-web",

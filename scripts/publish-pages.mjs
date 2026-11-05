@@ -8,6 +8,8 @@ mkdirSync(target,{recursive:true});
 if(!existsSync(join(target,'.git'))){
   run('git',['init','-b','gh-pages'],target);
   run('git',['remote','add','origin','https://github.com/SeanChen0427/CC.git'],target);
+}else{
+  run('git',['pull','--rebase','origin','gh-pages'],target);
 }
 // Empty only the deployment worktree's tracked/untracked files; preserve its .git.
 run('git',['rm','-r','--ignore-unmatch','.'],target);
