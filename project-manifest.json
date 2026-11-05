@@ -116,7 +116,8 @@
     "date": "2026-11-05",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "1ca8fa166d6c68352470cea4eacbcc30a89e3e0d"
+    "pagesCommit": "77c89eb9594f432d7f6544e5013446af67a2407a",
+    "adminCredentialsChangedAndVerified": true
   },
   "brandName": "CCBABY",
   "testData": {

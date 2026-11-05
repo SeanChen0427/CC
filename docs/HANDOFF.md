@@ -49,3 +49,5 @@ LINE channel 尚未建立，指示先完成部署與串接準備；不要重問�
 0.3.1：依店主要求將唯一管理帳號由 owner 改為 hannah，維持至少 12 碼密碼規則；密碼不寫入此文件。
 
 帳密更新驗證（0.3.1）：hannah 與新密碼登入成功，舊帳號、舊密碼及舊管理工作階段均被拒絕；本機帳號與私有登入檔同步，維持新密碼至少 12 碼。
+
+正式自訂網域 https://ccbaby.beecharge.live/admin/ 已以 hannah 與新密碼實際登入成功；Pages build= built，commit 77c89eb。原網址保留轉址，LINE 尚未設定。
