@@ -220,7 +220,7 @@ svg {
   color:#7c8b71
 }
 .hero h1 {
-  font:34px/1.6 "Songti TC","Noto Serif TC",Georgia,serif;
+  font:clamp(24px,3vw,34px)/1.6 "Songti TC","Noto Serif TC",Georgia,serif;
   letter-spacing:.08em;
   margin:12px 0 12px;
   font-weight:400
@@ -832,6 +832,10 @@ svg {
   margin-top:3px
 }
 .order-item-side {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
   text-align:right
 }
 .order-item-side .text-button {
@@ -1252,21 +1256,21 @@ dialog::backdrop {
   .hero {
     padding:25px 22px;
     min-height:224px;
-    grid-template-columns:1fr .9fr
+    grid-template-columns:minmax(0,1fr)
   }
   .hero .eyebrow {
     font-size:8px;
     letter-spacing:.1em
   }
   .hero h1 {
-    font-size:24px;
+    font-size:clamp(22px,5.5vw,28px);
     line-height:1.65;
     margin-top:10px;
-    white-space:nowrap
+    white-space:normal
   }
   .hero-description {
     font-size:9px;
-    max-width:155px
+    max-width:none
   }
   .hero-foot {
     font-size:8px;
@@ -1279,11 +1283,13 @@ dialog::backdrop {
     padding:3px 8px
   }
   .hero-art {
-    transform:scale(.72);
+    transform:none;
     transform-origin:center center;
-    min-height:180px;
-    margin-right:-15px
+    min-height:160px;
+    width:100%;
+    margin:12px 0 0
   }
+  .hero-art .coming-soon { min-height:160px; }
   .hero-photo {
     width:125px;
     height:155px;
@@ -1462,7 +1468,9 @@ dialog::backdrop {
   }
   .page-heading {
     margin-bottom:23px;
-    align-items:center
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px
   }
   .page-heading h1 {
     font-size:26px
@@ -1471,6 +1479,7 @@ dialog::backdrop {
     font-size:10px
   }
   .page-heading .secondary-button {
+    align-self:flex-start;
     font-size:10px;
     padding:8px 11px
   }
