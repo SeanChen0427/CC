@@ -53,3 +53,7 @@ LINE channel 尚未建立，指示先完成部署與串接準備；不要重問�
 正式自訂網域 https://ccbaby.beecharge.live/admin/ 已以 hannah 與新密碼實際登入成功；Pages build= built，commit 77c89eb。原網址保留轉址，LINE 尚未設定。
 
 0.3.2：依店主手機截圖統一清除前後台固定換行與多餘句點，縮短頁面／彈窗標題，手機標題與操作按鈕分列，客戶首頁文案使用完整寬度。320／390／430／768／1440px 的主要頁面標題均為一行、無橫向溢出。此次僅修改前端與文件，沒有異動客戶、商品、帳密或後端業務。
+
+前端靜態資源以 package.json 版本號加入 app.js／style.css 查詢參數，避免手機瀏覽器繼續使用舊快取。
+
+0.3.2 正式驗證：Pages build=built、commit 636f8c8；正式後台標題「採買工作總覽」顯示一行，br=0、無多餘句點、無橫向溢出；兩個入口皆 HTTP 200 並引用版本化 app.js / style.css。

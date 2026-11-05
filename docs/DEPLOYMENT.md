@@ -106,3 +106,5 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 帳密更新驗證（0.3.1）：hannah 與新密碼登入成功，舊帳號、舊密碼及舊管理工作階段均被拒絕；本機帳號與私有登入檔同步，維持新密碼至少 12 碼。
 
 自訂網域更新（0.3.1）：發布時偵測 gh-pages 新增 CNAME=ccbaby.beecharge.live，保留設定。正式入口為根目錄 / 與 /admin/；原 GitHub Pages /CC/ 網址會轉址。已同步 CORS、LINE callback 預備網址與公開設定，建置保留 CNAME，後續發布前先整合遠端更新。
+
+前端靜態資源以 package.json 版本號加入 app.js／style.css 查詢參數，避免手機瀏覽器繼續使用舊快取。
