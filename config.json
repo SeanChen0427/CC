@@ -1,0 +1,8 @@
+{
+  "apiURL": "https://tukluknvmbsbsdzawmjf.supabase.co/functions/v1/ccbaby-api",
+  "publishableKey": "sb_publishable_PEQYN4yWxjtUcCTh_TMoOQ_JH22vgbA",
+  "customerURL": "https://seanchen0427.github.io/CC/",
+  "adminURL": "https://seanchen0427.github.io/CC/admin/",
+  "mode": "cloud",
+  "role": "customer"
+}
