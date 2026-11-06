@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "5f88fab48e6d9523b0d970a90e28005a341c0213",
+    "pagesCommit": "9696420f65666189b5616dda24f4b52d58e848cb",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -150,7 +150,7 @@
       390,
       768
     ],
-    "edgeVersion": 11,
+    "edgeVersion": 12,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -224,7 +224,10 @@
       320,
       390,
       768
-    ]
+    ],
+    "liveProductCostUiChecked": true,
+    "liveInvalidProductCostRejected": true,
+    "liveProductCostBusinessDataUnchanged": true
   },
   "brandName": "CCBABY",
   "testData": {

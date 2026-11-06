@@ -150,3 +150,7 @@ Edge v11、Pages built 559904e9。私有 JSONB 標記 preorders.deleted_at／del
 ## 0.3.10 商品編輯不中斷部署
 
 只有 GitHub Pages 管理端靜態更新，product-draft.js 於同分頁暫存與恢復表單，外圍及關閉保護。Supabase Edge 維持 v11，不變更正式業務資料、帳密與 12 小時登入。65 項測試及隔離 Chrome 320／390px 驗證通過；Pages 5f88fab48e6d9523b0d970a90e28005a341c0213 已 built；正式 index 使用 0.3.10，草稿模組與已驗證來源一致，Chrome 正式登入頁載入成功。未於正式站提交商品，完整互動使用隔離資料庫。
+
+## 0.3.11 商品選填進價部署
+
+Edge v12、Pages built 9696420f。商品 POST 支援 costUpdate，與採買共用私有 procurement.cost／version；管理目錄附成本與版本，客戶目錄不加欄。無 DDL／RPC 權限變更，部署須包含 domain/product-costing.mjs 與 shared/product-costing.js。正式只檢視表單與測負數拒絕，未儲存商品或成本，原有 13 商品、1 預購、open 保留。
