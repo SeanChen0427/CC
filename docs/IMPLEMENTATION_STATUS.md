@@ -6,7 +6,7 @@
 |---|---|
 | 雙入口 | 自訂網域 /、/admin/，各自 HTML／登入／授權；客戶未登入先自動跳 LINE |
 | 後端 | Supabase Auth 唯一 owner、私有 Postgres JSONB、Edge API、商品 Storage |
-| 資料 | 已有 1 款店主商品、0 份預購，保留真實 LINE 會員；活動 draft，預設不自動 seed |
+| 資料 | 本次唯讀查驗已有 13 款商品、1 份預購，活動 open；保留正式資料，預設不自動 seed |
 | LINE | Channel 2012401105 已 Published；入口先驗證再取商品，取消／失敗不循環，catalog 拒絕匿名 |
 | 管理 | 商品、CSV、圖片、活動、客戶明細、採買、人工分貨、Excel、JSON 已串接雲端 |
 | 商品照片 | 每款 8 張、多選／拖入、縮圖、逐張進度、重試／移除／排序與封面；相簿獨立、顏色綁定選填 |

@@ -138,3 +138,7 @@ Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供�
 只有 GitHub Pages 客戶端靜態檔案更新，gallery.js 提供主圖原生橫向捲動與相簿狀態；Supabase Edge 保持 v8、資料不變。本次執行 9 項相關測試，前次全套 46 項結果保留。
 
 0.3.6 已發布：Pages c70634171eed1836431814721ebf65f81fbe395b（built），正式 LINE 登入、相簿橫向捲動與張數同步已驗證。未部署 Edge 或修改正式業務資料。
+
+## 0.3.8 店主成本功能部署
+
+Edge v10、Pages built 37e6e82。新增私有 JSONB costSettings 與 procurement.cost，不改 Postgres schema／RPC 權限。匯出由 server/reports.mjs 共用三表，成本不傳回客戶 API。正式唯讀查驗 13 款商品、1 份預購、活動 open，業務資料未異動；匯率待店主自行設定。

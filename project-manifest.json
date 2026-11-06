@@ -93,7 +93,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "upload_real_products_set_campaign_dates_and_verify_customer_preorders",
+  "nextStep": "set_owner_exchange_rate_and_record_private_procurement_costs",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "c70634171eed1836431814721ebf65f81fbe395b",
+    "pagesCommit": "37e6e8233aa44435ad917925ff9ef7ba790d2e4c",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -150,7 +150,7 @@
       390,
       768
     ],
-    "edgeVersion": 8,
+    "edgeVersion": 10,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -182,14 +182,22 @@
       390,
       768,
       1440
+    ],
+    "liveCostApiChecked": true,
+    "liveCostExportChecked": true,
+    "liveBusinessDataUnchanged": true,
+    "liveCostUiChecked": true,
+    "liveCostViewports": [
+      320,
+      390
     ]
   },
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
-    "productionProducts": 1,
+    "productionProducts": 13,
     "productionCustomers": 1,
-    "productionPreorders": 0,
+    "productionPreorders": 1,
     "automaticSeed": false
   },
   "uiPreferences": {
