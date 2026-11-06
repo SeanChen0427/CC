@@ -13,9 +13,9 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "live_with_pending_frontend_release",
+    "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42252246268
+    "pagesRun": 42256918889
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -94,7 +94,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "deploy_size_costs_and_split_product_workbook_then_verify",
+  "nextStep": "owner_record_size_purchase_costs_and_export_split_product_rows",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -123,7 +123,7 @@
     "date": "2026-11-07",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "8db331883a51625d304a7732097362a720274115",
+    "pagesCommit": "ad3979475f4f288f2d46ba8387017470bc57674d",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -151,7 +151,7 @@
       390,
       768
     ],
-    "edgeVersion": 15,
+    "edgeVersion": 16,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -266,7 +266,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.14",
+    "lastLiveFrontendVersion": "0.3.15",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -280,8 +280,11 @@
       "app.js",
       "admin/index.html",
       "admin/app.js",
+      "admin/product-cost.js",
+      "admin/product-costing.js",
       "admin/product-draft.js",
       "admin/product-export.js",
+      "admin/style.css",
       "admin/config.json"
     ],
     "productSizeCostsBrowserChecked": true,
@@ -291,7 +294,13 @@
       320
     ],
     "productSplitWorkbookRendered": true,
-    "productSplitWorkbookDownloaded": true
+    "productSplitWorkbookDownloaded": true,
+    "liveProductSizeCostsBundleChecked": true,
+    "liveProductSizeCostsValidationChecked": true,
+    "liveSplitProductWorkbookChecked": true,
+    "liveSplitProductWorkbookRows": 22,
+    "liveSplitProductWorkbookPhotoAnchors": 22,
+    "liveProductSizeCostsBusinessDataUnchanged": true
   },
   "brandName": "CCBABY",
   "testData": {

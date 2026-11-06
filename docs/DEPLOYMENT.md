@@ -196,3 +196,13 @@ Pages build 於台北 00:31:17 回 built，部署查詢為 succeed，Actions run
 使用強制重新驗證／獨立查詢參數取得正式客戶及管理入口、兩端 app.js、管理 product-draft.js／product-export.js／config.json，共 7 檔皆 HTTP 200 且與發布工作副本逐位元相同；正式 index 已為 app.js／style.css?v=0.3.14。來源連結表單、顏色空白及草稿欄位程式已上線；實際填寫／保存／重開／匯出互動先前於隔離資料庫完成，本輪不在正式資料儲存示範商品
 
 本次只重試靜態發布及取消舊 Pages 部署，沒有重新部署 Edge、改動網域、修改正式商品／預購或清空資料；原 80 項測試與 UI／匯出驗證結果適用相同內容，未為空提交重跑測試
+
+## 0.3.15 尺寸進價與商品 Excel 拆列 — 2026-11-07
+
+Edge v16 ACTIVE，仍 verify_jwt=false 配合既有自訂 session／角色驗證；新增 costUpdate.sizeCosts 驗證目前尺寸與全規格版本，更新原私有 procurement.cost，無 DDL／RPC／Storage／網域或登入變更。舊 costUpdate.cost 與省略欄位保持相容，客戶 API 不增加成本
+
+83 項測試、隔離 Chrome 個別尺寸進價的草稿恢復／保存重開／改共用進價保留尺寸例外／新增尺寸／清除、320px 無溢出及真正下載 Excel 通過。Artifact Tool 匯入及渲染確定 S／M／XL 590／10000 KRW 與 2XL 690／15000 KRW 相鄰兩列，兩列保留照片與來源連結
+
+正式只查目錄、拒絕不存在尺寸／非法來源、驗證匯出及資料雜湊，未提交有效商品修改；當下 16 商品、1 預購、open 保留，下載 XLSX 與本機預期逐位元相同，22 價格列／22 首圖錨點／16 media 檔、全部 XML 可解析。同商品重用照片 bytes，未填／零元及 CSV 格式不變，私有檔仍在忽略的 .local/exports/ccbaby-products-with-photos.xlsx
+
+靜態提交 ad3979475f4f288f2d46ba8387017470bc57674d 已發布，[run 42256918889](https://github.com/SeanChen0427/CC/actions/runs/42256918889) 成功，台北 00:58:00 Pages 回 built／部署 succeed。獨立查詢參數與 no-cache 取得正式雙入口、兩端 app.js、管理 product-cost.js／product-costing.js／product-draft.js／product-export.js／style.css／config.json 共 10 檔皆 HTTP 200，與成品逐位元一致，確認正式 0.3.15 已生效；未重新觸發或取消其他部署
