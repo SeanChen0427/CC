@@ -797,6 +797,12 @@ td small {
 .form-grid .wide {
   grid-column:1/-1
 }
+.field-help {font-size:11px;line-height:1.6;color:#829074;font-weight:400;margin-top:5px}
+.managed-categories {list-style:none;padding:0;margin:24px 0 12px}
+.managed-categories li {display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid #e1e6db}
+.managed-categories strong {font-size:14px;font-weight:500;overflow-wrap:anywhere;min-width:0}
+.managed-categories span {font-size:12px;color:#859477;white-space:nowrap}
+.category-note {font-size:12px;line-height:1.7;color:#829074}
 .size-pricing {margin:0 0 20px;padding:16px;border:1px solid #dce2d5;border-radius:8px;background:#f8faf5;min-width:0}
 .size-pricing h3 {font-size:14px;margin:0 0 7px}
 .size-pricing p {font-size:12px;line-height:1.7;color:#748368;margin:0 0 12px}
