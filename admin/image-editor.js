@@ -1,13 +1,13 @@
-import { prepareUpload } from './image-upload.js?v=0.3.9';
+import { prepareUpload } from './image-upload.js?v=0.3.10';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const colorsIn = value => [...new Set(value.split(/[,，]/).map(x => x.trim()).filter(Boolean))];
 
-export function mountImageEditor(root, { images = [], bindings = [], colorsInput, upload, onChange }) {
+export function mountImageEditor(root, { images = [], bindings = [], bindingEnabled = bindings.length > 0, colorsInput, upload, onChange }) {
   let items = images.map(url => ({ id: crypto.randomUUID(), url, status: 'done' }));
   let links = [...bindings], running = false, disposed = false, dragged = null, notice = '';
   let controller;
-  const enabled = bindings.length > 0;
+  const enabled = bindingEnabled;
   root.innerHTML = `<div class="photo-editor-heading"><h3>商品照片</h3><span id="photo-count"></span></div>
     <div class="photo-dropzone" tabindex="0" role="button" aria-label="選取或拖曳多張商品照片"><strong>拖曳多張照片到這裡</strong><span>或點一下選取照片，可分批追加</span><input type="file" id="image-upload" multiple accept="image/png,image/jpeg,image/webp" hidden></div>
     <p class="photo-help">最多 8 張，較大的照片會自動縮圖，支援 JPG／PNG／WebP，原檔每張 20 MB 以內</p>
@@ -107,17 +107,19 @@ export function mountImageEditor(root, { images = [], bindings = [], colorsInput
     if (action === 'remove') { if (item.preview) URL.revokeObjectURL(item.preview); items.splice(index, 1); links = links.filter(link => link.url !== item.url); notice = ''; render(); }
     if (action === 'retry') { item.status = 'pending'; item.error = ''; notice = ''; render(); void run(); }
   });
-  $('#bind-photos').addEventListener('change', renderBindings);
+  $('#bind-photos').addEventListener('change', render);
   $('#photo-bindings').addEventListener('change', event => {
     const color = event.target.dataset.color; if (color === undefined) return;
     links = links.filter(link => link.color !== color);
     if (event.target.value) links.push({color,url:event.target.value});
+    onChange({ busy: running || items.some(item => item.status !== 'done'), failed: items.some(item => item.status === 'error') });
   });
   colorsInput.addEventListener('input', renderBindings);
   render();
   return {
     get busy() { return running || items.some(item => item.status !== 'done'); },
     value() { return { images: urls(), imageBindings: currentBindings() }; },
+    draft() { return { images: urls(), imageBindings: currentBindings(), bindingEnabled: $('#bind-photos').checked, pendingCount: items.filter(item => item.status !== 'done').length }; },
     dispose() { disposed = true; controller?.abort(); for (const item of items) if (item.preview) URL.revokeObjectURL(item.preview); colorsInput.removeEventListener('input', renderBindings); },
   };
 }

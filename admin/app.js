@@ -1,11 +1,12 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.9';
-import { art } from './product-art.js?v=0.3.9';
-import { mountImageEditor } from './image-editor.js?v=0.3.9';
-import { editorPricing } from './product-pricing.js?v=0.3.9';
-import { mountSizePricing } from './size-pricing.js?v=0.3.9';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.9';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.9';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.9';
+import { request, config, cloud, download } from './runtime.js?v=0.3.10';
+import { art } from './product-art.js?v=0.3.10';
+import { mountImageEditor } from './image-editor.js?v=0.3.10';
+import { editorPricing } from './product-pricing.js?v=0.3.10';
+import { mountSizePricing } from './size-pricing.js?v=0.3.10';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.10';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.10';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.10';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.10';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -33,7 +34,7 @@ const paths = {
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.list}</svg>`;
 const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',procurement:'採買清單',settings:'活動與設定'};
-const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null};
+const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null,productEditor:null};
 const modal=$('#modal');
 let toastTimer;
 const labels={draft:'準備中',open:'開放預購中',closed:'已結單',purchasing:'韓國採購中',arrived:'商品已到台',archived:'已封存'};
@@ -47,22 +48,42 @@ async function api(path, options={}){
 
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3500);}
 function photo(p){return p.images?.[0]||'data:image/svg+xml,'+encodeURIComponent(art(p.kind,p.tone));}
-function showModal(content,small=false){state.imageEditor?.dispose();state.imageEditor=null;modal.className=small?'modal-small':'';modal.innerHTML=`<button class="modal-close" data-action="close" aria-label="關閉">${icon('close')}</button><div class="modal-content">${content}</div>`;if(!modal.open)modal.showModal();}
+function disposeEditor(){state.productEditor?.dispose();state.productEditor=null;state.imageEditor?.dispose();state.imageEditor=null;}
+function showModal(content,small=false){disposeEditor();modal.className=small?'modal-small':'';modal.innerHTML=`<button class="modal-close" data-action="close" aria-label="關閉">${icon('close')}</button><div class="modal-content">${content}</div>`;if(!modal.open)modal.showModal();}
+const productDrafts=()=>createProductDrafts((config.apiURL||config.customerURL)+':'+state.data.campaign.id);
+function closeModal(){
+  const editor=state.productEditor;
+  if(editor){
+    if(editor.saving)return false;
+    editor.flush();
+    if(editor.dirty&&!window.confirm('商品尚未儲存，要保留草稿並關閉編輯嗎？'))return false;
+    if(!editor.pause()){toast('目前無法暫存草稿，請先儲存商品或繼續編輯');return false;}
+    if(editor.dirty)toast('商品草稿已保留，開啟同款商品可繼續');
+  }
+  disposeEditor();modal.close();return true;
+}
+function restoreProductDraft(){
+  const draft=productDrafts().active();
+  if(!draft)return;
+  if(draft.id!=null&&!state.data.products.some(p=>p.id===draft.id)){productDrafts().remove(draft.id);return;}
+  state.view='products';history.replaceState(null,'','#products');renderShell();showProductEditor(draft.id);
+}
 function formData(form){return Object.fromEntries(new FormData(form));}
 const exportButton=()=>`<button class="button light" data-action="export">${icon('download')}匯出 Excel</button>`;
 const brand=()=>`<div class="brand"><span class="brand-symbol">${icon('bag')}</span><span><span class="brand-title">CCBABY</span><small>店主採購工作台</small></span></div>`;
 
 function renderLogin(){
+  state.productEditor?.flush();disposeEditor();modal.close();
   $('#app').innerHTML=`<div class="login-screen"><section class="login-story">${brand()}<div><div class="eyebrow">CURATE WITH CARE</div><h1>商品與採買管理</h1><p>從每一份小小的喜歡，到一張清楚的採買清單， 這一趟，讓預購的每個細節都有自己的位置</p></div><footer>CCBABY / OWNER WORKSPACE</footer><div class="story-number">01</div></section><section class="login-panel"><form class="login-card" id="login-form"><div class="eyebrow">WELCOME TO YOUR WORKSPACE</div><h2>歡迎回來</h2><p>請使用店主專屬帳號登入採購工作台</p><label class="field">管理帳號<input name="username" autocomplete="username" required value="hannah"></label><label class="field">登入密碼<input name="password" type="password" autocomplete="current-password" required placeholder="輸入你的管理密碼"></label><div id="login-error" class="error" role="alert"></div><button class="button" type="submit">登入工作台 ${icon('arrow')}</button><div class="login-note"><span class="pill"><i></i>${cloud ? '店主專屬入口' : '本機工作台'}</span><p>客戶與管理入口各自獨立， 此處只供店主管理商品、預購與採買進度</p></div></form></section></div>`;
   $('#login-form').addEventListener('submit',async event=>{
     event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;$('#login-error').textContent='';
-    try{await api('admin/login',{method:'POST',body:formData(form)});await load();renderShell();}
+    try{await api('admin/login',{method:'POST',body:formData(form)});await load();renderShell();restoreProductDraft();}
     catch(error){$('#login-error').textContent=error.message;button.disabled=false;}
   });
 }
 async function load(){state.data=await api('admin/state');}
 const productCategories=()=>categoryNames(state.data.categories,state.data.products);
-function navigate(view){state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
+function navigate(view){if(!closeModal())return;state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
 function renderShell(){
   const d=state.data;if(!d)return;
   $('#app').innerHTML=`<div class="workspace"><aside class="sidebar">${brand()}<div class="nav-label">YOUR WORKSPACE</div><nav class="side-nav" aria-label="管理導覽">${[['dashboard','grid'],['products','bag'],['customers','users'],['procurement','list'],['settings','settings']].map(([id,img])=>`<button data-action="navigate" data-view="${id}" class="${state.view===id?'active':''}">${icon(img)}<span>${views[id]}</span>${id==='products'?`<span class="nav-count">${d.products.length}</span>`:''}</button>`).join('')}</nav><div class="sidebar-bottom"><a class="side-preview" href="${esc(config.customerURL)}" target="_blank" rel="noopener">${icon('external')}預覽客戶選物頁</a><div class="owner"><div class="avatar">S</div><div><div class="owner-name">店主工作室</div><div class="owner-role">OWNER / 唯一管理員</div></div><button class="text-button" data-action="logout">登出</button></div></div></aside><div class="admin-main"><header class="topbar"><div class="breadcrumb"><span>韓國年度採購</span><span>/</span><strong>${views[state.view]}</strong></div><div class="topbar-right"><span>${esc(d.campaign.name)}</span><span class="pill"><i></i>${cloud ? '雲端工作台' : '本機工作台'}</span><button class="text-button" data-action="refresh" aria-label="重新整理資料">更新資料</button><button class="text-button mobile-logout" data-action="logout">登出</button></div></header><main class="admin-content" id="content"></main></div></div>`;
@@ -167,29 +188,50 @@ function showDeleteOrder(id){
 
 function showProductEditor(id){
   const p=state.data.products.find(p=>p.id===id);
+  const drafts=productDrafts(),draft=drafts.read(p?.id);
   const variants=p?.variants.filter(v=>v.active)||[];
   const pricing=editorPricing(p);
-  showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><section id="product-photos" class="photo-editor" aria-label="商品照片管理"></section>
+  showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><p class="product-draft-status" id="product-draft-status" role="status"></p><div class="product-draft-warning" id="product-draft-warning" hidden><p></p><button type="button" class="button light" id="confirm-draft-photos">確認照片已齊</button></div><section id="product-photos" class="photo-editor" aria-label="商品照片管理"></section>
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
     <label class="field">商品分類<select name="category" required aria-label="商品分類">${productCategories().length?'':'<option value="">請先新增分類</option>'}${productCategories().map(category=>`<option value="${esc(category)}" ${p?.category===category?'selected':''}>${esc(category)}</option>`).join('')}</select><small class="field-help">可在商品管理的「分類管理」新增</small></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
     <label class="field wide">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${pricing.basePrice}"></label>
     <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL,2XL')}"></label>
     <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
-    <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="button light" data-action="close">取消</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
-  const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:$('#product-form [name="sizes"]'),priceInput:$('#product-form [name="price"]'),sizeSurcharges:pricing.sizeSurcharges});
+    <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="text-button" data-action="discard-product-draft">放棄草稿</button><button type="button" class="button light" data-action="close">稍後繼續</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
+  const form=$('#product-form');
+  if(draft)for(const [name,value] of Object.entries(draft.fields)){
+    const input=form.elements.namedItem(name);if(!input)continue;
+    if(name==='category'&&value&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));
+    input.value=value;
+  }
+  const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:form.elements.sizes,priceInput:form.elements.price,sizeSurcharges:draft?.sizeSurcharges||pricing.sizeSurcharges});
+  let watcher,missingPhotos=draft?.pendingCount||0,saving=false;
+  let uploadStatus={busy:false,failed:false};
+  const updateButton=()=>{const button=form.querySelector('button[type="submit"]');button.disabled=saving||uploadStatus.busy||uploadStatus.failed||missingPhotos>0;button.textContent=saving?'儲存中':uploadStatus.busy?'等待照片上傳':uploadStatus.failed?'請先處理失敗照片':missingPhotos?'請先確認照片':'儲存商品';};
   const editor=mountImageEditor($('#product-photos'),{
-    images:p?.images,bindings:p?.imageBindings,colorsInput:$('#product-form [name="colors"]'),
+    images:draft?.images||p?.images,bindings:draft?.imageBindings||p?.imageBindings,bindingEnabled:draft?.bindingEnabled,colorsInput:form.elements.colors,
     upload:(data,signal)=>api('admin/upload',{method:'POST',body:{data},signal}),
-    onChange:({busy,failed})=>{const button=$('#product-form button[type="submit"]');button.disabled=busy||failed;button.textContent=busy?'等待照片上傳':failed?'請先處理失敗照片':'儲存商品';},
+    onChange:status=>{uploadStatus=status;updateButton();watcher?.flush();},
   });
   state.imageEditor=editor;
-  $('#product-form').addEventListener('submit',async e=>{
-    if(editor.busy){e.preventDefault();return;}
-    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]');button.disabled=true;
+  const capture=()=>{const photos=editor.draft();return{id:p?.id??null,fields:formData(form),sizeSurcharges:sizePricing.draft(),...photos,pendingCount:photos.pendingCount+missingPhotos};};
+  watcher=watchProductDraft({form,document,window,capture,initial:draft?null:JSON.stringify(capture()),drafts,onStatus:({dirty,stored})=>{
+    $('#product-draft-status').textContent=!stored?'此瀏覽器目前無法暫存，離開前請先儲存商品':dirty?(draft?'已恢復商品草稿，請確認後儲存':'草稿已暫存於此分頁，儲存後才會更新商品'):'編輯內容會暫存於此分頁，儲存後才會更新商品';
+  }});
+  state.productEditor={id:p?.id??null,flush:watcher.flush,pause:watcher.pause,dispose:watcher.dispose,get dirty(){return watcher.dirty;},get saving(){return saving;}};
+  const showMissingPhotos=()=>{const warning=$('#product-draft-warning');warning.hidden=missingPhotos===0;warning.querySelector('p').textContent=`有 ${missingPhotos} 張照片在頁面中斷前未完成上傳，請重新選取，或確認不需要保留後按「確認照片已齊」`;updateButton();};
+  $('#confirm-draft-photos').addEventListener('click',()=>{missingPhotos=0;showMissingPhotos();watcher.flush();});
+  showMissingPhotos();watcher.flush();
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();if(editor.busy||missingPhotos||saving)return;
+    saving=true;updateButton();
     const data=formData(form);data.active=data.active==='true';data.sizeSurcharges=sizePricing.value();Object.assign(data,editor.value());if(p)data.id=p.id;
-    try{await api('admin/products',{method:'POST',body:data});await load();modal.close();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
-    catch(error){$('#product-error').textContent=error.message;button.disabled=false;}
+    try{await api('admin/products',{method:'POST',body:data});}
+    catch(error){saving=false;if(form.isConnected){$('#product-error').textContent=error.message;updateButton();}return;}
+    watcher.dispose();drafts.remove(p?.id);disposeEditor();modal.close();
+    try{await load();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
+    catch(error){toast('商品已儲存，清單更新失敗，請按更新資料');}
   });
 }
 
@@ -252,7 +294,13 @@ document.addEventListener('click',async event=>{
   try{
     if(action==='export'){await download('admin/export.xlsx','ccbaby-preorder.xlsx');return;}
     if(action==='backup'){await download('admin/backup','ccbaby-preorder-backup.json');return;}
-    if(action==='close'){modal.close();return;}
+    if(action==='close'){closeModal();return;}
+    if(action==='discard-product-draft'){
+      if(state.productEditor?.saving)return;
+      if(!window.confirm('確定放棄這份商品草稿？已儲存的商品不會變更'))return;
+      const id=state.productEditor?.id;
+      disposeEditor();productDrafts().remove(id);modal.close();return;
+    }
     if(action==='navigate'){navigate(target.dataset.view);return;}
     if(action==='logout'){await api('logout',{method:'POST',body:{}});state.data=null;renderLogin();return;}
     if(action==='refresh'){await load();renderShell();toast('已取得最新資料');return;}
@@ -299,14 +347,15 @@ document.addEventListener('click',async event=>{
     }
   }catch(error){toast(error.message);}
 });
-modal.addEventListener('close',()=>{state.imageEditor?.dispose();state.imageEditor=null;});
-modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
+modal.addEventListener('close',()=>{if(!modal.open){state.productEditor?.flush();disposeEditor();}});
+modal.addEventListener('cancel',event=>{event.preventDefault();closeModal();});
+modal.addEventListener('click',event=>{if(event.target===modal&&!state.productEditor){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)closeModal();}});
 window.addEventListener('hashchange',()=>{
   const view=location.hash.slice(1);
-  if(state.data&&views[view]&&view!==state.view){modal.close();state.view=view;state.search='';state.limit=25;renderShell();}
+  if(state.data&&views[view]&&view!==state.view){if(!closeModal()){history.replaceState(null,'','#'+state.view);return;}state.view=view;state.search='';state.limit=25;renderShell();}
 });
 try{
   const me=await api('me');
-  if(me.authenticated){await load();if(views[location.hash.slice(1)])state.view=location.hash.slice(1);renderShell();}
+  if(me.authenticated){await load();if(views[location.hash.slice(1)])state.view=location.hash.slice(1);renderShell();restoreProductDraft();}
   else renderLogin();
 }catch(error){renderLogin();toast(error.message);}
