@@ -1426,6 +1426,13 @@ dialog::backdrop {
 .purchase-cost h3 { margin:0 0 16px; font-size:15px; font-weight:500; }
 .cost-output { display:block; min-height:44px; padding:12px 0; color:#5c7350; font-size:18px; }
 .cost-rate { font-size:12px; line-height:1.7; }
+.order-delete-action { margin-top:26px; padding-top:14px; border-top:1px solid var(--line); }
+.order-delete-action p { margin:6px 0 0; font-size:12px; line-height:1.7; }
+.danger-text { color:#9b504b; }
+.button.danger { background:#9b504b; border-color:#9b504b; color:#fff; }
+.delete-summary { display:grid; gap:8px; padding:16px; margin:18px 0; border:1px solid #e4cdca; border-radius:6px; background:#fcf7f6; overflow-wrap:anywhere; }
+.delete-summary strong { font-size:18px; }
+.delete-summary span { font-size:13px; }
 @media(max-width:760px) {
   .cost-figures { grid-template-columns:1fr; gap:14px; }
   .cost-overview { padding:18px; }

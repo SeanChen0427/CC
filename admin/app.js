@@ -1,11 +1,11 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.8';
-import { art } from './product-art.js?v=0.3.8';
-import { mountImageEditor } from './image-editor.js?v=0.3.8';
-import { editorPricing } from './product-pricing.js?v=0.3.8';
-import { mountSizePricing } from './size-pricing.js?v=0.3.8';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.8';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.8';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.8';
+import { request, config, cloud, download } from './runtime.js?v=0.3.9';
+import { art } from './product-art.js?v=0.3.9';
+import { mountImageEditor } from './image-editor.js?v=0.3.9';
+import { editorPricing } from './product-pricing.js?v=0.3.9';
+import { mountSizePricing } from './size-pricing.js?v=0.3.9';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.9';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.9';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.9';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -134,6 +134,32 @@ function showOrder(id){
   const o=state.data.orders.find(o=>o.id===id);if(!o)return;
   showModal(`<div class="eyebrow">PREORDER DETAILS / ${esc(o.code)}</div><h2>${esc(o.name)}的預購清單</h2><p>${date(o.created_at)} 建立，共 ${o.quantity} 件選物</p><div class="detail-contact"><div>LINE 暱稱<strong>${esc(o.customer.display_name)}</strong></div><div>聯絡手機<strong>${esc(o.phone||'尚未填寫')}</strong></div><div class="wide">收件資料<strong>${esc(o.customer.delivery||'待客戶補填')}</strong></div></div>
     ${o.items.map(i=>{const cost=state.data.report.find(r=>r.variant_id===i.variant_id)?.cost;return `<div class="modal-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>售價單價 ${money(i.price)} · 單件進價 ${cost?krw(cost.unitKrw)+' ／ '+costMoney(unitCostTwd(cost)):'未填'}</small><small>需求進價 ${cost?costMoney(costTotal(cost,i.quantity)):'未填'}</small><small>分配買到 ${i.bought} · 確認缺貨 ${i.shortage} · 待處理 ${i.quantity-i.bought-i.shortage}</small></div><div class="right"><span class="money">${money(i.price*i.quantity)}</span> <button class="text-button" data-action="allocate" data-id="${i.id}">分配採購結果</button></div></div>`;}).join('')}<div class="detail-total"><span>預估商品小計，非已收款</span><strong>${money(o.total)}</strong></div><div class="form-actions"><button class="button light" data-action="copy-order" data-id="${o.id}">複製分貨明細</button><button class="button" data-action="close">完成</button></div>`);
+  const deletion=document.createElement('div');deletion.className='order-delete-action';
+  deletion.innerHTML=`<button class="text-button danger-text" data-action="delete-order" data-id="${o.id}" ${orderDeleteBlocked(o)?'disabled':''}>刪除預購</button>${orderDeleteBlocked(o)?'<p>已有採購、缺貨或分配紀錄，請先處理採購與分配再刪除</p>':''}`;
+  modal.querySelector('.modal-content').append(deletion);
+}
+
+function orderDeleteBlocked(order){
+  return order.items.some(item=>{
+    const row=state.data.report.find(r=>r.variant_id===item.variant_id);
+    return item.bought||item.shortage||row?.bought||row?.shortage;
+  });
+}
+
+function showDeleteOrder(id){
+  const order=state.data.orders.find(o=>o.id===id);if(!order)return;
+  if(orderDeleteBlocked(order)){toast('請先處理採購與分配再刪除');return;}
+  showModal(`<div class="eyebrow">CONFIRM ORDER DELETION</div><h2>刪除這份預購</h2><div class="delete-summary"><strong>${esc(order.code)}</strong><span>${esc(order.name)} · ${order.quantity} 件 · ${money(order.total)}</span></div><p>刪除後，客戶將看不到這份預購，採買表與匯出也會排除</p><form id="delete-order-form"><label class="field">輸入完整預購編號確認<input name="confirmCode" required maxlength="40" autocomplete="off" spellcheck="false" placeholder="${esc(order.code)}"></label><label class="field">刪除原因<textarea name="reason" required maxlength="300" placeholder="例如 重複送單或客戶取消"></textarea></label><p class="settings-foot">整份預購會一起刪除，系統保留內部刪除紀錄</p><div class="error" id="delete-order-error" role="alert"></div><div class="form-actions"><button class="button light" type="button" data-action="order" data-id="${order.id}">保留預購</button><button class="button danger" type="submit" disabled>確認刪除整份預購</button></div></form>`,true);
+  const form=$('#delete-order-form'),button=form.querySelector('[type="submit"]');
+  const ready=()=>form.elements.confirmCode.value.trim()===order.code&&Boolean(form.elements.reason.value.trim());
+  form.addEventListener('input',()=>{button.disabled=!ready();});
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    if(!ready()){$('#delete-order-error').textContent='請填寫相符的完整預購編號與刪除原因';return;}
+    button.disabled=true;
+    try{await api('admin/orders/'+order.id+'/delete',{method:'POST',body:{...formData(form),version:order.version}});await load();modal.close();renderShell();toast('預購已刪除，客戶端與採買表已同步排除');}
+    catch(error){$('#delete-order-error').textContent=error.message;button.disabled=!ready();}
+  });
 }
 
 function showProductEditor(id){
@@ -229,6 +255,7 @@ document.addEventListener('click',async event=>{
     if(action==='refresh'){await load();renderShell();toast('已取得最新資料');return;}
     if(action==='more'){state.limit+=25;renderTable();return;}
     if(action==='order'){showOrder(id);return;}
+    if(action==='delete-order'){showDeleteOrder(id);return;}
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
     if(action==='import'){showImport();return;}
