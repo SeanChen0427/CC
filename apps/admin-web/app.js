@@ -151,14 +151,17 @@ function showDeleteOrder(id){
   if(orderDeleteBlocked(order)){toast('請先處理採購與分配再刪除');return;}
   showModal(`<div class="eyebrow">CONFIRM ORDER DELETION</div><h2>刪除這份預購</h2><div class="delete-summary"><strong>${esc(order.code)}</strong><span>${esc(order.name)} · ${order.quantity} 件 · ${money(order.total)}</span></div><p>刪除後，客戶將看不到這份預購，採買表與匯出也會排除</p><form id="delete-order-form"><label class="field">輸入完整預購編號確認<input name="confirmCode" required maxlength="40" autocomplete="off" spellcheck="false" placeholder="${esc(order.code)}"></label><label class="field">刪除原因<textarea name="reason" required maxlength="300" placeholder="例如 重複送單或客戶取消"></textarea></label><p class="settings-foot">整份預購會一起刪除，系統保留內部刪除紀錄</p><div class="error" id="delete-order-error" role="alert"></div><div class="form-actions"><button class="button light" type="button" data-action="order" data-id="${order.id}">保留預購</button><button class="button danger" type="submit" disabled>確認刪除整份預購</button></div></form>`,true);
   const form=$('#delete-order-form'),button=form.querySelector('[type="submit"]');
+  let submitting=false;
   const ready=()=>form.elements.confirmCode.value.trim()===order.code&&Boolean(form.elements.reason.value.trim());
-  form.addEventListener('input',()=>{button.disabled=!ready();});
+  form.addEventListener('input',()=>{button.disabled=submitting||!ready();});
   form.addEventListener('submit',async event=>{
     event.preventDefault();
+    if(submitting)return;
     if(!ready()){$('#delete-order-error').textContent='請填寫相符的完整預購編號與刪除原因';return;}
-    button.disabled=true;
-    try{await api('admin/orders/'+order.id+'/delete',{method:'POST',body:{...formData(form),version:order.version}});await load();modal.close();renderShell();toast('預購已刪除，客戶端與採買表已同步排除');}
-    catch(error){$('#delete-order-error').textContent=error.message;button.disabled=!ready();}
+    const data={...formData(form),version:order.version};submitting=true;
+    form.querySelectorAll('input,textarea,button').forEach(field=>{field.disabled=true;});
+    try{await api('admin/orders/'+order.id+'/delete',{method:'POST',body:data});await load();modal.close();renderShell();toast('預購已刪除，客戶端與採買表已同步排除');}
+    catch(error){submitting=false;$('#delete-order-error').textContent=error.message;form.querySelectorAll('input,textarea,button').forEach(field=>{field.disabled=false;});button.disabled=!ready();}
   });
 }
 
