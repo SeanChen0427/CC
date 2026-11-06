@@ -3,6 +3,7 @@ import { art } from './product-art.js';
 import { mountImageEditor } from './image-editor.js';
 import { editorPricing } from './product-pricing.js';
 import { mountSizePricing } from './size-pricing.js';
+import { categoryNames, categoryCounts } from './product-categories.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -51,6 +52,7 @@ function renderLogin(){
   });
 }
 async function load(){state.data=await api('admin/state');}
+const productCategories=()=>categoryNames(state.data.categories,state.data.products);
 function navigate(view){state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
 function renderShell(){
   const d=state.data;if(!d)return;
@@ -87,10 +89,10 @@ function renderTablePage(){
     customers:['PEOPLE & PREORDERS','客戶預購紀錄','依客戶查看完整預購，回台後也能照著分貨'],
     procurement:['YOUR BUYING LIST','採買清單','每個規格分開計算，買到多少就記下多少'],
   }[view];
-  const actions=view==='products'?`<button class="button light" data-action="import">CSV 批次匯入</button><button class="button" data-action="new-product">${icon('plus')}新增商品</button>`:exportButton();
+  const actions=view==='products'?`<button class="button light" data-action="categories">分類管理</button><button class="button light" data-action="import">CSV 批次匯入</button><button class="button" data-action="new-product">${icon('plus')}新增商品</button>`:exportButton();
   $('#content').innerHTML=heading(...meta,actions)+
     (view==='procurement'?`<div class="page-note">${icon('box')}「待採買」與「確認缺貨」分開記錄，買到後可在客戶明細手動分配，沒有自動順位</div>`:'')+
-    `<section class="panel" data-page="${view}"><div class="toolbar"><div class="toolbar-left"><label class="search-box">${icon('search')}<input id="table-search" placeholder="${view==='customers'?'搜尋姓名、手機或預購編號':'搜尋商品名稱、編號或規格'}" value="${esc(state.search)}" aria-label="搜尋清單"></label>${view!=='customers'?`<select class="filter-select" id="category-filter" aria-label="分類篩選"><option>全部分類</option>${[...new Set(state.data.products.map(p=>p.category))].map(c=>`<option ${state.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div>${view==='procurement'?`<label class="checkbox-label"><input type="checkbox" id="pending-only" ${state.onlyPending?'checked':''}>只看待採買</label>`:`<span class="pill gray">${view==='products'?state.data.products.length+' 款選物':state.data.orders.filter(o=>o.quantity>0).length+' 份預購'}</span>`}</div><div id="table-area"></div></section>`;
+    `<section class="panel" data-page="${view}"><div class="toolbar"><div class="toolbar-left"><label class="search-box">${icon('search')}<input id="table-search" placeholder="${view==='customers'?'搜尋姓名、手機或預購編號':'搜尋商品名稱、編號或規格'}" value="${esc(state.search)}" aria-label="搜尋清單"></label>${view!=='customers'?`<select class="filter-select" id="category-filter" aria-label="分類篩選"><option>全部分類</option>${productCategories().map(c=>`<option ${state.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div>${view==='procurement'?`<label class="checkbox-label"><input type="checkbox" id="pending-only" ${state.onlyPending?'checked':''}>只看待採買</label>`:`<span class="pill gray">${view==='products'?state.data.products.length+' 款選物':state.data.orders.filter(o=>o.quantity>0).length+' 份預購'}</span>`}</div><div id="table-area"></div></section>`;
   $('#table-search').addEventListener('input',e=>{state.search=e.target.value;state.limit=25;renderTable();});
   $('#category-filter')?.addEventListener('change',e=>{state.category=e.target.value;state.limit=25;renderTable();});
   $('#pending-only')?.addEventListener('change',e=>{state.onlyPending=e.target.checked;renderTable();});
@@ -131,7 +133,7 @@ function showProductEditor(id){
   const pricing=editorPricing(p);
   showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><section id="product-photos" class="photo-editor" aria-label="商品照片管理"></section>
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
-    <label class="field">商品分類<input name="category" list="categories" required maxlength="30" value="${esc(p?.category||'毛孩衣著')}"><datalist id="categories">${[...new Set(state.data.products.map(p=>p.category))].map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
+    <label class="field">商品分類<select name="category" required aria-label="商品分類">${productCategories().length?'':'<option value="">請先新增分類</option>'}${productCategories().map(category=>`<option value="${esc(category)}" ${p?.category===category?'selected':''}>${esc(category)}</option>`).join('')}</select><small class="field-help">可在商品管理的「分類管理」新增</small></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
     <label class="field wide">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${pricing.basePrice}"></label>
     <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL,2XL')}"></label>
     <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
@@ -150,6 +152,16 @@ function showProductEditor(id){
     const data=formData(form);data.active=data.active==='true';data.sizeSurcharges=sizePricing.value();Object.assign(data,editor.value());if(p)data.id=p.id;
     try{await api('admin/products',{method:'POST',body:data});await load();modal.close();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
     catch(error){$('#product-error').textContent=error.message;button.disabled=false;}
+  });
+}
+
+function showCategoryManager(){
+  const counts=categoryCounts(state.data.categories,state.data.products);
+  showModal(`<div class="eyebrow">ORGANIZE YOUR COLLECTION</div><h2>分類管理</h2><p>先建立分類，再在商品編輯時選用</p><form id="category-form"><label class="field">新分類名稱<input name="name" required maxlength="30" placeholder="例如 外出配件"></label><div class="error" id="category-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">${icon('plus')}新增分類</button></div></form><ul class="managed-categories" aria-label="分類清單">${counts.map(([name,count])=>`<li><strong>${esc(name)}</strong><span>${count} 款商品</span></li>`).join('')||'<li>尚未建立分類</li>'}</ul><p class="category-note">新增分類不會更動已建檔商品</p><div class="form-actions"><button type="button" class="button light" data-action="close">完成</button></div>`,true);
+  $('#category-form').addEventListener('submit',async event=>{
+    event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;$('#category-error').textContent='';
+    try{await api('admin/categories',{method:'POST',body:formData(form)});await load();renderShell();showCategoryManager();toast('分類已新增，可在商品編輯時選用');}
+    catch(error){$('#category-error').textContent=error.message;button.disabled=false;}
   });
 }
 
@@ -201,6 +213,7 @@ document.addEventListener('click',async event=>{
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
     if(action==='import'){showImport();return;}
+    if(action==='categories'){showCategoryManager();return;}
     if(action==='copy-order'){
       const o=state.data.orders.find(o=>o.id===id);
       const value=[o.code+' '+o.name,...o.items.map(i=>`${i.product_code} ${i.product_name} ${i.color}/${i.size} ×${i.quantity}（買到${i.bought}／缺貨${i.shortage}）`),'預估商品小計 '+money(o.total)].join('\n');

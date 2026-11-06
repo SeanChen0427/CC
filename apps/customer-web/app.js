@@ -3,6 +3,7 @@ import { art } from './product-art.js';
 import { enterCustomerSite } from './entry.js';
 import { imageForColor, photoIndexForColor } from './product-gallery.js';
 import { mountGallery } from './gallery.js';
+import { categoryCounts as countCategories } from './product-categories.js';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -90,7 +91,7 @@ const cartCount = () => state.cart.reduce((sum, i) => sum + i.quantity, 0);
 const route = () => ['shop', 'cart', 'orders'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'shop';
 const openForOrders = () => state.campaign?.status === 'open' && new Date(state.campaign.closesAt) > new Date();
 const date = value => new Intl.DateTimeFormat('zh-TW', { timeZone: 'Asia/Taipei', month:'2-digit',day:'2-digit' }).format(new Date(value));
-const categoryCounts = () => Object.entries(state.products.reduce((sum,p) => { sum[p.category] = (sum[p.category] || 0) + 1; return sum; }, {}));
+const categoryCounts = () => countCategories(state.categories,state.products);
 function categories() {
   return [['全部選物', state.products.length], ...categoryCounts()].map(([name, count]) =>
     `<button class="category-option ${state.category === name ? 'active' : ''}" data-action="category" data-category="${esc(name)}"><span>${esc(name)}</span><small>${count}</small></button>`).join('');
@@ -124,6 +125,7 @@ function renderShop() {
 }
 
 function renderGrid() {
+  const emptyCategory=!state.search&&state.category!=='全部選物';
   const filtered = state.products.filter(p => (state.category === '全部選物' || p.category === state.category) &&
     (p.name + ' ' + p.code).toLocaleLowerCase().includes(state.search.toLocaleLowerCase()));
   $('#category-heading').innerHTML = `${esc(state.category)}<small>${filtered.length} ITEMS</small>`;
@@ -134,7 +136,7 @@ function renderGrid() {
       <div class="product-photo" data-action="product" data-id="${p.id}" role="button" tabindex="0" aria-label="查看 ${esc(p.name)}"><img src="${photo(p)}" alt="${esc(p.name)}示意圖" loading="lazy">${p.badge ? `<span class="product-badge">${esc(p.badge)}</span>` : ''}</div>
       <div class="product-code">${esc(p.code)} / ${esc(p.category)}</div><h3>${esc(p.name)}</h3><div class="product-meta">${[...new Set(p.variants.map(v => v.color))].map(esc).join(' · ')}</div>
       <div class="product-bottom"><span class="product-price">${price}</span><button class="quick-add" data-action="product" data-id="${p.id}" aria-label="選擇 ${esc(p.name)} 規格">${icon('plus')}</button></div></article>`;
-  }).join('') || (!state.products.length ? `<div class="empty-state grid-empty">${icon('heart')}<h2>本期選物準備中</h2><p>我們正在整理這次的韓國選物， 開放預購時會再通知大家</p></div>` : `<div class="empty-state grid-empty">${icon('search')}<h2>找不到符合的商品</h2><p>換個關鍵字，或試著搜尋商品編號</p><button class="secondary-button" data-action="clear-search">查看全部商品</button></div>`);
+  }).join('') || (!state.products.length ? `<div class="empty-state grid-empty">${icon('heart')}<h2>本期選物準備中</h2><p>我們正在整理這次的韓國選物， 開放預購時會再通知大家</p></div>` : `<div class="empty-state grid-empty">${icon('search')}<h2>${emptyCategory?'這個分類尚未上架商品':'找不到符合的商品'}</h2><p>${emptyCategory?'可以先看看其他分類的選物':'換個關鍵字，或試著搜尋商品編號'}</p><button class="secondary-button" data-action="clear-search">查看全部商品</button></div>`);
   $('#load-more').innerHTML = filtered.length > state.limit
     ? `<div class="load-more-wrap"><button class="secondary-button" data-action="more">繼續看看 ${icon('arrow')}</button><p class="collection-end">已顯示 ${Math.min(filtered.length,state.limit)} / ${filtered.length} 件選物</p></div>`
     : `<p class="collection-end">${filtered.length ? 'THE END OF THIS LITTLE EDIT' : ''}</p>`;
@@ -349,7 +351,7 @@ try {
     showGate:(auth,message)=>{state.lineConfigured=auth.lineConfigured;state.lineChannelId=auth.lineChannelId;renderAuthGate(message);},
     login:channelId=>startLineLogin(channelId,{replace:true}),
     ready:(catalog,me)=>{
-      state.products=catalog.products;state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
+      state.products=catalog.products;state.categories=catalog.categories||[];state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
       state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();
     },
   });

@@ -2,6 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, chmodSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomBytes, scryptSync } from 'node:crypto';
+import { categoryNames } from '../shared/product-categories.js';
 
 export const DEMO_USERS = [
   { id: 'demo-visitor', name: '測試訪客' },
@@ -45,6 +46,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL REFERENCES products(id),
       color TEXT NOT NULL, size TEXT NOT NULL, price INTEGER NOT NULL CHECK(price>=0),
       active INTEGER NOT NULL DEFAULT 1
+    );
+    CREATE TABLE IF NOT EXISTS categories (
+      name TEXT PRIMARY KEY NOT NULL, created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS preorders (
       id INTEGER PRIMARY KEY, customer_id TEXT UNIQUE NOT NULL REFERENCES customers(id),
@@ -102,6 +106,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     campaign() {
       const row = this.get('SELECT * FROM campaign WHERE id=1');
       return { id: row.id, name: row.name, status: row.status, closesAt: row.closes_at, description: row.description };
+    },
+    categories() {
+      return categoryNames(this.all('SELECT name FROM categories ORDER BY rowid').map(row=>row.name),this.all('SELECT category FROM products ORDER BY id'));
     },
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);

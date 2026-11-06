@@ -14,6 +14,23 @@ test('product catalog requires a customer session and rejects anonymous or admin
   assert.equal(operate(s,'catalog','GET',{},anna).products.length,1);
 });
 test('customer sessions cannot read or mutate admin routes',()=>{const s=fixture();assert.throws(()=>operate(s,'admin/state','GET',{},anna),e=>e.status===401);assert.throws(()=>operate(s,'admin/products','POST',product,anna),e=>e.status===401);});
+test('creating categories preserves every legacy product, variant and preorder field',()=>{
+  const s=fixture();delete s.categories;submit(s);
+  s.products[0].images=[imagePrefix+'abc-1.png'];s.products[0].imageBindings=[{color:'奶油白',url:s.products[0].images[0]}];
+  const protectedKeys=['products','variants','customers','preorders','items','procurement','submissions','closing_snapshots','campaign'];
+  const protectedData=Object.fromEntries(protectedKeys.map(key=>[key,structuredClone(s[key])]));
+  assert.deepEqual(operate(s,'admin/state','GET',{},owner).categories,['衣著']);
+  assert.equal(s.categories,undefined);
+  operate(s,'admin/categories','POST',{name:'  玩具  '},owner);
+  assert.deepEqual(s.categories,['衣著','玩具']);
+  assert.deepEqual(operate(s,'catalog','GET',{},anna).categories,['衣著','玩具']);
+  for(const key of protectedKeys)assert.deepEqual(s[key],protectedData[key],key+' must stay identical');
+  for(const [body,status] of [[{name:'衣著'},409],[{name:'玩具'},409],[{name:''},400],[{name:'全部選物'},400],[{name:'長'.repeat(31)},400]]){
+    const before=structuredClone(s);assert.throws(()=>operate(s,'admin/categories','POST',body,owner),error=>error.status===status);assert.deepEqual(s,before);
+  }
+  assert.throws(()=>operate(s,'admin/categories','POST',{name:'拒絕'},anna),error=>error.status===401);
+  assert.throws(()=>operate(s,'admin/categories','POST',{name:'拒絕'},null),error=>error.status===401);
+});
 test('preorders are isolated, additive and idempotent',()=>{const s=fixture();submit(s,anna,{requestId:'a'});submit(s,anna,{requestId:'a'});assert.equal(s.items[0].quantity,2);assert.throws(()=>submit(s,anna,{requestId:'a',name:'別名'}),e=>e.status===409);submit(s);assert.equal(s.items[0].quantity,4);assert.equal(orders(s,bob.subject).length,0);assert.throws(()=>operate(s,'customer/items/1','PATCH',{quantity:0},bob),e=>e.status===404);});
 test('product price snapshots are immutable and stale cart prices rejected',()=>{const s=fixture();submit(s);operate(s,'admin/products','POST',{...product,id:1,price:690},owner,imagePrefix);assert.equal(s.items[0].price,590);assert.throws(()=>submit(s),e=>e.status===409);submit(s,anna,{items:[{variantId:1,quantity:1,expectedPrice:690}]});assert.equal(s.items.length,2);assert.equal(report(s)[0].demand,3);assert.equal(orders(s)[0].total,1870);});
 test('custom 2XL and larger surcharges keep variant IDs and historical preorder prices',()=>{

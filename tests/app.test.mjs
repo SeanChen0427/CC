@@ -192,6 +192,21 @@ test('two local applications, durable preorders and buying reports', async t => 
       assert.equal(saved.basePrice,590);assert.deepEqual(saved.sizeSurcharges,payload.sizeSurcharges);
       assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,sizeSurcharges:[{size:'不存在',extra:100}]}})).status,400);
     });
+    await t.test('standalone categories preserve existing product rows, variants and preorders',async()=>{
+      const tables=['products','variants','preorders','items','customers','procurement'];
+      const before=Object.fromEntries(tables.map(table=>[table,app.store.all('SELECT * FROM '+table)]));
+      const stateBefore=(await request('admin','admin/state')).data;
+      assert.equal((await request('admin','admin/categories',{method:'POST',body:{name:'獨立新增分類'}})).status,200);
+      assert.equal((await request('admin','admin/categories',{method:'POST',body:{name:'獨立新增分類'}})).status,409);
+      assert.equal((await request('admin','admin/categories',{method:'POST',body:{name:stateBefore.categories[0]}})).status,409);
+      assert.equal((await request('admin','admin/categories',{method:'POST',body:{name:'  '}})).status,400);
+      assert.equal((await request('customer','admin/categories',{method:'POST',body:{name:'拒絕'}})).status,403);
+      const stateAfter=(await request('admin','admin/state')).data;
+      assert.deepEqual(stateAfter.categories,[...stateBefore.categories,'獨立新增分類']);
+      assert.deepEqual(stateAfter.products,stateBefore.products);assert.deepEqual(stateAfter.orders,stateBefore.orders);
+      for(const table of tables)assert.deepEqual(app.store.all('SELECT * FROM '+table),before[table],table+' must stay identical');
+      assert.ok((await request('customer','catalog')).data.categories.includes('獨立新增分類'));
+    });
     await t.test('data and login survive local server restart',async()=>{
       await app.close();
       app=await startApp({directory,customerPort:0,adminPort:0,password,quiet:true,seed:true});
@@ -199,6 +214,7 @@ test('two local applications, durable preorders and buying reports', async t => 
       assert.equal((await request('admin','admin/state')).data.products.length,200);
       assert.equal((await request('admin','admin/state')).data.products.find(p=>p.id===catalog[0].id).imageBindings[0].color,'棕');
       assert.equal((await request('admin','admin/state')).data.products.find(p=>p.id===catalog[1].id).sizeSurcharges[2].extra,150);
+      assert.ok((await request('admin','admin/state')).data.categories.includes('獨立新增分類'));
       const credentials=await readFile(join(directory,'admin-credentials.txt'),'utf8');
       assert.ok(credentials.includes(password));
     });

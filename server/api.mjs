@@ -1,7 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges } from '../domain/rules.mjs';
+import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
 import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
 
@@ -119,7 +119,7 @@ export async function api({ store, req, role, path, method, body, session, local
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
   if (path === '/api/catalog' && role === 'customer' && method === 'GET') {
-    return { campaign: store.campaign(), products: store.catalog(), localOnly: true, lineConfigured: false };
+    return { campaign: store.campaign(), categories: store.categories(), products: store.catalog(), localOnly: true, lineConfigured: false };
   }
   if (path === '/api/me' && method === 'GET') {
     return { authenticated: Boolean(session), role, localOnly: true,
@@ -232,10 +232,18 @@ export async function api({ store, req, role, path, method, body, session, local
   }
   if (path === '/api/admin/state' && method === 'GET') {
     return {
-      campaign: store.campaign(), products: store.catalog(true), orders: store.orders(),
+      campaign: store.campaign(), categories: store.categories(), products: store.catalog(true), orders: store.orders(),
       report: store.report(), stats: summary(store),
       events: store.all('SELECT id,kind,subject,created_at FROM events ORDER BY id DESC LIMIT 12'),
     };
+  }
+  if (path === '/api/admin/categories' && method === 'POST') {
+    return store.transaction(()=>{
+      const existing=store.categories(),name=validateNewCategory(body.name,existing);
+      for(const category of [...existing,name]) store.run('INSERT OR IGNORE INTO categories(name,created_at) VALUES(?,?)',category,now());
+      store.event('category.create',name,{});
+      return {ok:true,categories:store.categories()};
+    });
   }
   if (path === '/api/admin/products' && method === 'POST') {
     const id = store.transaction(() => saveProduct(store, body, body.id ? Number(body.id) : undefined));
@@ -341,7 +349,7 @@ export async function api({ store, req, role, path, method, body, session, local
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };

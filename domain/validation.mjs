@@ -44,6 +44,13 @@ export function text(value, label, max = 150) {
   return result;
 }
 
+export function validateNewCategory(value, existing) {
+  const name = text(value, '分類名稱', 30);
+  if (['全部分類','全部選物'].includes(name)) throw new AppError('請使用其他分類名稱');
+  if (existing.includes(name)) throw new AppError('這個分類已存在', 409);
+  return name;
+}
+
 export function integer(value, label, max = 999, min = 0) {
   if (!Number.isSafeInteger(value) || value < min || value > max) {
     throw new AppError(`${label}需為 ${min}～${max} 的整數`);
