@@ -1426,6 +1426,9 @@ dialog::backdrop {
 .purchase-cost h3 { margin:0 0 16px; font-size:15px; font-weight:500; }
 .cost-output { display:block; min-height:44px; padding:12px 0; color:#5c7350; font-size:18px; }
 .cost-rate { font-size:12px; line-height:1.7; }
+.product-cost-details { margin-top:14px; font-size:12px; line-height:1.8; }
+.product-cost-details summary { cursor:pointer; }
+.product-cost-details ul { padding-left:20px; }
 .order-delete-action { margin-top:26px; padding-top:14px; border-top:1px solid var(--line); }
 .order-delete-action p { margin:6px 0 0; font-size:12px; line-height:1.7; }
 .danger-text { color:#9b504b; }

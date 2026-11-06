@@ -1,12 +1,13 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.10';
-import { art } from './product-art.js?v=0.3.10';
-import { mountImageEditor } from './image-editor.js?v=0.3.10';
-import { editorPricing } from './product-pricing.js?v=0.3.10';
-import { mountSizePricing } from './size-pricing.js?v=0.3.10';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.10';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.10';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.10';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.10';
+import { request, config, cloud, download } from './runtime.js?v=0.3.11';
+import { art } from './product-art.js?v=0.3.11';
+import { mountImageEditor } from './image-editor.js?v=0.3.11';
+import { editorPricing } from './product-pricing.js?v=0.3.11';
+import { mountSizePricing } from './size-pricing.js?v=0.3.11';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.11';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.11';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.11';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.11';
+import { mountProductCost } from './product-cost.js?v=0.3.11';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -195,6 +196,7 @@ function showProductEditor(id){
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
     <label class="field">商品分類<select name="category" required aria-label="商品分類">${productCategories().length?'':'<option value="">請先新增分類</option>'}${productCategories().map(category=>`<option value="${esc(category)}" ${p?.category===category?'selected':''}>${esc(category)}</option>`).join('')}</select><small class="field-help">可在商品管理的「分類管理」新增</small></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
     <label class="field wide">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${pricing.basePrice}"></label>
+    <section id="product-cost" class="purchase-cost wide" aria-label="商品進價設定"></section>
     <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL,2XL')}"></label>
     <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
@@ -206,6 +208,7 @@ function showProductEditor(id){
     input.value=value;
   }
   const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:form.elements.sizes,priceInput:form.elements.price,sizeSurcharges:draft?.sizeSurcharges||pricing.sizeSurcharges});
+  let productCost=mountProductCost($('#product-cost'),{variants:p?.variants||[],exchangeRate:state.data.costSettings?.exchangeRate,draft:draft?.productCost});
   let watcher,missingPhotos=draft?.pendingCount||0,saving=false;
   let uploadStatus={busy:false,failed:false};
   const updateButton=()=>{const button=form.querySelector('button[type="submit"]');button.disabled=saving||uploadStatus.busy||uploadStatus.failed||missingPhotos>0;button.textContent=saving?'儲存中':uploadStatus.busy?'等待照片上傳':uploadStatus.failed?'請先處理失敗照片':missingPhotos?'請先確認照片':'儲存商品';};
@@ -215,7 +218,7 @@ function showProductEditor(id){
     onChange:status=>{uploadStatus=status;updateButton();watcher?.flush();},
   });
   state.imageEditor=editor;
-  const capture=()=>{const photos=editor.draft();return{id:p?.id??null,fields:formData(form),sizeSurcharges:sizePricing.draft(),...photos,pendingCount:photos.pendingCount+missingPhotos};};
+  const capture=()=>{const photos=editor.draft();return{id:p?.id??null,fields:formData(form),sizeSurcharges:sizePricing.draft(),productCost:productCost.draft(),...photos,pendingCount:photos.pendingCount+missingPhotos};};
   watcher=watchProductDraft({form,document,window,capture,initial:draft?null:JSON.stringify(capture()),drafts,onStatus:({dirty,stored})=>{
     $('#product-draft-status').textContent=!stored?'此瀏覽器目前無法暫存，離開前請先儲存商品':dirty?(draft?'已恢復商品草稿，請確認後儲存':'草稿已暫存於此分頁，儲存後才會更新商品'):'編輯內容會暫存於此分頁，儲存後才會更新商品';
   }});
@@ -227,8 +230,24 @@ function showProductEditor(id){
     e.preventDefault();if(editor.busy||missingPhotos||saving)return;
     saving=true;updateButton();
     const data=formData(form);data.active=data.active==='true';data.sizeSurcharges=sizePricing.value();Object.assign(data,editor.value());if(p)data.id=p.id;
-    try{await api('admin/products',{method:'POST',body:data});}
-    catch(error){saving=false;if(form.isConnected){$('#product-error').textContent=error.message;updateButton();}return;}
+    try{Object.assign(data,productCost.value());await api('admin/products',{method:'POST',body:data});}
+    catch(error){
+      saving=false;if(!form.isConnected)return;
+      const area=$('#product-error');area.textContent=error.message;updateButton();
+      if(error.status===409&&error.message.startsWith('進價已更新')){
+        const refresh=document.createElement('button');refresh.type='button';refresh.className='button light';refresh.textContent='載入最新進價，保留其他欄位';area.append(refresh);
+        refresh.addEventListener('click',async()=>{
+          refresh.disabled=true;
+          try{
+            const latest=await api('admin/state'),saved=latest.products.find(item=>item.id===p?.id);
+            if(!saved)throw new Error('商品已變更，請保留草稿並更新清單');
+            state.data=latest;productCost=mountProductCost($('#product-cost'),{variants:saved.variants,exchangeRate:latest.costSettings?.exchangeRate});
+            area.textContent='已載入最新進價，其他欄位已保留，請確認後儲存';watcher.flush();
+          }catch(error){area.textContent=error.message;refresh.disabled=false;}
+        });
+      }
+      return;
+    }
     watcher.dispose();drafts.remove(p?.id);disposeEditor();modal.close();
     try{await load();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
     catch(error){toast('商品已儲存，清單更新失敗，請按更新資料');}

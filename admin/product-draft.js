@@ -29,6 +29,11 @@ export function createProductDrafts(scope, storage = () => sessionStorage) {
         .map(({ color, url }) => ({ color, url })),
       bindingEnabled: draft.bindingEnabled === true,
       pendingCount: Number.isSafeInteger(draft.pendingCount) && draft.pendingCount > 0 ? draft.pendingCount : 0,
+      ...(draft.productCost && typeof draft.productCost === 'object' ? {productCost:{
+        ...Object.fromEntries(['unitKrw','exchangeRate','initialUnitKrw','initialExchangeRate'].filter(key=>typeof draft.productCost[key]==='string').map(key=>[key,draft.productCost[key]])),
+        versions:(Array.isArray(draft.productCost.versions)?draft.productCost.versions:[]).filter(v=>v&&Number.isSafeInteger(v.variantId)&&v.variantId>0&&Number.isSafeInteger(v.version)&&v.version>=0).map(v=>({variantId:v.variantId,version:v.version})),
+        clearMixed:draft.productCost.clearMixed===true,
+      }} : {}),
       open: draft.open !== false,
     };
   }

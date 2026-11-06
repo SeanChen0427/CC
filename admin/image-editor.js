@@ -1,4 +1,4 @@
-import { prepareUpload } from './image-upload.js?v=0.3.10';
+import { prepareUpload } from './image-upload.js?v=0.3.11';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const colorsIn = value => [...new Set(value.split(/[,，]/).map(x => x.trim()).filter(Boolean))];
