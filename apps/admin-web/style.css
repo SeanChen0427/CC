@@ -1448,3 +1448,7 @@ dialog::backdrop {
     display:block
   }
 }
+.product-draft-status {color:#526849;font-size:13px;line-height:1.6;margin:0 0 16px;overflow-wrap:anywhere}
+.product-draft-warning {background:#fff4df;border:1px solid #e0c898;border-radius:12px;padding:14px;margin-bottom:16px}
+.product-draft-warning p {font-size:13px;line-height:1.6;margin:0 0 10px}
+#product-form .form-actions {flex-wrap:wrap}
