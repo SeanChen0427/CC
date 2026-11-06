@@ -1433,6 +1433,7 @@ dialog::backdrop {
 .product-cost-details { margin-top:14px; font-size:12px; line-height:1.8; }
 .product-cost-details summary { cursor:pointer; }
 .product-cost-details ul { padding-left:20px; }
+.size-cost-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin:14px 0; }
 .order-delete-action { margin-top:26px; padding-top:14px; border-top:1px solid var(--line); }
 .order-delete-action p { margin:6px 0 0; font-size:12px; line-height:1.7; }
 .danger-text { color:#9b504b; }
