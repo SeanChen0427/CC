@@ -9,7 +9,7 @@ import { workbook } from './xlsx.mjs';
 import { reportSheets } from './reports.mjs';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
-import { planProductCosts } from '../domain/product-costing.mjs';
+import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
 
 const now = () => new Date().toISOString();
@@ -86,7 +86,7 @@ function saveProduct(store, input, id) {
   p.sourceUrl ??= id ? store.get('SELECT source_url FROM products WHERE id=?',id).source_url : '';
   const previous=id?store.all('SELECT * FROM variants WHERE product_id=?',id):[];
   const records=store.all('SELECT * FROM procurement').map(r=>({...r,cost:r.cost?JSON.parse(r.cost):null}));
-  const costs=planProductCosts(input.costUpdate,previous,records,store.costSettings());
+  const costs=planProductCosts(input.costUpdate,previous,records,store.costSettings(),p.sizes);
   const values = [p.code, p.name, p.category, p.description, p.kind, p.tone, p.badge, p.active, JSON.stringify(p.images), JSON.stringify(p.imageBindings), JSON.stringify({basePrice:p.price,sizeSurcharges:p.sizeSurcharges}), p.sourceUrl];
   if (id) store.run(`UPDATE products SET code=?,name=?,category=?,description=?,kind=?,tone=?,badge=?,active=?,images=?,image_bindings=?,pricing=?,source_url=? WHERE id=?`, ...values, id);
   else id = Number(store.run(`INSERT INTO products(code,name,category,description,kind,tone,badge,active,images,image_bindings,pricing,source_url,created_at)
@@ -98,8 +98,9 @@ function saveProduct(store, input, id) {
     let variantId=old?.id;
     if (old) store.run('UPDATE variants SET price=?,active=1 WHERE id=?', price, old.id);
     else variantId=Number(store.run('INSERT INTO variants(product_id,color,size,price) VALUES(?,?,?,?)', id, color, size, price).lastInsertRowid);
-    if(costs.hasCost || (!old && costs.inherit)) {
-      const cost=costs.hasCost?costs.cost:costs.inherit,record=records.find(r=>r.variant_id===variantId);
+    const cost=costForProductVariant(costs,size,!old);
+    if(cost!==undefined) {
+      const record=records.find(r=>r.variant_id===variantId);
       if(!sameCost(record?.cost,cost)) {
         store.run('INSERT INTO procurement(variant_id,cost,version) VALUES(?,?,1) ON CONFLICT(variant_id) DO UPDATE SET cost=excluded.cost,version=procurement.version+1',variantId,cost?JSON.stringify(cost):null);
         store.event('procurement.cost',variantId,{before:record?.cost || null,after:cost,source:'product'});

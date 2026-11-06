@@ -69,3 +69,35 @@ for(const engine of ['cloud','sqlite'])test(`${engine}: optional product costs a
     assert.ok((await run('admin/state')).products.find(p=>p.id===created.id).variants.every(v=>v.cost.unitKrw===11000));
   }finally{store?.db.close();}
 });
+
+for(const engine of ['cloud','sqlite'])test(`${engine}: size costs patch only selected sizes, inherit colors and keep versions atomic`,async()=>{
+  const state=engine==='cloud'?emptyState():null,store=state?null:openStore(':memory:',{password:'fixture-only'});
+  const run=async(path,method='GET',body={},session=owner)=>state?operate(state,path,method,body,session):api({store,req:{},role:session.role,path:'/api/'+path,method,body,session});
+  const details={...product,colors:'白,黑',sizes:'S,M,2XL',sizeSurcharges:[{size:'2XL',extra:100}]};
+  const read=async()=>(await run('admin/state')).products[0];
+  const save=async(sizeCosts,extra={})=>run('admin/products','POST',{...details,id:1,...extra,costUpdate:{sizeCosts,versions:productCostState((await read()).variants).versions}});
+  try{
+    await run('admin/products','POST',{...details,costUpdate:{defaultExchangeRate:.024,versions:[],sizeCosts:[{size:'S',cost:{unitKrw:10000,exchangeRate:.024}},{size:'M',cost:{unitKrw:10000,exchangeRate:.024}},{size:'2XL',cost:{unitKrw:14000,exchangeRate:.024}}]}});
+    let p=await read();
+    assert.deepEqual(p.variants.map(v=>[v.size,v.price,v.cost.unitKrw]),[['S',590,10000],['M',590,10000],['2XL',690,14000],['S',590,10000],['M',590,10000],['2XL',690,14000]]);
+    const stale=productCostState(p.variants).versions;
+    await save([{size:'2XL',cost:{unitKrw:15000,exchangeRate:.024}}]);
+    p=await read();assert.ok(p.variants.filter(v=>v.size!=='2XL').every(v=>v.cost.unitKrw===10000&&v.costVersion===1));
+    assert.ok(p.variants.filter(v=>v.size==='2XL').every(v=>v.cost.unitKrw===15000&&v.costVersion===2));
+    const before=await run('admin/state');
+    await assert.rejects(()=>run('admin/products','POST',{...details,id:1,costUpdate:{versions:stale,sizeCosts:[{size:'S',cost:null}]}}),e=>e.status===409);
+    for(const sizeCosts of [[{size:'missing',cost:null}],[{size:'S',cost:null},{size:'S',cost:null}],[{size:'S',cost:{unitKrw:-1,exchangeRate:.024}}],[{size:'S'}]])await assert.rejects(()=>save(sizeCosts));
+    assert.deepEqual(await run('admin/state'),before);
+    await run('admin/products','POST',{...details,id:1,colors:'白,黑,灰'});
+    p=await read();assert.equal(p.variants.find(v=>v.color==='灰'&&v.size==='2XL').cost.unitKrw,15000);
+    await save([{size:'2XL',cost:{unitKrw:0,exchangeRate:.024}}],{colors:'白,黑,灰'});
+    assert.ok((await read()).variants.filter(v=>v.active&&v.size==='2XL').every(v=>v.cost.unitKrw===0));
+    await save([{size:'M',cost:null}],{colors:'白,黑,灰'});
+    p=await read();assert.ok(p.variants.filter(v=>v.size==='M').every(v=>v.cost===null));
+    assert.ok(p.variants.filter(v=>v.size==='S').every(v=>v.cost.unitKrw===10000));
+    assert.equal((await run('admin/state')).report.length,0); // Does not create demand or purchases.
+    await run('admin/campaign','PUT',{name:'測試',status:'open',closesAt:new Date(Date.now()+86400000).toISOString()});
+    if(state)upsertCustomer(state,{id:customer.subject,display_name:'測試'});else store.run('INSERT INTO customers(id,display_name) VALUES(?,?)',customer.subject,'測試');
+    assert.doesNotMatch(JSON.stringify(await run('catalog','GET',{},customer)),/unitKrw|exchangeRate|costVersion|sizeCosts/);
+  }finally{store?.db.close();}
+});

@@ -26,7 +26,8 @@ for (const engine of ['cloud','sqlite']) test(`${engine}: exported products pres
     assert.ok(csv.startsWith('\uFEFF'));assert.match(csv,/'=商品/);assert.doesNotMatch(csv,/extra:3XL/);
     assert.equal(csvRows(csv).length,3);
     assert.deepEqual(sheets.map(s=>s.name),['商品清單','匯入底稿','欄位說明','規格進價']);
-    assert.equal(sheets[0].rows.length,3);
+    assert.equal(sheets[0].rows.length,4); // ORIGINAL has separate S / 2XL selling prices.
+    assert.deepEqual(sheets[0].rows.slice(1).map(r=>[r[1],r[5],r[6]]),[['ORIGINAL','S',590],['ORIGINAL','2XL',640],['OTHER','單一',100]]);
     assert.equal(sheets[3].rows.length,6);assert.deepEqual(sheets[3].rows[1].slice(6,9),[10000,.024,240]);
     assert.doesNotMatch(csv, /unitKrw|costVersion|fixture-only|customer/);
     const duplicated = await run('admin/import','POST',{csv});

@@ -3,7 +3,7 @@ import { previewProductImport } from '../domain/product-transfer.mjs';
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
-import { planProductCosts } from '../domain/product-costing.mjs';
+import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
 
 export function emptyState() {
@@ -65,7 +65,7 @@ function saveProduct(s, input, imagePrefix) {
   if (input.id && !old) throw new AppError('找不到商品', 404);
   p.sourceUrl ??= old?.sourceUrl || '';
   const previous=s.variants.filter(v=>v.product_id===id);
-  const costs=planProductCosts(input.costUpdate,previous,s.procurement,s.costSettings);
+  const costs=planProductCosts(input.costUpdate,previous,s.procurement,s.costSettings,p.sizes);
   const { colors, sizes, price, ...fields } = p;
   if (old) Object.assign(old, fields); else s.products.push({ ...fields, id, created_at: stamp() });
   s.variants.filter(v => v.product_id === id).forEach(v => { v.active = false; });
@@ -75,8 +75,8 @@ function saveProduct(s, input, imagePrefix) {
     let variant=v;
     if (v) Object.assign(v, { price: value, active: true });
     else {variant={ id: next(s,'variants'), product_id: id, color, size, price: value, active: true };s.variants.push(variant);}
-    if(costs.hasCost || (!v && costs.inherit)) {
-      const cost=costs.hasCost?costs.cost:costs.inherit;
+    const cost=costForProductVariant(costs,size,!v);
+    if(cost!==undefined) {
       let row=s.procurement.find(r=>r.variant_id===variant.id);
       if(!sameCost(row?.cost,cost)) {
         const before=row?.cost || null;

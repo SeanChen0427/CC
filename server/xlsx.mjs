@@ -46,6 +46,7 @@ function zip(files) {
 export function workbook(sheets) {
   const files = {};
   let media = 0;
+  const imageFiles = new Map();
   const ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
   sheets.forEach((sheet, index) => {
     const rows = sheet.rows.map((row, r) => '<row r="' + (r + 1) + '"' + (sheet.rowHeight ? ` ht="${r ? sheet.rowHeight : 32}" customHeight="1"` : '') + '>' +
@@ -60,8 +61,8 @@ export function workbook(sheets) {
     const worksheetRelationships = [];
     if (sheet.images?.length) {
       const relationships = [], anchors = sheet.images.map((image, i) => {
-        const name = `image${++media}.jpg`;
-        files['xl/media/' + name] = image.data;
+        let name = imageFiles.get(image.data);
+        if(!name){name=`image${++media}.jpg`;imageFiles.set(image.data,name);files['xl/media/' + name] = image.data;}
         relationships.push(`<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${name}"/>`);
         return `<xdr:oneCellAnchor><xdr:from><xdr:col>${image.col}</xdr:col><xdr:colOff>38100</xdr:colOff><xdr:row>${image.row}</xdr:row><xdr:rowOff>38100</xdr:rowOff></xdr:from><xdr:ext cx="1371600" cy="1371600"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${i + 1}" name="${xml(image.name || '商品圖')}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId${i + 1}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="1371600" cy="1371600"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
       }).join('');

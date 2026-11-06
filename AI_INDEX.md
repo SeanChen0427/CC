@@ -1,10 +1,10 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-07（Asia/Taipei）｜版本：0.3.14
+更新：2026-11-07（Asia/Taipei）｜版本：0.3.15
 
 品牌名稱已確認為 **CCBABY**。
 
-0.3.14 與 Edge v15 已正式發布；Pages 舊部署阻擋已取消，新部署成功，正式雙入口與關鍵模組逐位元核對通過。恢復過程見 HANDOFF／DEPLOYMENT
+0.3.15 尺寸個別進價及商品表拆列已完成本機／隔離驗證，正式發布進度見 HANDOFF／DEPLOYMENT；不以程式版本號判定已上線
 
 任何 AI 工具接手本專案，先從這份索引定位目前狀態與工作文件。
 本索引只負責導覽；產品需求、決策及實作進度各有自己的主文件，不在此另寫第二套規格。
@@ -87,6 +87,8 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 - 表格 domain/product-transfer.mjs／server/reports.mjs，XLSX 超連結 server/xlsx.mjs；[來源保存與隱私驗證](tests/product-source.test.mjs)
 
 ## 4. 索引樹
+
+0.3.15 沿用商品進價、商品輸出與含圖 Excel 入口：shared/product-costing.js 的 sizeCostState、domain/product-costing.mjs 的成本規劃／每尺寸 patch、domain/product-transfer.mjs 的 productDisplayRows；驗證沿用 tests/product-costing.test.mjs／product-workbook.test.mjs／product-draft.test.mjs
 
 ```text
 不同 AI 工具

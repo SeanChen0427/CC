@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.14",
+  "documentVersion": "0.3.15",
   "updatedAt": "2026-11-07",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -13,7 +13,7 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "live",
+    "status": "live_with_pending_frontend_release",
     "customDomain": "ccbaby.beecharge.live",
     "pagesRun": 42252246268
   },
@@ -94,7 +94,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "record_owner_product_source_urls_and_export_buying_records",
+  "nextStep": "deploy_size_costs_and_split_product_workbook_then_verify",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -116,7 +116,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 80,
+    "integrationTestsPassed": 83,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -160,12 +160,12 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 80,
+    "affectedTestsPassed": 83,
     "affectedTests": [
-      "product-source",
+      "product-costing",
+      "product-draft",
       "product-transfer",
       "product-workbook",
-      "product-draft",
       "app"
     ],
     "nativeGalleryScrollBrowserChecked": true,
@@ -283,7 +283,15 @@
       "admin/product-draft.js",
       "admin/product-export.js",
       "admin/config.json"
-    ]
+    ],
+    "productSizeCostsBrowserChecked": true,
+    "productSizeCostsDraftChecked": true,
+    "productSizeCostsClearChecked": true,
+    "productSizeCostsViewports": [
+      320
+    ],
+    "productSplitWorkbookRendered": true,
+    "productSplitWorkbookDownloaded": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -344,7 +352,10 @@
     "optionalOnProduct": true,
     "inlineExchangeRate": true,
     "singleSharedCostSource": true,
-    "preserveMixedVariantCosts": true
+    "preserveMixedVariantCosts": true,
+    "perSizeInProductEditor": true,
+    "perSizeFullKrwPrice": true,
+    "preserveUntouchedSizeCosts": true
   },
   "orderDeletion": {
     "adminOnly": true,
@@ -399,7 +410,10 @@
     "blankMissingCosts": true,
     "preserveZeroCosts": true,
     "mixedCostsInVariantSheet": true,
-    "thumbnailMaxBytes": 6000
+    "thumbnailMaxBytes": 6000,
+    "summaryRows": "group_actual_variants_by_sale_price_and_full_cost",
+    "repeatFirstPhotoOnSplitRows": true,
+    "importRows": "one_per_product"
   },
   "productSource": {
     "adminOnly": true,

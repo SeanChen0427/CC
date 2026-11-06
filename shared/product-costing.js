@@ -10,3 +10,21 @@ export function productCostState(variants, records) {
   const mixed = active.some(v => !sameCost(v.cost, first));
   return { commonCost:mixed ? null : first, mixed, entries, versions:entries.map(v => ({variantId:v.variantId,version:v.version})) };
 }
+
+// Use the most frequent existing cost as the editor's common value. Size edits
+// remain explicit patches, so an untouched mixed color/size keeps its own cost.
+export function sizeCostState(variants) {
+  const active = variants.filter(v => v.active), counts = [];
+  for (const variant of active) {
+    let group = counts.find(entry => sameCost(entry.cost, variant.cost));
+    if (!group) { group = {cost:variant.cost || null,count:0}; counts.push(group); }
+    group.count++;
+  }
+  const baseCost = counts.sort((a,b) => b.count-a.count)[0]?.cost || null;
+  const sizes = [...new Set(active.map(v => v.size))].map(size => {
+    const entries = active.filter(v => v.size === size), first = entries[0].cost || null;
+    const mixed = entries.some(v => !sameCost(v.cost,first));
+    return {size,cost:mixed ? null : first,mixed};
+  });
+  return {baseCost,sizes};
+}

@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { AppError } from '../domain/validation.mjs';
-import { productSheets } from '../domain/product-transfer.mjs';
+import { productSheets, productDisplayRows } from '../domain/product-transfer.mjs';
 import { workbook } from './xlsx.mjs';
 
 function jpegThumbnail(value) {
@@ -23,16 +23,16 @@ function jpegThumbnail(value) {
 
 export function productWorkbook(products, thumbnails = []) {
   if (!Array.isArray(thumbnails) || thumbnails.length > products.length) throw new AppError('商品縮圖清單無效');
-  const seen = new Set(), images = [];
+  const seen = new Set(), photos = new Map();
   for (const item of thumbnails) {
     const index = products.findIndex(p => p.id === item?.productId);
     const product = products[index];
     if (!product || seen.has(product.id) || !product.images?.[0] || item.url !== product.images[0]) throw new AppError('商品照片已更新，請重新整理後再匯出',409);
     seen.add(product.id);
-    images.push({row:index + 1,col:0,name:product.code+' 第一張照片',data:jpegThumbnail(item.data)});
+    photos.set(product.id,jpegThumbnail(item.data));
   }
   if (products.some(p => p.images?.[0] && !seen.has(p.id))) throw new AppError('請重新整理選物管理，再下載含圖 Excel',409);
   const sheets = productSheets(products);
-  sheets[0].images = images;
+  sheets[0].images = productDisplayRows(products).flatMap(({product},index)=>photos.has(product.id)?[{row:index+1,col:0,name:product.code+' 第一張照片',data:photos.get(product.id)}]:[]);
   return workbook(sheets);
 }

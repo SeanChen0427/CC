@@ -33,6 +33,7 @@ export function createProductDrafts(scope, storage = () => sessionStorage) {
         ...Object.fromEntries(['unitKrw','exchangeRate','initialUnitKrw','initialExchangeRate'].filter(key=>typeof draft.productCost[key]==='string').map(key=>[key,draft.productCost[key]])),
         versions:(Array.isArray(draft.productCost.versions)?draft.productCost.versions:[]).filter(v=>v&&Number.isSafeInteger(v.variantId)&&v.variantId>0&&Number.isSafeInteger(v.version)&&v.version>=0).map(v=>({variantId:v.variantId,version:v.version})),
         clearMixed:draft.productCost.clearMixed===true,
+        ...Object.fromEntries(['sizeCosts','initialSizeCosts'].filter(key=>Array.isArray(draft.productCost[key])).map(key=>[key,draft.productCost[key].filter(row=>row&&typeof row.size==='string'&&typeof row.unitKrw==='string').slice(0,144).map(({size,unitKrw})=>({size,unitKrw}))])),
       }} : {}),
       open: draft.open !== false,
     };

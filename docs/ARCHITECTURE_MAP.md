@@ -1,5 +1,7 @@
 # 架構地圖與樹狀圖
 
+0.3.15 尺寸進價與商品拆列：product-cost.js 共用值／個別尺寸完整進價 → costUpdate.sizeCosts＋全規格版本 → planProductCosts 驗證目前尺寸、成本與衝突 → 兩後端更新原 procurement.cost。新顏色沿用該尺寸一致成本，未指定修改保留舊規格；客戶不含成本。productDisplayRows 按實際售價＋完整成本及有效顏色／尺寸組合拆列，productWorkbook 每列同首圖，xlsx.mjs 重用同圖 bytes，連結跟隨新列；CSV／匯入底稿一款一列，無 DDL
+
 0.3.14 商品來源記錄：商品編輯 sourceUrl → 同分頁草稿白名單 → 共用 productSourceUrl 驗證 → 雲端 products.sourceUrl／本機 products.source_url。僅管理 catalog 與採買報表回傳；客戶 catalog 明確排除此欄。商品／CSV／採買 XLSX 帶來源，xlsx.mjs 建立安全 http(s) 超連結關聯，與首圖 drawing 共存；不請求來源網址、不改採購或預購。新增顏色欄空白，既有規格及草稿照原資料。
 
 0.3.13 含圖商品 Excel：product-export.js 先取得已授權 admin/state → 各商品 images[0] 於瀏覽器以四張並行轉 144×144、6 KB 內 JPEG → POST admin/products.xlsx → server/product-workbook.mjs 核對當前商品／第一張 URL、JPEG 格式尺寸 → productSheets 四表 → xlsx.mjs DrawingML／media 內嵌。POST 分支只讀不走 revision 提交，圖片不放 Storage；成本仍取後端目前有效規格的私有紀錄。

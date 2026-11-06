@@ -197,9 +197,9 @@ function showProductEditor(id){
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
     <label class="field">商品分類<select name="category" required aria-label="商品分類">${productCategories().length?'':'<option value="">請先新增分類</option>'}${productCategories().map(category=>`<option value="${esc(category)}" ${p?.category===category?'selected':''}>${esc(category)}</option>`).join('')}</select><small class="field-help">可在商品管理的「分類管理」新增</small></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
     <label class="field wide">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${pricing.basePrice}"></label>
-    <section id="product-cost" class="purchase-cost wide" aria-label="商品進價設定"></section>
     <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(','))}" placeholder="請填商品實際顏色"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL,2XL')}"></label>
     <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
+    <section id="product-cost" class="purchase-cost wide" aria-label="商品進價設定"></section>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
     <label class="field wide">韓國商品連結（選填）<input name="sourceUrl" type="url" inputmode="url" maxlength="2048" value="${esc(p?.sourceUrl||'')}" placeholder="https://" autocomplete="off"><small class="field-help">供你後續查找，匯出表格會一併帶入</small></label>
     <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="text-button" data-action="discard-product-draft">放棄草稿</button><button type="button" class="button light" data-action="close">稍後繼續</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
@@ -210,7 +210,7 @@ function showProductEditor(id){
     input.value=value;
   }
   const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:form.elements.sizes,priceInput:form.elements.price,sizeSurcharges:draft?.sizeSurcharges||pricing.sizeSurcharges});
-  let productCost=mountProductCost($('#product-cost'),{variants:p?.variants||[],exchangeRate:state.data.costSettings?.exchangeRate,draft:draft?.productCost});
+  let productCost=mountProductCost($('#product-cost'),{variants:p?.variants||[],exchangeRate:state.data.costSettings?.exchangeRate,sizesInput:form.elements.sizes,draft:draft?.productCost});
   let watcher,missingPhotos=draft?.pendingCount||0,saving=false;
   let uploadStatus={busy:false,failed:false};
   const updateButton=()=>{const button=form.querySelector('button[type="submit"]');button.disabled=saving||uploadStatus.busy||uploadStatus.failed||missingPhotos>0;button.textContent=saving?'儲存中':uploadStatus.busy?'等待照片上傳':uploadStatus.failed?'請先處理失敗照片':missingPhotos?'請先確認照片':'儲存商品';};
@@ -243,7 +243,7 @@ function showProductEditor(id){
           try{
             const latest=await api('admin/state'),saved=latest.products.find(item=>item.id===p?.id);
             if(!saved)throw new Error('商品已變更，請保留草稿並更新清單');
-            state.data=latest;productCost=mountProductCost($('#product-cost'),{variants:saved.variants,exchangeRate:latest.costSettings?.exchangeRate});
+            state.data=latest;productCost.dispose();productCost=mountProductCost($('#product-cost'),{variants:saved.variants,exchangeRate:latest.costSettings?.exchangeRate,sizesInput:form.elements.sizes});
             area.textContent='已載入最新進價，其他欄位已保留，請確認後儲存';watcher.flush();
           }catch(error){area.textContent=error.message;refresh.disabled=false;}
         });
@@ -296,7 +296,7 @@ function renderSettings(){
 }
 
 function showProductExport(){
-  showModal(`<div class="eyebrow">YOUR COLLECTION TO GO</div><h2>匯出本期商品</h2><p>下載全部已儲存的選物，包含下架商品，不受目前搜尋與分類篩選影響</p><div class="form-actions"><button class="button" data-action="products-xlsx">${icon('download')}下載商品 Excel</button><button class="button light" data-action="products-csv">下載匯入用 CSV</button></div><p class="settings-foot">商品 Excel 含第一張照片、韓幣與台幣進價，未填金額留空；另有匯入底稿、欄位說明與規格進價</p><div class="page-note">批量新增：複製匯入底稿的商品列 → 換成新編號 → 編輯資料 → 另存 CSV UTF-8 → 預覽匯入</div><p class="settings-foot">匯入僅新增，既有編號會報錯；CSV 保留本站照片網址，進價與新照片請在商品編輯填寫</p><div class="form-actions"><button class="button light" data-action="csv-template">下載欄位範例</button><button class="button light" data-action="import">前往 CSV 批次匯入</button></div>`);
+  showModal(`<div class="eyebrow">YOUR COLLECTION TO GO</div><h2>匯出本期商品</h2><p>下載全部已儲存的選物，包含下架商品，不受目前搜尋與分類篩選影響</p><div class="form-actions"><button class="button" data-action="products-xlsx">${icon('download')}下載商品 Excel</button><button class="button light" data-action="products-csv">下載匯入用 CSV</button></div><p class="settings-foot">商品 Excel 含首圖、售價與韓幣／台幣進價，價格不同的尺寸會在商品下方拆列；未填金額留空，匯入底稿仍一款一列</p><div class="page-note">批量新增：複製匯入底稿的商品列 → 換成新編號 → 編輯資料 → 另存 CSV UTF-8 → 預覽匯入</div><p class="settings-foot">匯入僅新增，既有編號會報錯；CSV 保留本站照片網址，進價與新照片請在商品編輯填寫</p><div class="form-actions"><button class="button light" data-action="csv-template">下載欄位範例</button><button class="button light" data-action="import">前往 CSV 批次匯入</button></div>`);
 }
 
 function showImport(){
