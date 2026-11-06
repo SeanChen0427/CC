@@ -132,3 +132,7 @@ LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播
 Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供每尺寸加價及售價。舊請求保留相容；不遷移既有商品價格、不改成立預購，也沒有 Postgres schema 變更。本機 SQLite 增加 pricing 欄位保留現有資料。
 
 0.3.5 已發布：Pages 3fef1c65d1327d9467735ea20cb9ac33296b9c5e（built）、Edge v8（ACTIVE）；正式登入及尺寸加價編輯器已驗證，既有售價未異動。
+
+## 0.3.6 手機滑動相簿更新 — 2026-11-06
+
+只有 GitHub Pages 客戶端靜態檔案更新，gallery.js 提供主圖原生橫向捲動與相簿狀態；Supabase Edge 保持 v8、資料不變。本次執行 9 項相關測試，前次全套 46 項結果保留。

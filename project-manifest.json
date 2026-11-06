@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.5",
+  "documentVersion": "0.3.6",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -158,7 +158,20 @@
       320,
       390
     ],
-    "liveSizePricingChecked": true
+    "liveSizePricingChecked": true,
+    "affectedTestsPassed": 9,
+    "affectedTests": [
+      "customer-entry",
+      "product-gallery"
+    ],
+    "nativeGalleryScrollBrowserChecked": true,
+    "galleryZoomAndReturnChecked": true,
+    "galleryVerticalScrollChecked": true,
+    "galleryViewports": [
+      320,
+      390
+    ],
+    "physicalIPhoneSwipeChecked": false
   },
   "brandName": "CCBABY",
   "testData": {
@@ -183,7 +196,9 @@
     "reorder": true,
     "remove": true,
     "independentGallery": true,
-    "optionalColorBindings": true
+    "optionalColorBindings": true,
+    "nativeSwipe": true,
+    "photoCounter": true
   },
   "productPricing": {
     "basePrice": true,

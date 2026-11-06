@@ -1,5 +1,8 @@
 # 架構地圖與樹狀圖
 
+0.3.6 客戶相簿：app.js 產生全部照片 → gallery.js 綁定原生 scroll-snap 橫向捲動 → 同步 photoIndex／縮圖／張數。縮圖與方向鍵走同一個 select，放大及返回沿用目前索引，ResizeObserver 保留旋轉後位置；換視窗或關閉時解除監聽。只有靜態前端更新，資料與後端不變。
+
+
 0.3.5 尺寸定價：商品基本售價 → size-pricing.js 依尺寸列表產生加價欄位及即時售價 → 後端驗證 sizeSurcharges → 同一顏色／尺寸 variant 保留 ID、更新未來售價。product-pricing.js 負責舊商品回填；雲端 JSONB 保存 basePrice／sizeSurcharges，本機 pricing JSON 加欄保存。既有預購快照不回寫。
 
 

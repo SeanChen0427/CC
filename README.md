@@ -1,6 +1,6 @@
 # CCBABY 韓國年度預購網站
 
-版本：0.3.5｜更新：2026-11-06（Asia/Taipei）
+版本：0.3.6｜更新：2026-11-06（Asia/Taipei）
 
 跨 AI 接手先讀 [AI_INDEX.md](AI_INDEX.md)，最新工作狀態見 [HANDOFF.md](docs/HANDOFF.md)。
 
