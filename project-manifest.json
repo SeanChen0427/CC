@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "3fef1c65d1327d9467735ea20cb9ac33296b9c5e",
+    "pagesCommit": "c70634171eed1836431814721ebf65f81fbe395b",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -171,7 +171,8 @@
       320,
       390
     ],
-    "physicalIPhoneSwipeChecked": false
+    "physicalIPhoneSwipeChecked": false,
+    "liveGalleryScrollChecked": true
   },
   "brandName": "CCBABY",
   "testData": {

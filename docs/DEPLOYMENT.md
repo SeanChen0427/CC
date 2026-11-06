@@ -136,3 +136,5 @@ Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供�
 ## 0.3.6 手機滑動相簿更新 — 2026-11-06
 
 只有 GitHub Pages 客戶端靜態檔案更新，gallery.js 提供主圖原生橫向捲動與相簿狀態；Supabase Edge 保持 v8、資料不變。本次執行 9 項相關測試，前次全套 46 項結果保留。
+
+0.3.6 已發布：Pages c70634171eed1836431814721ebf65f81fbe395b（built），正式 LINE 登入、相簿橫向捲動與張數同步已驗證。未部署 Edge 或修改正式業務資料。
