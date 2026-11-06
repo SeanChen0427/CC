@@ -1,6 +1,8 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.4';
-import { art } from './product-art.js?v=0.3.4';
-import { mountImageEditor } from './image-editor.js?v=0.3.4';
+import { request, config, cloud, download } from './runtime.js?v=0.3.5';
+import { art } from './product-art.js?v=0.3.5';
+import { mountImageEditor } from './image-editor.js?v=0.3.5';
+import { editorPricing } from './product-pricing.js?v=0.3.5';
+import { mountSizePricing } from './size-pricing.js?v=0.3.5';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -126,15 +128,16 @@ function showOrder(id){
 function showProductEditor(id){
   const p=state.data.products.find(p=>p.id===id);
   const variants=p?.variants.filter(v=>v.active)||[];
-  const low=variants.length?Math.min(...variants.map(v=>v.price)):590;
-  const high=variants.length?Math.max(...variants.map(v=>v.price)):590;
+  const pricing=editorPricing(p);
   showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><section id="product-photos" class="photo-editor" aria-label="商品照片管理"></section>
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
     <label class="field">商品分類<input name="category" list="categories" required maxlength="30" value="${esc(p?.category||'毛孩衣著')}"><datalist id="categories">${[...new Set(state.data.products.map(p=>p.category))].map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
-    <label class="field">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${low}"></label><label class="field">XL／2XL 加價<input name="extra" type="number" required min="0" max="100000" value="${high-low}"></label>
-    <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL')}"></label>
+    <label class="field wide">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${pricing.basePrice}"></label>
+    <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL,2XL')}"></label>
+    <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
     <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="button light" data-action="close">取消</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
+  const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:$('#product-form [name="sizes"]'),priceInput:$('#product-form [name="price"]'),sizeSurcharges:pricing.sizeSurcharges});
   const editor=mountImageEditor($('#product-photos'),{
     images:p?.images,bindings:p?.imageBindings,colorsInput:$('#product-form [name="colors"]'),
     upload:(data,signal)=>api('admin/upload',{method:'POST',body:{data},signal}),
@@ -144,7 +147,7 @@ function showProductEditor(id){
   $('#product-form').addEventListener('submit',async e=>{
     if(editor.busy){e.preventDefault();return;}
     e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]');button.disabled=true;
-    const data=formData(form);data.active=data.active==='true';Object.assign(data,editor.value());if(p)data.id=p.id;
+    const data=formData(form);data.active=data.active==='true';data.sizeSurcharges=sizePricing.value();Object.assign(data,editor.value());if(p)data.id=p.id;
     try{await api('admin/products',{method:'POST',body:data});await load();modal.close();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
     catch(error){$('#product-error').textContent=error.message;button.disabled=false;}
   });

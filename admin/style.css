@@ -797,6 +797,13 @@ td small {
 .form-grid .wide {
   grid-column:1/-1
 }
+.size-pricing {margin:0 0 20px;padding:16px;border:1px solid #dce2d5;border-radius:8px;background:#f8faf5;min-width:0}
+.size-pricing h3 {font-size:14px;margin:0 0 7px}
+.size-pricing p {font-size:12px;line-height:1.7;color:#748368;margin:0 0 12px}
+.size-pricing-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:12px}
+.size-price-field {display:flex;flex-direction:column;gap:7px;min-width:0;font-size:13px}
+.size-price-field input {width:100%;min-width:0;padding:10px;border:1px solid #d5ddce;border-radius:5px;background:white;font:inherit}
+.size-price-field output {font-size:11px;color:#697c58;line-height:1.6}
 .field textarea {
   min-height:90px;
   resize:vertical

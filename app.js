@@ -1,7 +1,7 @@
-import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.4';
-import { art } from './product-art.js?v=0.3.4';
-import { enterCustomerSite } from './entry.js?v=0.3.4';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.4';
+import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.5';
+import { art } from './product-art.js?v=0.3.5';
+import { enterCustomerSite } from './entry.js?v=0.3.5';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.5';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
