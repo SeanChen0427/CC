@@ -1,8 +1,8 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.5';
-import { art } from './product-art.js?v=0.3.5';
-import { mountImageEditor } from './image-editor.js?v=0.3.5';
-import { editorPricing } from './product-pricing.js?v=0.3.5';
-import { mountSizePricing } from './size-pricing.js?v=0.3.5';
+import { request, config, cloud, download } from './runtime.js?v=0.3.6';
+import { art } from './product-art.js?v=0.3.6';
+import { mountImageEditor } from './image-editor.js?v=0.3.6';
+import { editorPricing } from './product-pricing.js?v=0.3.6';
+import { mountSizePricing } from './size-pricing.js?v=0.3.6';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');

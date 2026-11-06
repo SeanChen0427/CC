@@ -1,7 +1,8 @@
-import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.5';
-import { art } from './product-art.js?v=0.3.5';
-import { enterCustomerSite } from './entry.js?v=0.3.5';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.5';
+import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.6';
+import { art } from './product-art.js?v=0.3.6';
+import { enterCustomerSite } from './entry.js?v=0.3.6';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.6';
+import { mountGallery } from './gallery.js?v=0.3.6';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -140,6 +141,7 @@ function renderGrid() {
 }
 
 function setModal(content, className = '') {
+  state.gallery?.dispose();state.gallery=null;
   modal.className = className;
   modal.innerHTML = `<button class="modal-close" data-action="close" aria-label="關閉">${icon('close')}</button>` + content;
   if (!modal.open) modal.showModal();
@@ -157,12 +159,13 @@ function showProduct(id, retain = false) {
   const variant = product.variants.find(v => v.color === selected.color && v.size === selected.size);
   const images = product.images?.length ? product.images : [photo(product)];
   selected.photoIndex = Math.max(0, Math.min(selected.photoIndex || 0, images.length - 1));
-  setModal(`<div class="product-dialog"><div class="product-gallery"><div class="product-main-image" data-action="zoom"><img src="${esc(images[selected.photoIndex])}" alt="${esc(product.name)} 照片 ${selected.photoIndex + 1}"></div><div class="image-thumbs">${images.map((url,i) => `<button class="${i===selected.photoIndex?'selected':''}" data-action="photo" data-index="${i}" aria-label="查看商品照片 ${i+1}" aria-pressed="${i===selected.photoIndex}"><img src="${esc(url)}" alt="商品照片 ${i+1}"></button>`).join('')}</div></div>
+  setModal(`<div class="product-dialog"><div class="product-gallery"><div class="product-main-image" role="region" aria-label="商品照片${images.length>1?'，可左右滑動':''}" tabindex="0">${images.map((url,i)=>`<button class="gallery-slide" type="button" data-action="zoom" data-index="${i}" aria-label="放大商品照片 ${i+1}"><img src="${esc(url)}" alt="${esc(product.name)} 照片 ${i+1}" draggable="false" ${i!==selected.photoIndex?'loading="lazy"':''}></button>`).join('')}</div><div class="gallery-progress" ${images.length<2?'hidden':''}><span>左右滑動</span><output class="gallery-count" aria-live="polite">${selected.photoIndex+1} / ${images.length}</output></div><div class="image-thumbs">${images.map((url,i) => `<button class="${i===selected.photoIndex?'selected':''}" data-action="photo" data-index="${i}" aria-label="查看商品照片 ${i+1}" aria-pressed="${i===selected.photoIndex}"><img src="${esc(url)}" alt="商品照片 ${i+1}"></button>`).join('')}</div></div>
     <div class="product-detail"><div class="eyebrow">${esc(product.code)} · ${esc(product.category)}</div><h2>${esc(product.name)}</h2><div class="detail-price">${money(variant?.price ?? Math.min(...product.variants.map(v=>v.price)))}<small>預購參考售價</small></div>
     <p class="detail-description">${esc(product.description)}</p>
     <div class="option-label">顏色 <span>${esc(selected.color || '請選擇')}</span></div><div class="options">${colors.map(color => `<button class="option ${selected.color===color?'selected':''}" data-action="option" data-option="color" data-value="${esc(color)}">${esc(color)}</button>`).join('')}</div>
     <div class="option-label">尺寸／規格 ${['vest','coat'].includes(product.kind)?'<button class="text-button" data-action="size">尺寸參考</button>':''}</div><div class="options">${sizes.map(size => `<button class="option ${selected.size===size?'selected':''}" data-action="option" data-option="size" data-value="${esc(size)}">${esc(size)}</button>`).join('')}</div>
     <div class="product-cta"><div class="quantity"><button data-action="detail-qty" data-delta="-1" aria-label="減少數量">−</button><span>${selected.quantity}</span><button data-action="detail-qty" data-delta="1" aria-label="增加數量">＋</button></div><button class="primary-button" data-action="add" ${!variant || !openForOrders()?'disabled':''}>${openForOrders() ? variant?'加入購物車 '+money(variant.price*selected.quantity):'請先選擇完整規格':'本期已結單'}</button></div></div></div>`);
+  state.gallery=mountGallery($('.product-gallery'),{index:selected.photoIndex,onChange:index=>{selected.photoIndex=index;}});
 }
 
 function showLogin() {
@@ -252,7 +255,7 @@ document.addEventListener('click', async event => {
     if(action==='product'){showProduct(Number(target.dataset.id));return;}
     if(action==='clear-search'){state.search='';state.category='全部選物';state.limit=24;renderShop();return;}
     if(action==='more'){state.limit+=24;renderGrid();return;}
-    if(action==='photo'){state.selection.photoIndex=Number(target.dataset.index);showProduct(state.selection.id,true);return;}
+    if(action==='photo'){state.gallery?.select(Number(target.dataset.index));return;}
     if(action==='option'){
       state.selection[target.dataset.option]=target.dataset.value;
       if(target.dataset.option==='color'){
@@ -302,6 +305,7 @@ document.addEventListener('click', async event => {
     }
     if(action==='zoom'){
       const p=state.products.find(p=>p.id===state.selection.id);
+      if(target.dataset.index!==undefined)state.selection.photoIndex=Number(target.dataset.index);
       setModal(`<img class="zoom-image" src="${esc(p.images?.[state.selection.photoIndex] || photo(p))}" alt="${esc(p.name)}放大圖"><button class="secondary-button" data-action="back-product" style="margin:15px">返回商品</button>`);return;
     }
     if(action==='back-product'){showProduct(state.selection.id,true);return;}
@@ -330,6 +334,7 @@ document.addEventListener('click', async event => {
 document.addEventListener('keydown',event=>{
   if(event.key==='Enter'&&event.target.matches('.product-photo'))showProduct(Number(event.target.dataset.id));
 });
+modal.addEventListener('close',()=>{state.gallery?.dispose();state.gallery=null;});
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
 window.addEventListener('hashchange',()=>{modal.close();render();window.scrollTo(0,0);});
 window.addEventListener('pageshow',event=>{
