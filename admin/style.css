@@ -441,6 +441,7 @@ button:focus-visible,a:focus-visible {
 }
 .heading-actions {
   display:flex;
+  flex-wrap:wrap;
   flex-shrink:0;
   gap:9px
 }
@@ -996,6 +997,9 @@ dialog::backdrop {
   min-height:145px;
   resize:vertical
 }
+.import-guide { margin: 16px 0; }
+.import-guide summary { cursor: pointer; padding: 10px 0; }
+.import-guide td { white-space: normal; overflow-wrap: anywhere; }
 .inline-info {
   display:flex;
   gap:11px;

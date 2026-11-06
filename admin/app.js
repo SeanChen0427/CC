@@ -1,13 +1,13 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.11';
-import { art } from './product-art.js?v=0.3.11';
-import { mountImageEditor } from './image-editor.js?v=0.3.11';
-import { editorPricing } from './product-pricing.js?v=0.3.11';
-import { mountSizePricing } from './size-pricing.js?v=0.3.11';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.11';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.11';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.11';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.11';
-import { mountProductCost } from './product-cost.js?v=0.3.11';
+import { request, config, cloud, download } from './runtime.js?v=0.3.12';
+import { art } from './product-art.js?v=0.3.12';
+import { mountImageEditor } from './image-editor.js?v=0.3.12';
+import { editorPricing } from './product-pricing.js?v=0.3.12';
+import { mountSizePricing } from './size-pricing.js?v=0.3.12';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.12';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.12';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.12';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.12';
+import { mountProductCost } from './product-cost.js?v=0.3.12';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -120,7 +120,7 @@ function renderTablePage(){
     customers:['PEOPLE & PREORDERS','客戶預購紀錄','依客戶查看完整預購，回台後也能照著分貨'],
     procurement:['YOUR BUYING LIST','採買清單','每個規格分開計算，買到多少就記下多少'],
   }[view];
-  const actions=view==='products'?`<button class="button light" data-action="categories">分類管理</button><button class="button light" data-action="import">CSV 批次匯入</button><button class="button" data-action="new-product">${icon('plus')}新增商品</button>`:exportButton();
+  const actions=view==='products'?`<button class="button light" data-action="export-products">${icon('download')}匯出商品</button><button class="button light" data-action="categories">分類管理</button><button class="button light" data-action="import">CSV 批次匯入</button><button class="button" data-action="new-product">${icon('plus')}新增商品</button>`:exportButton();
   $('#content').innerHTML=heading(...meta,actions)+
     (view==='procurement'?purchaseOverview()+`<div class="page-note">${icon('box')}進價僅供店主查看，買到後可在客戶明細手動分配</div>`:'')+
     `<section class="panel" data-page="${view}"><div class="toolbar"><div class="toolbar-left"><label class="search-box">${icon('search')}<input id="table-search" placeholder="${view==='customers'?'搜尋姓名、手機或預購編號':'搜尋商品名稱、編號或規格'}" value="${esc(state.search)}" aria-label="搜尋清單"></label>${view!=='customers'?`<select class="filter-select" id="category-filter" aria-label="分類篩選"><option>全部分類</option>${productCategories().map(c=>`<option ${state.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div>${view==='procurement'?`<label class="checkbox-label"><input type="checkbox" id="pending-only" ${state.onlyPending?'checked':''}>只看待採買</label>`:`<span class="pill gray">${view==='products'?state.data.products.length+' 款選物':state.data.orders.filter(o=>o.quantity>0).length+' 份預購'}</span>`}</div><div id="table-area"></div></section>`;
@@ -293,8 +293,12 @@ function renderSettings(){
   });
 }
 
+function showProductExport(){
+  showModal(`<div class="eyebrow">YOUR COLLECTION TO GO</div><h2>匯出本期商品</h2><p>下載全部已儲存的選物，包含下架商品，不受目前搜尋與分類篩選影響</p><div class="form-actions"><button class="button" data-action="products-xlsx">${icon('download')}下載商品 Excel</button><button class="button light" data-action="products-csv">下載匯入用 CSV</button></div><p class="settings-foot">Excel 內有商品清單、欄位說明與規格進價；CSV 每款一列，尺寸加價各自一欄</p><div class="page-note">批量新增：複製商品列 → 換成新編號 → 編輯資料 → 另存 CSV UTF-8 → 預覽匯入</div><p class="settings-foot">匯入僅新增，既有編號會報錯；進價在商品編輯填寫，照片只保留本站既有網址，新照片請另行上傳</p><div class="form-actions"><button class="button light" data-action="csv-template">下載欄位範例</button><button class="button light" data-action="import">前往 CSV 批次匯入</button></div>`);
+}
+
 function showImport(){
-  showModal(`<div class="eyebrow">BUILD YOUR COLLECTION</div><h2>批次匯入商品</h2><p>上傳 UTF-8 CSV，或直接貼上內容，可從 Excel 另存為 CSV 後使用</p><div class="page-note">必要欄位：code,name,category,price,colors,sizes 顏色／尺寸中的逗號需以雙引號包住</div><input id="csv-file" type="file" accept=".csv,text/csv" aria-label="上傳 CSV"><label class="field">CSV 內容<textarea id="csv-text" class="import-text" placeholder='code,name,category,price,colors,sizes&#10;SP121,日常背心,毛孩衣著,590,"奶油白,燕麥棕","S,M,L"'></textarea></label><div id="import-result"></div><div class="form-actions"><button class="button light" data-action="csv-template">下載範本</button><button class="button" id="preview-import">預覽並檢查</button><button class="button" id="commit-import" hidden>確認匯入</button></div>`);
+  showModal(`<div class="eyebrow">BUILD YOUR COLLECTION</div><h2>批次匯入商品</h2><p>上傳 UTF-8 CSV，或直接貼上內容，可從 Excel 另存為 CSV 後使用</p><div class="page-note">僅新增商品，請使用未用過的編號；可先匯出既有商品當作填寫範例</div><details class="import-guide"><summary>查看欄位填寫方式</summary><div class="table-scroll"><table><thead><tr><th>CSV 欄位</th><th>填寫方式</th></tr></thead><tbody><tr><td>code / name / category</td><td>商品編號／名稱／分類，必填</td></tr><tr><td>price</td><td>基本售價，台幣整數</td></tr><tr><td>colors / sizes</td><td>顏色／尺寸，多個項目以逗號分隔</td></tr><tr><td>extra:尺寸名稱</td><td>該尺寸加價，例如 extra:2XL 填 50；可自行新增尺寸欄</td></tr><tr><td>description / badge</td><td>商品說明／標籤，選填</td></tr><tr><td>active</td><td>true 上架／false 下架，空白預設上架</td></tr><tr><td>kind / tone</td><td>示意圖類型／色碼，沿用範例或留白</td></tr><tr><td>images / imageBindings</td><td>既有照片／綁定的 JSON 陣列，沿用匯出內容或留白</td></tr></tbody></table></div><p class="settings-foot">含逗號、換行或雙引號的內容由 Excel 另存 CSV 自動處理；進價請在新增後填寫，XLSX 請先另存 CSV UTF-8</p></details><input id="csv-file" type="file" accept=".csv,text/csv" aria-label="上傳 CSV"><label class="field">CSV 內容<textarea id="csv-text" class="import-text" placeholder='code,name,category,price,colors,sizes&#10;NEW001,日常背心,毛孩衣著,590,"奶油白,燕麥棕","S,M,L"'></textarea></label><div id="import-result"></div><div class="form-actions"><button class="button light" data-action="export-products">匯出既有商品</button><button class="button light" data-action="csv-template">下載範本</button><button class="button" id="preview-import">預覽並檢查</button><button class="button" id="commit-import" hidden>確認匯入</button></div>`);
   $('#csv-file').addEventListener('change',async e=>{if(e.target.files[0]){$('#csv-text').value=await e.target.files[0].text();$('#commit-import').hidden=true;}});
   $('#csv-text').addEventListener('input',()=>{$('#commit-import').hidden=true;$('#import-result').innerHTML='';});
   $('#preview-import').addEventListener('click',async()=>{
@@ -329,6 +333,11 @@ document.addEventListener('click',async event=>{
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
     if(action==='import'){showImport();return;}
+    if(action==='export-products'){showProductExport();return;}
+    if(action==='products-xlsx'||action==='products-csv'){
+      const ext=action==='products-xlsx'?'xlsx':'csv';
+      await download('admin/products.'+ext,'ccbaby-products.'+ext);return;
+    }
     if(action==='categories'){showCategoryManager();return;}
     if(action==='copy-order'){
       const o=state.data.orders.find(o=>o.id===id);
@@ -336,8 +345,7 @@ document.addEventListener('click',async event=>{
       await navigator.clipboard.writeText(value);toast('分貨明細已複製');return;
     }
     if(action==='csv-template'){
-      const csv='\uFEFFcode,name,category,price,colors,sizes,kind,tone\nSP121,日常背心,毛孩衣著,590,"奶油白,燕麥棕","S,M,L",vest,#b9a38b\n';
-      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='product-template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return;
+      await download('admin/products-template.csv','ccbaby-products-template.csv');return;
     }
     if(action==='procure'){
       const r=state.data.report.find(r=>r.variant_id===id);
