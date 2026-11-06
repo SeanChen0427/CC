@@ -1,4 +1,4 @@
-import { unitCostTwd, costTotal } from './costing.js?v=0.3.12';
+import { unitCostTwd, costTotal } from './costing.js?v=0.3.13';
 
 const twd = value => 'NT$ ' + value.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2});
 
