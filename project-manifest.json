@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "9696420f65666189b5616dda24f4b52d58e848cb",
+    "pagesCommit": "6b6f80d737acf3878bdad596164df1fad178743d",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -238,7 +238,9 @@
     "productTransferXlsxXmlChecked": true,
     "liveProductTransferChecked": true,
     "liveProductTransferBusinessDataUnchanged": true,
-    "liveProductTransferProductCount": 13
+    "liveProductTransferProductCount": 13,
+    "liveProductTransferBundleChecked": true,
+    "liveProductTransferLoginPageChecked": true
   },
   "brandName": "CCBABY",
   "testData": {
