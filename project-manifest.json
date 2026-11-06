@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "ded5ec50a6e25bb52d7ad5d2423a3e42df52a0a7",
+    "pagesCommit": "ae7605f7b94f1d1bb7c753e9445ffd1dc39f813f",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -149,7 +149,10 @@
       320,
       390,
       768
-    ]
+    ],
+    "edgeVersion": 7,
+    "liveImageEditorChecked": true,
+    "legacyImageMigrationChecked": true
   },
   "brandName": "CCBABY",
   "testData": {
