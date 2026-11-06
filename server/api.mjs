@@ -1,7 +1,8 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
+import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
+import { productCsv, productSheets, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
 import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
 import { reportSheets } from './reports.mjs';
@@ -109,25 +110,7 @@ function saveProduct(store, input, id) {
 }
 
 function importPreview(store, csv) {
-  const rows = csvRows(text(csv, 'CSV 內容', 1000000));
-  const headers = rows.shift().map(x => x.trim());
-  const required = ['code', 'name', 'category', 'price', 'colors', 'sizes'];
-  if (required.some(key => !headers.includes(key))) {
-    throw new AppError('CSV 欄位需包含 code,name,category,price,colors,sizes');
-  }
-  const seen = new Set(), errors = [], products = [];
-  rows.forEach((cells, index) => {
-    try {
-      const input = Object.fromEntries(headers.map((key, i) => [key, cells[i] || '']));
-      input.kind ||= 'vest'; input.tone ||= '#b9a38b';
-      const product = validateProduct(input);
-      if (seen.has(product.code) || store.get('SELECT id FROM products WHERE code=?', product.code)) {
-        throw new AppError('商品編號重複：' + product.code);
-      }
-      seen.add(product.code); products.push({ ...input, line: index + 2 });
-    } catch (error) { errors.push({ line: index + 2, message: error.message }); }
-  });
-  return { products, errors, count: rows.length };
+  return previewProductImport(csv, validateProduct, code => store.get('SELECT id FROM products WHERE code=?',code));
 }
 
 export async function api({ store, req, role, path, method, body, session, localDir, credentialPath }) {
@@ -377,6 +360,13 @@ export async function api({ store, req, role, path, method, body, session, local
     });
     if (credentialPath && existsSync(credentialPath)) unlinkSync(credentialPath);
     return { ok: true, cookie: 'sp_admin=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' };
+  }
+  if (['/api/admin/products.csv','/api/admin/products.xlsx','/api/admin/products-template.csv'].includes(path) && method === 'GET') {
+    const products = path.endsWith('-template.csv') ? templateProducts : store.catalog(true);
+    const excel = path.endsWith('.xlsx');
+    return {buffer:excel ? workbook(productSheets(products)) : Buffer.from(productCsv(products)),
+      type:excel ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv; charset=utf-8',
+      filename:path.split('/').at(-1).replace('products','ccbaby-products')};
   }
   if (path === '/api/admin/export.xlsx' && method === 'GET') {
     return { buffer: workbook(reportSheets(store.campaign(),store.orders(),store.report(),store.costSettings())),

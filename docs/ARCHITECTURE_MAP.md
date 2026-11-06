@@ -1,5 +1,7 @@
 # 架構地圖與樹狀圖
 
+0.3.12 商品輸出：選物管理 → admin/products.xlsx 或 products.csv（只讀）→ domain/product-transfer.mjs 共用欄位與列格式 → 既有 XLSX 寫出器／UTF-8 BOM CSV。admin/products-template.csv 提供相同欄位範例；兩端 admin/import 共用預覽／解析，再走原商品驗證與原子交易，只新增、不以編號覆寫。extra:<size> 對應 sizeSurcharges；商品／規格、採購與預購不因匯出改動，無 DDL。
+
 0.3.11 商品進價：product-cost.js 選填韓幣與同頁匯率 → 商品儲存 costUpdate（含原採買版本）→ domain/product-costing.mjs 驗證 → 與採買清單共用 procurement.cost／version。admin catalog 僅於管理端附 variant.cost／costVersion，客戶 catalog 不加欄。私有紀錄可先於預購存在，無需求時不算報表；草稿保留輸入與原版本，衝突明確載入最新進價。無資料庫 DDL。
 
 

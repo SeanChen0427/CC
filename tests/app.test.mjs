@@ -32,7 +32,7 @@ test('two local applications, durable preorders and buying reports', async t => 
     });
     const cookie = response.headers.get('set-cookie');
     if(cookie) jars[jar]=cookie.split(';')[0];
-    const binary = path.endsWith('.xlsx') || path.endsWith('backup');
+    const binary = path.endsWith('.xlsx') || path.endsWith('.csv') || path.endsWith('backup');
     const data = binary && response.ok ? Buffer.from(await response.arrayBuffer()) : await response.json();
     return {status:response.status,data};
   }
@@ -163,6 +163,17 @@ test('two local applications, durable preorders and buying reports', async t => 
       const backup=await request('admin','admin/backup');
       const text=backup.data.toString();assert.ok(text.includes(visitorOrder.code));assert.ok(!text.includes(password));
       const tables=JSON.parse(text).tables;assert.ok(!tables.admin);assert.ok(!tables.sessions);
+    });
+    await t.test('product downloads use owner authentication and include every stored product',async()=>{
+      const before=(await request('admin','admin/state')).data;
+      for(const path of ['admin/products.csv','admin/products.xlsx','admin/products-template.csv']) {
+        assert.equal((await request('admin',path,{jar:'anonymous'})).status,401);
+        assert.equal((await request('customer',path)).status,403);
+        const result=await request('admin',path);
+        assert.equal(result.status,200);assert.ok(result.data.length>0);
+        if(path==='admin/products.csv')assert.equal(csvRows(result.data.toString()).length,before.products.length+1);
+      }
+      assert.deepEqual((await request('admin','admin/state')).data,before);
     });
     await t.test('catalog supports 200 products with validated bulk import',async()=>{
       const rows=Array.from({length:79},(_,i)=>`LOAD${i+1},批次測試商品${i+1},測試分類,500,奶油白,標準`);

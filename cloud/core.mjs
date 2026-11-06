@@ -1,4 +1,5 @@
-import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/validation.mjs';
+import { AppError, text, integer, contact, assertOpen, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/validation.mjs';
+import { previewProductImport } from '../domain/product-transfer.mjs';
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
@@ -177,11 +178,9 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   if(path==='admin/products'&&method==='POST')return{ok:true,id:saveProduct(s,body,imagePrefix)};
   if(path==='admin/import'&&method==='POST') {
-    const rows=csvRows(text(body.csv,'CSV 內容',1000000)),headers=rows.shift().map(x=>x.trim()),errors=[],products=[],seen=new Set();
-    if(['code','name','category','price','colors','sizes'].some(k=>!headers.includes(k)))throw new AppError('CSV 欄位需包含 code,name,category,price,colors,sizes');
-    rows.forEach((cells,index)=>{try{const p=Object.fromEntries(headers.map((k,i)=>[k,cells[i]||'']));p.kind||='vest';p.tone||='#b9a38b';validateProduct(p,imagePrefix);if(seen.has(p.code)||s.products.some(x=>x.code===p.code))throw new AppError('商品編號重複：'+p.code);seen.add(p.code);products.push({...p,line:index+2});}catch(e){errors.push({line:index+2,message:e.message});}});
+    const {products,errors,count}=previewProductImport(body.csv,p=>validateProduct(p,imagePrefix),code=>s.products.some(p=>p.code===code));
     if(body.commit){if(errors.length)throw new AppError('請先修正所有匯入錯誤');for(const p of products)saveProduct(s,p,imagePrefix);event(s,'products.import','campaign',{count:products.length});}
-    return{ok:true,products,errors,count:rows.length};
+    return{ok:true,products,errors,count};
   }
   const procurement=path.match(/^admin\/procurement\/(\d+)$/);
   if(procurement&&method==='PUT') {

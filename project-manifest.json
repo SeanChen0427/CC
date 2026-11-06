@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.11",
+  "documentVersion": "0.3.12",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -93,7 +93,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "set_owner_exchange_rate_and_record_private_procurement_costs",
+  "nextStep": "export_current_products_and_prepare_new_product_csv",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 68,
+    "integrationTestsPassed": 72,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -150,7 +150,7 @@
       390,
       768
     ],
-    "edgeVersion": 12,
+    "edgeVersion": 13,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -159,9 +159,11 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 6,
+    "affectedTestsPassed": 72,
     "affectedTests": [
-      "product-draft"
+      "product-transfer",
+      "app",
+      "cloud"
     ],
     "nativeGalleryScrollBrowserChecked": true,
     "galleryZoomAndReturnChecked": true,
@@ -227,7 +229,16 @@
     ],
     "liveProductCostUiChecked": true,
     "liveInvalidProductCostRejected": true,
-    "liveProductCostBusinessDataUnchanged": true
+    "liveProductCostBusinessDataUnchanged": true,
+    "productTransferBrowserChecked": true,
+    "productTransferViewports": [
+      320,
+      390
+    ],
+    "productTransferXlsxXmlChecked": true,
+    "liveProductTransferChecked": true,
+    "liveProductTransferBusinessDataUnchanged": true,
+    "liveProductTransferProductCount": 13
   },
   "brandName": "CCBABY",
   "testData": {
@@ -314,6 +325,23 @@
     "sourcePaths": [
       "apps/admin-web/product-draft.js",
       "tests/product-draft.test.mjs"
+    ]
+  },
+  "productTransfer": {
+    "adminOnly": true,
+    "exportAllSavedProducts": true,
+    "xlsxSheets": [
+      "商品清單",
+      "欄位說明",
+      "規格進價"
+    ],
+    "csvImportMode": "create_only",
+    "perSizeSurchargeColumns": "extra:<size>",
+    "photos": "existing_urls_only",
+    "costImport": false,
+    "sourcePaths": [
+      "domain/product-transfer.mjs",
+      "tests/product-transfer.test.mjs"
     ]
   }
 }

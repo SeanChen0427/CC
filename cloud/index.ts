@@ -1,7 +1,8 @@
 // Custom app sessions are verified in PostgreSQL on every protected request.
 // verify_jwt=false is required: these opaque tokens are not Supabase Auth JWTs.
 import { AppError, text } from '../domain/validation.mjs';
-import { operate, orders, report } from './core.mjs';
+import { operate, orders, report, catalog } from './core.mjs';
+import { productCsv, productSheets, templateProducts } from '../domain/product-transfer.mjs';
 import { workbook } from '../server/xlsx.mjs';
 import { reportSheets } from '../server/reports.mjs';
 
@@ -85,6 +86,13 @@ Deno.serve(async req=>{
     if(path==='catalog'&&method==='GET')return json({...operate(state.data,path,method,body,state.session,imagePrefix),lineConfigured,lineChannelId:lineConfigured?lineId:null});
     if(path==='me'&&method==='GET')return json(operate(state.data,path,method,body,state.session,imagePrefix));
     if(!state.session)throw new AppError('請先登入',401);
+    if(['admin/products.csv','admin/products.xlsx','admin/products-template.csv'].includes(path)&&method==='GET'){
+      if(state.session.role!=='admin')throw new AppError('請先登入',401);
+      const products=path.endsWith('-template.csv')?templateProducts:catalog(state.data,true),excel=path.endsWith('.xlsx');
+      return new Response(excel?workbook(productSheets(products)):productCsv(products),{headers:{...headers,
+        'Content-Type':excel?'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'text/csv; charset=utf-8',
+        'Content-Disposition':'attachment; filename="'+path.split('/').at(-1).replace('products','ccbaby-products')+'"'}});
+    }
     if(path==='logout'&&method==='POST'){await rpc('ccbaby_revoke',{p_hash:hash,p_all_admin:false});return json({ok:true});}
     if(path==='admin/password'&&method==='POST'){
       const p=text(body.password,'新密碼',128);if(p.length<12)throw new AppError('新密碼至少 12 個字元');
