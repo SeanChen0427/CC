@@ -142,3 +142,7 @@ Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供�
 ## 0.3.8 店主成本功能部署
 
 Edge v10、Pages built 37e6e82。新增私有 JSONB costSettings 與 procurement.cost，不改 Postgres schema／RPC 權限。匯出由 server/reports.mjs 共用三表，成本不傳回客戶 API。正式唯讀查驗 13 款商品、1 份預購、活動 open，業務資料未異動；匯率待店主自行設定。
+
+## 0.3.9 管理刪除預購部署
+
+Edge v11、Pages built 559904e9。私有 JSONB 標記 preorders.deleted_at／delete_reason，無 Postgres DDL／RPC 權限變更。客戶與有效報表排除，歷史留在私有備份；舊送單重試及修改被拒絕。正式站僅測錯誤編號與取消確認，未刪正式預購，業務狀態前後一致。
