@@ -1,5 +1,8 @@
 # 架構地圖與樹狀圖
 
+0.3.9 預購刪除：管理明細 → 完整編號＋原因確認 → admin/orders/:id/delete → domain/order-deletion.mjs 驗證店主路由、版本及採購／分配 → 標記 deleted_at 並遞增受影響採購版本 → 客戶查單、總覽與有效匯出排除。舊送單請求不復活，重新送單建立新編號。雲端沿用私有 JSONB；本機舊表無損升級，歷史保留。
+
+
 0.3.8 店主進價：管理匯率設定 → admin/cost-settings → 私有設定；採買紀錄 purchase-cost.js → domain/costing.mjs 驗證 → procurement.cost 與數量同版本提交。shared/costing.js 以整數計算換算與合計，server/reports.mjs 共用三表匯出。雲端 JSONB 原子 revision 與本機 SQLite 交易保留，無 Postgres DDL；成本不加入商品或客戶 API。
 
 

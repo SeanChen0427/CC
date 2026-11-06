@@ -1,6 +1,7 @@
 import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/validation.mjs';
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
+import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -15,14 +16,15 @@ export function catalog(s, all = false) {
   return s.products.filter(p => all || p.active).map(p => ({ ...p, variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)) }));
 }
 export function orders(s, customerId) {
-  return s.preorders.filter(o => !customerId || o.customer_id === customerId).map(o => {
+  return s.preorders.filter(o => !o.deleted_at && (!customerId || o.customer_id === customerId)).map(o => {
     const items = s.items.filter(i => i.order_id === o.id && i.quantity > 0);
     return { ...o, customer: s.customers.find(c => c.id === o.customer_id), items, quantity: items.reduce((a, i) => a + i.quantity, 0), total: items.reduce((a, i) => a + i.quantity * i.price, 0) };
   }).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 }
 export function report(s) {
+  const activeOrders = new Set(s.preorders.filter(o => !o.deleted_at).map(o => o.id));
   return s.variants.flatMap(v => {
-    const items = s.items.filter(i => i.variant_id === v.id && i.quantity > 0);
+    const items = s.items.filter(i => activeOrders.has(i.order_id) && i.variant_id === v.id && i.quantity > 0);
     if (!items.length) return [];
     const p = s.products.find(p => p.id === v.product_id), r = s.procurement.find(r => r.variant_id === v.id);
     const demand = items.reduce((a, i) => a + i.quantity, 0), bought = r?.bought || 0, shortage = r?.shortage || 0;
@@ -88,7 +90,11 @@ export function operate(s, path, method, body, session, imagePrefix) {
   if (path === 'customer/preorders' && method === 'POST') {
     const requestId = text(body.requestId,'送出識別',100), signature = JSON.stringify(body);
     const saved = s.submissions.find(x => x.customer_id === session.subject && x.request_id === requestId);
-    if (saved) { if (saved.signature !== signature) throw new AppError('同一送出識別不能用於不同內容',409); return saved.result; }
+    if (saved) {
+      if (saved.signature !== signature) throw new AppError('同一送出識別不能用於不同內容',409);
+      if (s.preorders.find(o => o.id === saved.result.orderId)?.deleted_at) throw new AppError('這次送出的預購已由店主刪除，請重新整理後再送出',409);
+      return saved.result;
+    }
     assertOpen(s.campaign); const details = contact(body);
     if (!Array.isArray(body.items) || !body.items.length || body.items.length > 150) throw new AppError('請先將商品加入購物車');
     const combined = new Map();
@@ -100,7 +106,7 @@ export function operate(s, path, method, body, session, imagePrefix) {
       const quantity = integer((combined.get(v.id)?.quantity || 0)+i.quantity,'同規格數量',99,1);
       combined.set(v.id,{ v, p, quantity });
     }
-    let o = s.preorders.find(o => o.customer_id === session.subject);
+    let o = s.preorders.find(o => !o.deleted_at && o.customer_id === session.subject);
     if (!o) { const id=next(s,'preorders'); o={ id, customer_id:session.subject, code:`CC${new Date().getFullYear()}-${String(id).padStart(4,'0')}`, created_at:stamp(), version:0 }; s.preorders.push(o); }
     for (const {v,p,quantity} of combined.values()) {
       const old=s.items.find(i => i.order_id===o.id && i.variant_id===v.id && i.price===v.price);
@@ -114,7 +120,7 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   const itemMatch=path.match(/^customer\/items\/(\d+)$/);
   if (itemMatch && method==='PATCH') {
-    assertOpen(s.campaign);const i=s.items.find(i=>i.id===Number(itemMatch[1])&&s.preorders.some(o=>o.id===i.order_id&&o.customer_id===session.subject));
+    assertOpen(s.campaign);const i=s.items.find(i=>i.id===Number(itemMatch[1])&&s.preorders.some(o=>!o.deleted_at&&o.id===i.order_id&&o.customer_id===session.subject));
     if(!i)throw new AppError('找不到這筆預購',404);
     const r=s.procurement.find(r=>r.variant_id===i.variant_id);
     if(i.bought||i.shortage||r?.bought||r?.shortage)throw new AppError('已有採購紀錄，請聯絡店主',409);
@@ -127,6 +133,22 @@ export function operate(s, path, method, body, session, imagePrefix) {
   if(path==='admin/cost-settings'&&method==='PUT') {
     s.costSettings={exchangeRate:validateExchangeRate(body.exchangeRate)};
     event(s,'cost.settings','1',s.costSettings);return {ok:true};
+  }
+  const deletion=path.match(/^admin\/orders\/(\d+)\/delete$/);
+  if(deletion&&method==='POST') {
+    const order=s.preorders.find(o=>o.id===Number(deletion[1]));
+    const items=s.items.filter(i=>i.order_id===order?.id);
+    const reason=validateOrderDeletion(order,items,s.procurement,body);
+    if(order.deleted_at)return {ok:true};
+    const before=structuredClone(order);
+    Object.assign(order,{deleted_at:stamp(),delete_reason:reason,updated_at:stamp(),version:order.version+1});
+    for(const variantId of new Set(items.filter(i=>i.quantity>0).map(i=>i.variant_id))) {
+      let row=s.procurement.find(r=>r.variant_id===variantId);
+      if(!row){row={variant_id:variantId,bought:0,shortage:0,note:'',version:0};s.procurement.push(row);}
+      row.version++;
+    }
+    event(s,'preorder.delete',order.id,{before,reason,quantity:items.reduce((n,i)=>n+i.quantity,0)});
+    return {ok:true};
   }
   if(path==='admin/categories'&&method==='POST') {
     const existing=categoryNames(s.categories,s.products),name=validateNewCategory(body.name,existing);
@@ -152,7 +174,7 @@ export function operate(s, path, method, body, session, imagePrefix) {
     Object.assign(row,{bought:body.bought,shortage:body.shortage,note:String(body.note||'').slice(0,500),cost,version:r.version+1});event(s,'procurement.update',r.variant_id,{before,after:structuredClone(row)});return{ok:true};
   }
   if(path==='admin/allocation'&&method==='POST') {
-    const i=s.items.find(i=>i.id===body.itemId&&i.quantity>0);if(!i)throw new AppError('找不到有效明細',404);
+    const i=s.items.find(i=>i.id===body.itemId&&i.quantity>0&&s.preorders.some(o=>o.id===i.order_id&&!o.deleted_at));if(!i)throw new AppError('找不到有效明細',404);
     const r=report(s).find(r=>r.variant_id===i.variant_id),bought=integer(body.bought,'分配買到數',i.quantity),shortage=integer(body.shortage,'分配缺貨數',i.quantity);
     if(bought+shortage>i.quantity)throw new AppError('分配合計不能超過預購數');
     if(r.allocated_bought-i.bought+bought>r.bought||r.allocated_shortage-i.shortage+shortage>r.shortage)throw new AppError('分配不能超過採購紀錄');

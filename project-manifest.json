@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.8",
+  "documentVersion": "0.3.9",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 54,
+    "integrationTestsPassed": 59,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -190,6 +190,15 @@
     "liveCostViewports": [
       320,
       390
+    ],
+    "orderDeletionGuardChecked": true,
+    "deletedOrderCustomerHiddenChecked": true,
+    "deletedOrderReportExcludedChecked": true,
+    "deletedOrderReplayBlockedChecked": true,
+    "legacyOrderUniquenessMigrationChecked": true,
+    "orderDeletionViewports": [
+      320,
+      390
     ]
   },
   "brandName": "CCBABY",
@@ -242,6 +251,21 @@
       "domain/costing.mjs",
       "server/reports.mjs",
       "tests/costing.test.mjs"
+    ]
+  },
+  "orderDeletion": {
+    "adminOnly": true,
+    "fullOrder": true,
+    "confirmation": "exact_order_code_and_reason",
+    "staleVersionGuard": true,
+    "blocksProcurementOrAllocation": true,
+    "internalHistoryRetained": true,
+    "customerHidden": true,
+    "excludedFromActiveReports": true,
+    "newSubmissionGetsNewOrder": true,
+    "sourcePaths": [
+      "domain/order-deletion.mjs",
+      "tests/order-deletion.test.mjs"
     ]
   }
 }

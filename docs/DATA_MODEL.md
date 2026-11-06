@@ -173,3 +173,14 @@ LINE Token 不作報表欄位；驗證所需資料與紀錄最小化。
 - `admin/state`、店主 XLSX 及私有 JSON 備份可取得成本；客戶 catalog／orders／me 不含成本或設定
 - 採買成本隨採購版本原子寫入，保留異動前後值；調整成本不修改預購快照
 - Excel 三表「客戶預購明細」「採買彙總」「進銷總覽」共用 server/reports.mjs 計算，空白成本留白並標示未填，不當作零成本
+
+## 0.3.9 店主刪除預購（已實作）
+
+- `preorders.deleted_at`／`delete_reason` 記錄內部刪除狀態，items 與歷史不實體刪除
+- 同客戶／同活動僅一份未刪除預購；雲端查詢排除 deleted_at，本機用未刪除 customer_id 的 partial unique index
+- 舊 SQLite 的 customer_id 無條件唯一限制於啟動時交易內重建預購表，保留 ID、明細外鍵與價格快照，再驗證 foreign_key_check；不清空資料
+- `admin/orders/:id/delete` POST：後端驗證店主、確認編號、原因、預購版本、相關買到／缺貨／分配結果
+- 刪除操作與採購版本遞增在同一交易／revision 提交，既有成本與採購紀錄不刪除；有買到或缺貨時阻擋刪除
+- orders、report、stats 與 Excel 只計入未刪除預購，客戶舊品項修改與店主舊分配均拒絕
+- submissions 保存原結果與 orderId；已刪除預購的原 requestId 重試回 409，新 requestId 可建立新 ID／預購編號
+- 重試同一刪除具冪等性，不會刪除客戶後來的新預購；內部備份保留所有已刪除歷史

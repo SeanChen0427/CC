@@ -6,6 +6,7 @@ import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
 import { reportSheets } from './reports.mjs';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
+import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -172,7 +173,9 @@ export async function api({ store, req, role, path, method, body, session, local
     const saved = store.get('SELECT * FROM submissions WHERE customer_id=? AND request_id=?', session.subject, requestId);
     if (saved) {
       if (saved.fingerprint !== hash) throw new AppError('同一送出識別不能重複使用於不同內容', 409);
-      return JSON.parse(saved.result);
+      const result=JSON.parse(saved.result);
+      if(store.get('SELECT deleted_at FROM preorders WHERE id=?',result.orderId)?.deleted_at)throw new AppError('這次送出的預購已由店主刪除，請重新整理後再送出',409);
+      return result;
     }
     assertOpen(store.campaign());
     const details = contact(body);
@@ -190,7 +193,7 @@ export async function api({ store, req, role, path, method, body, session, local
       combined.set(variant.id, { ...variant, quantity: qty });
     }
     return store.transaction(() => {
-      let order = store.get('SELECT * FROM preorders WHERE customer_id=?', session.subject);
+      let order = store.get('SELECT * FROM preorders WHERE customer_id=? AND deleted_at IS NULL', session.subject);
       if (!order) {
         const id = Number(store.run(`INSERT INTO preorders(customer_id,name,phone,created_at,updated_at)
           VALUES(?,?,?,?,?)`, session.subject, details.name, details.phone, now(), now()).lastInsertRowid);
@@ -218,7 +221,7 @@ export async function api({ store, req, role, path, method, body, session, local
   if (itemMatch && method === 'PATCH') {
     assertOpen(store.campaign());
     const item = store.get(`SELECT i.* FROM items i JOIN preorders o ON o.id=i.order_id
-      WHERE i.id=? AND o.customer_id=?`, Number(itemMatch[1]), session.subject);
+      WHERE i.id=? AND o.customer_id=? AND o.deleted_at IS NULL`, Number(itemMatch[1]), session.subject);
     if (!item) throw new AppError('找不到這筆預購', 404);
     const quantity = integer(body.quantity, '數量', 999);
     const recorded = store.get('SELECT bought,shortage FROM procurement WHERE variant_id=?', item.variant_id);
@@ -244,6 +247,21 @@ export async function api({ store, req, role, path, method, body, session, local
     return store.transaction(()=>{
       store.run('INSERT INTO cost_settings(id,exchange_rate) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET exchange_rate=excluded.exchange_rate',rate);
       store.event('cost.settings','1',{exchangeRate:rate});
+      return {ok:true};
+    });
+  }
+  const deletion=path.match(/^\/api\/admin\/orders\/(\d+)\/delete$/);
+  if(deletion&&method==='POST') {
+    return store.transaction(()=>{
+      const order=store.get('SELECT * FROM preorders WHERE id=?',Number(deletion[1]));
+      const items=order?store.all('SELECT * FROM items WHERE order_id=?',order.id):[];
+      const reason=validateOrderDeletion(order,items,store.all('SELECT * FROM procurement'),body);
+      if(order.deleted_at)return {ok:true};
+      store.run('UPDATE preorders SET deleted_at=?,delete_reason=?,updated_at=?,version=version+1 WHERE id=?',now(),reason,now(),order.id);
+      for(const variantId of new Set(items.filter(i=>i.quantity>0).map(i=>i.variant_id))) {
+        store.run('INSERT INTO procurement(variant_id,version) VALUES(?,1) ON CONFLICT(variant_id) DO UPDATE SET version=procurement.version+1',variantId);
+      }
+      store.event('preorder.delete',order.id,{before:order,reason,quantity:items.reduce((n,i)=>n+i.quantity,0)});
       return {ok:true};
     });
   }
@@ -287,7 +305,7 @@ export async function api({ store, req, role, path, method, body, session, local
     });
   }
   if (path === '/api/admin/allocation' && method === 'POST') {
-    const item = store.get('SELECT * FROM items WHERE id=?', Number(body.itemId));
+    const item = store.get('SELECT i.* FROM items i JOIN preorders o ON o.id=i.order_id WHERE i.id=? AND o.deleted_at IS NULL', Number(body.itemId));
     if (!item || !item.quantity) throw new AppError('找不到有效明細', 404);
     const row = store.report().find(r => r.variant_id === item.variant_id);
     const bought = integer(body.bought, '分配買到數', item.quantity);

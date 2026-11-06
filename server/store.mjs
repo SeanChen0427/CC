@@ -54,9 +54,10 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       name TEXT PRIMARY KEY NOT NULL, created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS preorders (
-      id INTEGER PRIMARY KEY, customer_id TEXT UNIQUE NOT NULL REFERENCES customers(id),
+      id INTEGER PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES customers(id),
       code TEXT UNIQUE, name TEXT NOT NULL, phone TEXT NOT NULL, created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1
+      updated_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1,
+      deleted_at TEXT, delete_reason TEXT NOT NULL DEFAULT ''
     );
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY, order_id INTEGER NOT NULL REFERENCES preorders(id),
@@ -85,6 +86,7 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY, data TEXT NOT NULL, created_at TEXT NOT NULL
     );
   `);
+  upgradePreorders(db);
   if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'image_bindings')) {
     db.exec("ALTER TABLE products ADD COLUMN image_bindings TEXT NOT NULL DEFAULT '[]'");
   }
@@ -131,8 +133,8 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     },
     orders(customerId) {
       const orders = customerId
-        ? this.all('SELECT * FROM preorders WHERE customer_id=? ORDER BY id DESC', customerId)
-        : this.all('SELECT * FROM preorders ORDER BY updated_at DESC');
+        ? this.all('SELECT * FROM preorders WHERE deleted_at IS NULL AND customer_id=? ORDER BY id DESC', customerId)
+        : this.all('SELECT * FROM preorders WHERE deleted_at IS NULL ORDER BY updated_at DESC');
       const items = this.all('SELECT * FROM items WHERE quantity>0 ORDER BY id');
       return orders.map(order => ({
         ...order,
@@ -155,6 +157,7 @@ export function openStore(filename, { seed = false, password, credentialPath } =
           MIN(i.price) AS priceMin, MAX(i.price) AS priceMax, SUM(i.price*i.quantity) AS salesTotal
         FROM variants v JOIN products p ON p.id=v.product_id
         JOIN items i ON i.variant_id=v.id AND i.quantity>0
+        JOIN preorders o ON o.id=i.order_id AND o.deleted_at IS NULL
         LEFT JOIN procurement r ON r.variant_id=v.id
         GROUP BY v.id ORDER BY p.id,v.id
       `).map(row => ({
@@ -178,6 +181,35 @@ export function openStore(filename, { seed = false, password, credentialPath } =
   }
   if (seed && !store.get('SELECT id FROM products LIMIT 1')) seedData(store);
   return store;
+}
+
+function upgradePreorders(db) {
+  const columns=db.prepare('PRAGMA table_info(preorders)').all();
+  if(!columns.some(c=>c.name==='deleted_at'))db.exec('ALTER TABLE preorders ADD COLUMN deleted_at TEXT');
+  if(!columns.some(c=>c.name==='delete_reason'))db.exec("ALTER TABLE preorders ADD COLUMN delete_reason TEXT NOT NULL DEFAULT ''");
+  const legacyUnique=db.prepare('PRAGMA index_list(preorders)').all().some(index=>{
+    const fields=db.prepare('SELECT name FROM pragma_index_info(?)').all(index.name);
+    return index.unique && !index.partial && fields.length===1 && fields[0].name==='customer_id';
+  });
+  if(legacyUnique) {
+    // Replace the old unconditional customer uniqueness without deleting history or items.
+    db.exec('PRAGMA foreign_keys=OFF; BEGIN IMMEDIATE;');
+    try {
+      db.exec(`CREATE TABLE preorders_upgrade (
+        id INTEGER PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES customers(id),
+        code TEXT UNIQUE, name TEXT NOT NULL, phone TEXT NOT NULL, created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1,
+        deleted_at TEXT, delete_reason TEXT NOT NULL DEFAULT ''
+      );
+      INSERT INTO preorders_upgrade SELECT id,customer_id,code,name,phone,created_at,updated_at,version,deleted_at,delete_reason FROM preorders;
+      DROP TABLE preorders;
+      ALTER TABLE preorders_upgrade RENAME TO preorders;`);
+      if(db.prepare('PRAGMA foreign_key_check').all().length)throw new Error('預購升級關聯檢查失敗');
+      db.exec('COMMIT');
+    } catch(error) {db.exec('ROLLBACK');throw error;}
+    finally {db.exec('PRAGMA foreign_keys=ON');}
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS preorders_active_customer ON preorders(customer_id) WHERE deleted_at IS NULL');
 }
 
 function seedData(store) {
