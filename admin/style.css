@@ -1412,6 +1412,30 @@ dialog::backdrop {
 .mobile-logout {
   display:none
 }
+
+.cost-overview { padding:20px 23px; margin-bottom:20px; border:1px solid var(--line); border-radius:8px; background:#fafbf7; }
+.cost-setting { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:12px; }
+.cost-figures { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; margin-top:18px; }
+.cost-figures small { display:block; margin-bottom:7px; color:#7f8d72; }
+.cost-figures strong { font-size:20px; font-weight:500; overflow-wrap:anywhere; }
+.cost-overview p { font-size:12px; margin:16px 0 0; color:#7f8d72; }
+.cost-cell small { line-height:1.9; }
+.exchange-panel { margin-bottom:23px; }
+.exchange-panel .field { max-width:380px; }
+.purchase-cost { border:1px solid var(--line); border-radius:6px; padding:16px; margin:18px 0; background:#fafbf7; }
+.purchase-cost h3 { margin:0 0 16px; font-size:15px; font-weight:500; }
+.cost-output { display:block; min-height:44px; padding:12px 0; color:#5c7350; font-size:18px; }
+.cost-rate { font-size:12px; line-height:1.7; }
+@media(max-width:760px) {
+  .cost-figures { grid-template-columns:1fr; gap:14px; }
+  .cost-overview { padding:18px; }
+  .cost-cell { overflow-wrap:anywhere; }
+  .cost-cell small { font-size:11px; }
+  [data-page="procurement"] td:last-child { flex-wrap:wrap; }
+}
+@media(max-width:400px) {
+  .purchase-cost .form-grid { grid-template-columns:1fr; }
+}
 @media(max-width:760px) {
   .mobile-logout {
     display:block

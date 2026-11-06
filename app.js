@@ -1,9 +1,9 @@
-import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.7';
-import { art } from './product-art.js?v=0.3.7';
-import { enterCustomerSite } from './entry.js?v=0.3.7';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.7';
-import { mountGallery } from './gallery.js?v=0.3.7';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.7';
+import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.8';
+import { art } from './product-art.js?v=0.3.8';
+import { enterCustomerSite } from './entry.js?v=0.3.8';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.8';
+import { mountGallery } from './gallery.js?v=0.3.8';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.8';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
