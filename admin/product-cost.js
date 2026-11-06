@@ -1,5 +1,5 @@
-import { productCostState } from './product-costing.js?v=0.3.13';
-import { unitCostTwd } from './costing.js?v=0.3.13';
+import { productCostState } from './product-costing.js?v=0.3.14';
+import { unitCostTwd } from './costing.js?v=0.3.14';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
