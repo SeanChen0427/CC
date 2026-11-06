@@ -13,13 +13,9 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "live_with_pending_frontend_release",
+    "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pendingPagesCommit": "b6b9954c56a5b6092b37e849bc936cecdd569b33",
-    "pendingPagesRun": 42248157954,
-    "pendingPagesStatus": "failed_timeout",
-    "pendingPagesReason": "deployment_state_stalled_suspected",
-    "pendingPagesRerun": 42245013491
+    "pagesRun": 42252246268
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -98,7 +94,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "resolve_github_pages_deployment_state_then_verify_static_0_3_14",
+  "nextStep": "record_owner_product_source_urls_and_export_buying_records",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -126,8 +122,8 @@
     "xlsxStructureChecked": true,
     "date": "2026-11-07",
     "cloudSmokeChecked": true,
-    "pagesLiveChecked": false,
-    "pagesCommit": "c09c214c7f043974247c6b67a1b015171671ee0e",
+    "pagesLiveChecked": true,
+    "pagesCommit": "8db331883a51625d304a7732097362a720274115",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -270,10 +266,24 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.13",
+    "lastLiveFrontendVersion": "0.3.14",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
-    "pagesTimeoutRootCauseOfficiallyConfirmed": false
+    "pagesTimeoutRootCauseOfficiallyConfirmed": false,
+    "newProductColorsLiveSourceChecked": true,
+    "pagesBlockedByOldDeploymentConfirmed": true,
+    "pagesStaleDeploymentCancelled": true,
+    "pagesDeploymentRecovered": true,
+    "liveProductSourceBundleChecked": true,
+    "pagesLiveFilesCompared": [
+      "index.html",
+      "app.js",
+      "admin/index.html",
+      "admin/app.js",
+      "admin/product-draft.js",
+      "admin/product-export.js",
+      "admin/config.json"
+    ]
   },
   "brandName": "CCBABY",
   "testData": {

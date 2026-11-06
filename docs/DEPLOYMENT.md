@@ -165,7 +165,7 @@ Edge v12、Pages built 9696420f。商品 POST 支援 costUpdate，與採買共�
 
 ## 0.3.14 商品來源記錄
 
-商品 POST 支援 sourceUrl，僅店主目錄／採買表回傳，客戶目錄明確排除。雲端私有 JSONB 新增選填商品欄，無 DDL／RPC／Storage／登入設定變更；本機 SQLite 啟動時加 products.source_url，保留舊資料。來源不由伺服器抓取。XLSX 超連結與首圖內嵌關聯相容，原 CSV 必填欄不變。前台移除新增商品預設顏色，草稿白名單加來源；Edge v15 ACTIVE，正式管理目錄及商品匯出欄位、非法連結拒絕與資料雜湊比對通過；檢查時 16 商品、1 預購、open 保留，Pages 待發布。
+商品 POST 支援 sourceUrl，僅店主目錄／採買表回傳，客戶目錄明確排除。雲端私有 JSONB 新增選填商品欄，無 DDL／RPC／Storage／登入設定變更；本機 SQLite 啟動時加 products.source_url，保留舊資料。來源不由伺服器抓取。XLSX 超連結與首圖內嵌關聯相容，原 CSV 必填欄不變。前台移除新增商品預設顏色，草稿白名單加來源；Edge v15 ACTIVE，正式管理目錄及商品匯出欄位、非法連結拒絕與資料雜湊比對通過；檢查時 16 商品、1 預購、open 保留。Pages 已於後續重試恢復，見下方紀錄
 
 2026-11-07 發布恢復進度：gh-pages 目標為 b6b9954c56a5b6092b37e849bc936cecdd569b33。原 run 42245013491 的 deploy-pages 於 deployment_queued／updating_pages 等待超過 600000ms 後逾時，重跑停在 queued；取消回覆已完成但查詢仍 queued。依官方 Pages builds API 重新觸發 run 42248157954，建置通過但部署再次逾時，正式 index 仍為 0.3.13。未改 Pages 來源或 CNAME，既有功能與正式業務資料保留
 
@@ -180,3 +180,19 @@ Edge v12、Pages built 9696420f。商品 POST 支援 costUpdate，與採買共�
 - [本次第二次失敗日誌](https://github.com/SeanChen0427/CC/actions/runs/42248157954)，[第一次失敗與卡住的重跑](https://github.com/SeanChen0427/CC/actions/runs/42245013491)
 - GitHub 官方狀態頁當下標示正常，不能據此宣稱全面故障；其他使用者有同樣的建置成功、updating_pages／空白狀態、重跑永久排隊現象。[近期相同案例](https://github.com/orgs/community/discussions/212127)、[另一個案例](https://github.com/orgs/community/discussions/212207)
 - 判斷：發布卡在 GitHub Pages 服務端／部署狀態，確切內部根因尚無官方確認；不是已證實的程式、檔案大小、分支、審核或憑證問題。停止增加重試，保留現站與資料；待 GitHub 端狀態恢復或取得可驗證的處理方式，再發布並核對 index／app.js／product-draft.js 的 0.3.14 成品
+
+### 2026-11-07 使用者要求重試與舊部署阻擋
+
+- 使用者要求再試發布，未改程式／正式業務資料；POST Pages builds 產生 [run 42251666169](https://github.com/SeanChen0427/CC/actions/runs/42251666169)，build 與 artifact 成功，沿用 b6b9954 部署 ID 後約 5 秒即回報 Deployment cancelled，沒有發出取消指令
+- 以不改檔案的空提交 8db331883a51625d304a7732097362a720274115 產生新部署編號，tree 與 b6b9954 完全相同（449826a1cee401faaa4eb76edfc578da7054cdac）；[run 42251915582](https://github.com/SeanChen0427/CC/actions/runs/42251915582) 明確回 400，指出舊 b6b9954 仍為 in progress，須先取消或等待。Request ID：7818:B0134:E81B85:2F92626:6AEDFF0F
+- 舊部署查詢曾回 deployment_cancelled，稍後又回空白；但新部署建立 API 仍將它視為進行中，已取得直接的服務端狀態不一致證據，不能把取消錯誤歸咎於 Node 警告
+- 台北時間 00:24:42 依 [官方取消部署 API](https://docs.github.com/en/rest/pages/pages#cancel-a-github-pages-deployment) POST 指定舊 b6b9954，HTTP 204 成功，查詢回 deployment_cancelled；等待後重新觸發 [run 42252246268](https://github.com/SeanChen0427/CC/actions/runs/42252246268)，新 8db3318 進入 deployment_queued，之後成功發布
+- upload-artifact@v4 的 Node 20 棄用提示是 runner 切換 Node 24 的警告；對應 build 已成功。這是 GitHub 管理的 Pages workflow，沒有為了消除警告更動網站程式或發布架構。[官方說明](https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/)
+
+### 2026-11-07 00:31 發布恢復與正式檔案驗證
+
+Pages build 於台北 00:31:17 回 built，部署查詢為 succeed，Actions run 42252246268 於 00:31:35 全部成功。正式 gh-pages 為 8db331883a51625d304a7732097362a720274115，內容與原 b6b9954 完全相同；解除指定舊部署後這次發布完成，但首次卡住的 GitHub 內部根因仍無官方確認
+
+使用強制重新驗證／獨立查詢參數取得正式客戶及管理入口、兩端 app.js、管理 product-draft.js／product-export.js／config.json，共 7 檔皆 HTTP 200 且與發布工作副本逐位元相同；正式 index 已為 app.js／style.css?v=0.3.14。來源連結表單、顏色空白及草稿欄位程式已上線；實際填寫／保存／重開／匯出互動先前於隔離資料庫完成，本輪不在正式資料儲存示範商品
+
+本次只重試靜態發布及取消舊 Pages 部署，沒有重新部署 Edge、改動網域、修改正式商品／預購或清空資料；原 80 項測試與 UI／匯出驗證結果適用相同內容，未為空提交重跑測試
