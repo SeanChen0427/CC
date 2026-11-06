@@ -3,6 +3,7 @@
 import { AppError, text } from '../domain/validation.mjs';
 import { operate, orders, report } from './core.mjs';
 import { workbook } from '../server/xlsx.mjs';
+import { reportSheets } from '../server/reports.mjs';
 
 const base = Deno.env.get('SUPABASE_URL');
 const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -34,10 +35,7 @@ async function passwordLogin(password) {
   return result;
 }
 function exportWorkbook(s) {
-  const at=new Date().toISOString(),name=s.campaign.name;
-  const rows=[['活動','預購編號','LINE 暱稱','聯絡姓名','手機','商品編號','商品名稱','規格','數量','預估單價','預估小計','分配買到','分配缺貨','收件資料','匯出時間']];
-  for(const o of orders(s))for(const i of o.items)rows.push([name,o.code,o.customer.display_name,o.name,o.phone,i.product_code,i.product_name,i.color+' / '+i.size,i.quantity,i.price,i.quantity*i.price,i.bought,i.shortage,o.customer.delivery,at]);
-  return workbook([{name:'客戶預購明細',rows},{name:'採買彙總',rows:[['活動','商品編號','商品名稱','顏色','尺寸／規格','需求','已買','待採買','確認缺貨','未分配已買','備註','匯出時間'],...report(s).map(r=>[name,r.code,r.name,r.color,r.size,r.demand,r.bought,r.remaining,r.shortage,r.unallocated,r.note,at])]}]);
+  return workbook(reportSheets(s.campaign,orders(s),report(s),s.costSettings));
 }
 
 Deno.serve(async req=>{

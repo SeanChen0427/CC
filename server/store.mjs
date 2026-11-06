@@ -24,6 +24,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY CHECK(id=1), name TEXT NOT NULL,
       status TEXT NOT NULL, closes_at TEXT NOT NULL, description TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS cost_settings (
+      id INTEGER PRIMARY KEY CHECK(id=1), exchange_rate REAL NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS admin (
       id INTEGER PRIMARY KEY CHECK(id=1), username TEXT NOT NULL UNIQUE,
       salt TEXT NOT NULL, hash TEXT NOT NULL
@@ -88,6 +91,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
   if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'pricing')) {
     db.exec('ALTER TABLE products ADD COLUMN pricing TEXT');
   }
+  if (!db.prepare('PRAGMA table_info(procurement)').all().some(column => column.name === 'cost')) {
+    db.exec('ALTER TABLE procurement ADD COLUMN cost TEXT');
+  }
   if (filename !== ':memory:') chmodSync(filename, 0o600);
   const store = {
     db, demoMode: seed,
@@ -109,6 +115,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     },
     categories() {
       return categoryNames(this.all('SELECT name FROM categories ORDER BY rowid').map(row=>row.name),this.all('SELECT category FROM products ORDER BY id'));
+    },
+    costSettings() {
+      return {exchangeRate:this.get('SELECT exchange_rate FROM cost_settings WHERE id=1')?.exchange_rate ?? null};
     },
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);
@@ -142,13 +151,14 @@ export function openStore(filename, { seed = false, password, credentialPath } =
           COALESCE(SUM(i.bought),0) AS allocated_bought,
           COALESCE(SUM(i.shortage),0) AS allocated_shortage,
           COALESCE(r.bought,0) AS bought, COALESCE(r.shortage,0) AS shortage,
-          COALESCE(r.note,'') AS note, COALESCE(r.version,0) AS version
+          COALESCE(r.note,'') AS note, COALESCE(r.version,0) AS version, r.cost,
+          MIN(i.price) AS priceMin, MAX(i.price) AS priceMax, SUM(i.price*i.quantity) AS salesTotal
         FROM variants v JOIN products p ON p.id=v.product_id
         JOIN items i ON i.variant_id=v.id AND i.quantity>0
         LEFT JOIN procurement r ON r.variant_id=v.id
         GROUP BY v.id ORDER BY p.id,v.id
       `).map(row => ({
-        ...row, remaining: Math.max(row.demand - row.bought - row.shortage, 0),
+        ...row, cost:row.cost ? JSON.parse(row.cost) : null, remaining: Math.max(row.demand - row.bought - row.shortage, 0),
         unallocated: row.bought - row.allocated_bought,
       }));
     },

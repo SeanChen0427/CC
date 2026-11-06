@@ -1,6 +1,6 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-06（Asia/Taipei）｜版本：0.3.6
+更新：2026-11-06（Asia/Taipei）｜版本：0.3.8
 
 品牌名稱已確認為 **CCBABY**。
 
@@ -47,6 +47,12 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 | 目標規格與真實完成範圍 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | 規格、程式及驗證紀錄 |
 | 最新進度、交棒、未完成工作 | [HANDOFF.md](docs/HANDOFF.md) | CHANGELOG 與 manifest 階段 |
 | AI 工作規則與驗證方式 | [AI_START_HERE.md](docs/AI_START_HERE.md) | 三份工具入口保持一致 |
+
+### 店主進價程式入口（0.3.8）
+
+- [進價表單](apps/admin-web/purchase-cost.js)、[換算與合計](shared/costing.js)
+- [後端成本驗證](domain/costing.mjs)、[共用 Excel 三表](server/reports.mjs)
+- [成本與權限驗證](tests/costing.test.mjs)
 
 ## 4. 索引樹
 

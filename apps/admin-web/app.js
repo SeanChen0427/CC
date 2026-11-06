@@ -4,9 +4,18 @@ import { mountImageEditor } from './image-editor.js';
 import { editorPricing } from './product-pricing.js';
 import { mountSizePricing } from './size-pricing.js';
 import { categoryNames, categoryCounts } from './product-categories.js';
+import { unitCostTwd, costTotal, costSummary } from './costing.js';
+import { mountPurchaseCost } from './purchase-cost.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
+const costMoney = value => 'NT$ '+Number(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const krw = value => '₩ '+Number(value).toLocaleString('en-US');
+const saleRange = row => money(row.priceMin)+(row.priceMax!==row.priceMin?'～'+money(row.priceMax):'');
+function purchaseOverview(){
+  const totals=costSummary(state.data.report),rate=state.data.costSettings?.exchangeRate;
+  return `<section class="cost-overview" aria-label="進銷金額總覽"><div class="cost-setting"><span>${rate?'目前匯率：1 韓元＝'+rate+' 台幣':'尚未設定韓幣換算匯率'}</span><button class="text-button" data-action="navigate" data-view="settings">設定匯率 →</button></div><div class="cost-figures"><div><small>預購售價合計</small><strong>${money(totals.salesTotal)}</strong></div><div><small>需求進價已填小計</small><strong>${costMoney(totals.demandTwd)}</strong></div><div><small>已買進價已填小計</small><strong>${costMoney(totals.boughtTwd)}</strong></div></div><p>${totals.missingDemand?'尚有 '+totals.missingDemand+' 件需求未填進價，小計尚未包含全部成本':'所有有效需求已填進價'}${totals.missingBought?' · 已買中有 '+totals.missingBought+' 件未填進價':''}</p></section>`;
+}
 const paths = {
   bag:'<path d="M5 7h14l1 14H4L5 7Z"/><path d="M9 8V6a3 3 0 016 0v2"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -91,7 +100,7 @@ function renderTablePage(){
   }[view];
   const actions=view==='products'?`<button class="button light" data-action="categories">分類管理</button><button class="button light" data-action="import">CSV 批次匯入</button><button class="button" data-action="new-product">${icon('plus')}新增商品</button>`:exportButton();
   $('#content').innerHTML=heading(...meta,actions)+
-    (view==='procurement'?`<div class="page-note">${icon('box')}「待採買」與「確認缺貨」分開記錄，買到後可在客戶明細手動分配，沒有自動順位</div>`:'')+
+    (view==='procurement'?purchaseOverview()+`<div class="page-note">${icon('box')}進價僅供店主查看，買到後可在客戶明細手動分配</div>`:'')+
     `<section class="panel" data-page="${view}"><div class="toolbar"><div class="toolbar-left"><label class="search-box">${icon('search')}<input id="table-search" placeholder="${view==='customers'?'搜尋姓名、手機或預購編號':'搜尋商品名稱、編號或規格'}" value="${esc(state.search)}" aria-label="搜尋清單"></label>${view!=='customers'?`<select class="filter-select" id="category-filter" aria-label="分類篩選"><option>全部分類</option>${productCategories().map(c=>`<option ${state.category===c?'selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div>${view==='procurement'?`<label class="checkbox-label"><input type="checkbox" id="pending-only" ${state.onlyPending?'checked':''}>只看待採買</label>`:`<span class="pill gray">${view==='products'?state.data.products.length+' 款選物':state.data.orders.filter(o=>o.quantity>0).length+' 份預購'}</span>`}</div><div id="table-area"></div></section>`;
   $('#table-search').addEventListener('input',e=>{state.search=e.target.value;state.limit=25;renderTable();});
   $('#category-filter')?.addEventListener('change',e=>{state.category=e.target.value;state.limit=25;renderTable();});
@@ -111,12 +120,12 @@ function renderTable(){
       return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)}</small></span></div></td><td>${esc(row.category)}</td><td class="money">${money(Math.min(...prices))}</td><td>${prices.length} 種</td><td><span class="pill ${row.active?'':'gray'}">${row.active?'上架中':'已下架'}</span></td><td><button class="text-button" data-action="edit-product" data-id="${row.id}">編輯</button></td></tr>`;
     }
     if(view==='customers') return `<tr><td><div class="customer-cell"><span class="avatar">${esc(row.name.slice(-1))}</span><span><strong>${esc(row.name)}</strong><small>LINE：${esc(row.customer.display_name)}</small></span></div></td><td class="number">${esc(row.code)}</td><td>${row.quantity} 件</td><td class="money">${money(row.total)}</td><td>${row.phone?esc(row.phone):'<span class="muted">示範資料未填</span>'}</td><td><span class="pill">${labels[state.data.campaign.status]}</span></td><td><button class="text-button" data-action="order" data-id="${row.id}">查看明細</button></td></tr>`;
-    return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)} · ${esc(row.color)} / ${esc(row.size)}</small></span></div></td><td class="number">${row.demand}</td><td class="number">${row.bought}</td><td><span class="pill ${row.remaining?'gray':''}">${row.remaining}</span></td><td><span class="${row.shortage?'pill rose':'muted'}">${row.shortage}</span></td><td><small>${row.unallocated?'尚有 '+row.unallocated+' 件待分配':esc(row.note)||'—'}</small></td><td><button class="text-button" data-action="procure" data-id="${row.variant_id}">記錄</button><button class="text-button" data-action="demand" data-id="${row.variant_id}">看需求</button></td></tr>`;
+    return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)} · ${esc(row.color)} / ${esc(row.size)}</small></span></div></td><td class="number">${row.demand}</td><td class="number">${row.bought}</td><td><span class="pill ${row.remaining?'gray':''}">${row.remaining}</span></td><td><span class="${row.shortage?'pill rose':'muted'}">${row.shortage}</span></td><td class="cost-cell"><small>單件進價 ${row.cost?krw(row.cost.unitKrw)+' ／ '+costMoney(unitCostTwd(row.cost)):'未填'}</small><small>預購售價 ${saleRange(row)}</small><small>${row.unallocated?'尚有 '+row.unallocated+' 件待分配':esc(row.note)||'—'}</small></td><td><button class="text-button" data-action="procure" data-id="${row.variant_id}">記錄進價／採買</button><button class="text-button" data-action="demand" data-id="${row.variant_id}">看需求</button></td></tr>`;
   }).join('');
   const headings={
     products:['商品／編號','分類','起始售價','規格','狀態',''],
     customers:['客戶','預購編號','數量','預估金額','手機','階段',''],
-    procurement:['商品與規格','需求','已買','待買','缺貨','備註／分配',''],
+    procurement:['商品與規格','需求','已買','待買','缺貨','進價／售價／備註',''],
   }[view];
   $('#table-area').innerHTML=rows.length?`<div class="table-scroll"><table><thead><tr>${headings.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div><div class="table-footer"><span>顯示 ${Math.min(rows.length,state.limit)} / ${rows.length} 筆</span>${rows.length>state.limit?'<button class="text-button" data-action="more">載入更多 →</button>':'<span>清單已更新</span>'}</div>`:`<div class="empty">${icon('search')}<h3>目前沒有符合的資料</h3><p>試著調整關鍵字或篩選條件</p></div>`;
 }
@@ -124,7 +133,7 @@ function renderTable(){
 function showOrder(id){
   const o=state.data.orders.find(o=>o.id===id);if(!o)return;
   showModal(`<div class="eyebrow">PREORDER DETAILS / ${esc(o.code)}</div><h2>${esc(o.name)}的預購清單</h2><p>${date(o.created_at)} 建立，共 ${o.quantity} 件選物</p><div class="detail-contact"><div>LINE 暱稱<strong>${esc(o.customer.display_name)}</strong></div><div>聯絡手機<strong>${esc(o.phone||'尚未填寫')}</strong></div><div class="wide">收件資料<strong>${esc(o.customer.delivery||'待客戶補填')}</strong></div></div>
-    ${o.items.map(i=>`<div class="modal-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>分配買到 ${i.bought} · 確認缺貨 ${i.shortage} · 待處理 ${i.quantity-i.bought-i.shortage}</small></div><div class="right"><span class="money">${money(i.price*i.quantity)}</span> <button class="text-button" data-action="allocate" data-id="${i.id}">分配採購結果</button></div></div>`).join('')}<div class="detail-total"><span>預估商品小計，非已收款</span><strong>${money(o.total)}</strong></div><div class="form-actions"><button class="button light" data-action="copy-order" data-id="${o.id}">複製分貨明細</button><button class="button" data-action="close">完成</button></div>`);
+    ${o.items.map(i=>{const cost=state.data.report.find(r=>r.variant_id===i.variant_id)?.cost;return `<div class="modal-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>售價單價 ${money(i.price)} · 單件進價 ${cost?krw(cost.unitKrw)+' ／ '+costMoney(unitCostTwd(cost)):'未填'}</small><small>需求進價 ${cost?costMoney(costTotal(cost,i.quantity)):'未填'}</small><small>分配買到 ${i.bought} · 確認缺貨 ${i.shortage} · 待處理 ${i.quantity-i.bought-i.shortage}</small></div><div class="right"><span class="money">${money(i.price*i.quantity)}</span> <button class="text-button" data-action="allocate" data-id="${i.id}">分配採購結果</button></div></div>`;}).join('')}<div class="detail-total"><span>預估商品小計，非已收款</span><strong>${money(o.total)}</strong></div><div class="form-actions"><button class="button light" data-action="copy-order" data-id="${o.id}">複製分貨明細</button><button class="button" data-action="close">完成</button></div>`);
 }
 
 function showProductEditor(id){
@@ -165,12 +174,22 @@ function showCategoryManager(){
   });
 }
 
+function exchangeSettings(){
+  const rate=state.data.costSettings?.exchangeRate;
+  return `<section class="panel exchange-panel"><div class="panel-head"><h2>韓幣進價換算</h2><span class="pill gray">店主專用</span></div><form class="panel-body" id="cost-settings-form"><label class="field">1 韓元等於多少台幣<input name="exchangeRate" type="number" inputmode="decimal" min="0.000001" max="10" step="0.000001" required placeholder="例如 0.024" value="${rate ?? ''}"></label><p class="settings-foot">台幣進價＝韓幣進價 × 匯率，例如 10,000 韓元 × 0.024＝240 台幣</p><p class="settings-foot">新紀錄使用此設定，已保存的進價保留原匯率，可在採買紀錄改用目前匯率</p><div class="error" id="cost-settings-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">儲存匯率</button></div></form></section>`;
+}
+
 function renderSettings(){
   const campaign=state.data.campaign;
   const local=new Date(new Date(campaign.closesAt).getTime()+8*3600000).toISOString().slice(0,16);
-  $('#content').innerHTML=heading('READY FOR THE NEXT JOURNEY','活動與工作台設定','設定預購活動與管理帳號')+
+  $('#content').innerHTML=heading('READY FOR THE NEXT JOURNEY','活動與工作台設定','設定預購活動、匯率與管理帳號')+exchangeSettings()+
     `<div class="settings-grid"><section class="panel"><div class="panel-head"><h2>本期預購活動</h2><span class="pill">${labels[campaign.status]}</span></div><form class="panel-body" id="campaign-form"><label class="field">活動名稱<input name="name" required maxlength="80" value="${esc(campaign.name)}"></label><label class="field">預購截止時間（台灣時間）<input name="closesAt" type="datetime-local" required value="${local}"></label><label class="field">目前階段<select name="status">${Object.entries(labels).map(([value,label])=>`<option value="${value}" ${campaign.status===value?'selected':''}>${label}</option>`).join('')}</select></label><p class="settings-foot">離開「開放預購」階段會停止客戶新增與修改，並保留結單採購快照，重新開放會恢復預購</p><div class="error" id="campaign-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">儲存活動</button></div></form></section>
     <div><section class="panel"><div class="panel-head"><h2>預購資料備份</h2>${icon('box')}</div><div class="panel-body"><p class="settings-foot" style="margin-top:0">下載商品、客戶預購、採買與異動紀錄，備份不含管理密碼或登入憑證，請自行妥善保存</p><div class="form-actions"><button class="button light" data-action="backup">${icon('download')}下載 JSON 備份</button>${exportButton()}</div></div></section><section class="panel" style="margin-top:23px"><div class="panel-head"><h2>唯一管理員密碼</h2><span class="pill gray">hannah</span></div><form class="panel-body" id="password-form"><label class="field">目前密碼<input name="current" type="password" autocomplete="current-password" required></label><label class="field">新密碼<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required placeholder="至少 12 個字元"></label><label class="field">再次輸入新密碼<input name="confirm" type="password" autocomplete="new-password" required></label><p class="settings-foot">更換後會撤銷所有舊管理登入，請用新密碼重新登入</p><div class="error" id="password-error" role="alert"></div><div class="form-actions"><button class="button light" type="submit">更換密碼</button></div></form></section></div></div>`;
+  $('#cost-settings-form').addEventListener('submit',async e=>{
+    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button');button.disabled=true;
+    try{await api('admin/cost-settings',{method:'PUT',body:formData(form)});await load();renderShell();toast('匯率已儲存，既有進價維持原匯率');}
+    catch(error){$('#cost-settings-error').textContent=error.message;button.disabled=false;}
+  });
   $('#campaign-form').addEventListener('submit',async e=>{
     e.preventDefault();const data=formData(e.currentTarget);data.closesAt=new Date(data.closesAt+':00+08:00').toISOString();
     try{await api('admin/campaign',{method:'PUT',body:data});await load();renderShell();toast('活動設定已更新');}
@@ -225,11 +244,13 @@ document.addEventListener('click',async event=>{
     }
     if(action==='procure'){
       const r=state.data.report.find(r=>r.variant_id===id);
-      showModal(`<div class="eyebrow">RECORD YOUR FINDS</div><h2>記錄採買結果</h2><p>${esc(r.code)} ${esc(r.name)} ${esc(r.color)} / ${esc(r.size)} · 共需 ${r.demand} 件</p><form id="procure-form"><div class="form-grid"><label class="field">累計已買到<input name="bought" type="number" min="0" max="99999" required value="${r.bought}"></label><label class="field">確認缺貨<input name="shortage" type="number" min="0" max="${r.demand}" required value="${r.shortage}"></label></div><label class="field">採購備註<textarea name="note" maxlength="500">${esc(r.note)}</textarea></label><p class="settings-foot">尚未採買不是缺貨，只有確認無法購得時才填缺貨，已分配給客戶的數量需先調整分配後才能減少</p><div class="error" id="procure-error" role="alert"></div><div class="form-actions"><button type="button" class="button light" data-action="close">返回</button><button class="button">儲存紀錄</button></div></form>`,true);
+      showModal(`<div class="eyebrow">RECORD YOUR FINDS</div><h2>記錄進價與採買</h2><p>${esc(r.code)} ${esc(r.name)} ${esc(r.color)} / ${esc(r.size)} · 共需 ${r.demand} 件</p><form id="procure-form"><div class="form-grid"><label class="field">累計已買到<input name="bought" type="number" min="0" max="99999" required value="${r.bought}"></label><label class="field">確認缺貨<input name="shortage" type="number" min="0" max="${r.demand}" required value="${r.shortage}"></label></div><p class="settings-foot">預購售價 ${saleRange(r)} · 售價合計 ${money(r.salesTotal)}</p><section class="purchase-cost" id="purchase-cost" aria-label="進價紀錄"></section><label class="field">採購備註<textarea name="note" maxlength="500">${esc(r.note)}</textarea></label><p class="settings-foot">尚未採買不是缺貨，只有確認無法購得時才填缺貨，已分配給客戶的數量需先調整分配後才能減少</p><div class="error" id="procure-error" role="alert"></div><div class="form-actions"><button type="button" class="button light" data-action="close">返回</button><button class="button">儲存紀錄</button></div></form>`,true);
+      const costEditor=mountPurchaseCost($('#purchase-cost'),{cost:r.cost,exchangeRate:state.data.costSettings?.exchangeRate,demand:r.demand,boughtInput:$('#procure-form [name="bought"]')});
       $('#procure-form').addEventListener('submit',async e=>{
         e.preventDefault();const data=formData(e.currentTarget);data.bought=Number(data.bought);data.shortage=Number(data.shortage);data.version=r.version;
-        try{await api('admin/procurement/'+id,{method:'PUT',body:data});await load();modal.close();renderShell();toast('採買結果已儲存');}
-        catch(error){$('#procure-error').textContent=error.message;}
+        const button=e.currentTarget.querySelector('button[type="submit"],button:not([type])');button.disabled=true;
+        try{data.cost=costEditor.value();await api('admin/procurement/'+id,{method:'PUT',body:data});await load();modal.close();renderShell();toast('採買結果已儲存');}
+        catch(error){$('#procure-error').textContent=error.message;button.disabled=false;}
       });return;
     }
     if(action==='demand'){

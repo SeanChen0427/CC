@@ -34,7 +34,7 @@ Supabase ccbaby-api
 ├─ 客戶：LINE code + PKCE → LINE 官方端點驗證 ID token / nonce
 ├─ 授權：每次由 PostgreSQL 核對 session hash、角色及到期
 ├─ 商品圖：店主驗證後檢查檔頭、MIME、大小，再上傳 Storage
-├─ 報表：店主驗證後產生兩張工作表 XLSX / JSON 備份
+├─ 報表：店主驗證後產生三張工作表 XLSX / JSON 備份
 └─ 業務：cloud/core.mjs
         ▼
 PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
@@ -42,7 +42,7 @@ PostgreSQL ccbaby_private（不對 anon / authenticated 開放）
 │  ├─ campaign / seq
 │  ├─ products / variants
 │  ├─ customers / preorders / items
-│  ├─ procurement / submissions
+│  ├─ procurement（含私有 cost）/ costSettings / submissions
 │  └─ events / closing_snapshots
 ├─ sessions：SHA-256 雜湊、role、subject、12 小時到期
 └─ login_limits：雜湊 IP 的五分鐘登入限流

@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
 import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
+import { reportSheets } from './reports.mjs';
+import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -232,10 +234,18 @@ export async function api({ store, req, role, path, method, body, session, local
   }
   if (path === '/api/admin/state' && method === 'GET') {
     return {
-      campaign: store.campaign(), categories: store.categories(), products: store.catalog(true), orders: store.orders(),
+      campaign: store.campaign(), costSettings:store.costSettings(), categories: store.categories(), products: store.catalog(true), orders: store.orders(),
       report: store.report(), stats: summary(store),
       events: store.all('SELECT id,kind,subject,created_at FROM events ORDER BY id DESC LIMIT 12'),
     };
+  }
+  if (path === '/api/admin/cost-settings' && method === 'PUT') {
+    const rate=validateExchangeRate(body.exchangeRate);
+    return store.transaction(()=>{
+      store.run('INSERT INTO cost_settings(id,exchange_rate) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET exchange_rate=excluded.exchange_rate',rate);
+      store.event('cost.settings','1',{exchangeRate:rate});
+      return {ok:true};
+    });
   }
   if (path === '/api/admin/categories' && method === 'POST') {
     return store.transaction(()=>{
@@ -267,11 +277,12 @@ export async function api({ store, req, role, path, method, body, session, local
     if (row.version !== body.version) throw new AppError('資料已在另一個畫面更新，請重新整理', 409);
     validateProcurement({ demand: row.demand, bought: body.bought, shortage: body.shortage,
       allocatedBought: row.allocated_bought, allocatedShortage: row.allocated_shortage });
+    const cost=validateCost(body.cost,row.cost,store.costSettings());
     return store.transaction(() => {
-      store.run(`INSERT INTO procurement(variant_id,bought,shortage,note,version) VALUES(?,?,?,?,1)
-        ON CONFLICT(variant_id) DO UPDATE SET bought=excluded.bought,shortage=excluded.shortage,note=excluded.note,version=procurement.version+1`,
-        row.variant_id, body.bought, body.shortage, String(body.note || '').slice(0, 500));
-      store.event('procurement.update', row.variant_id, { before: row, after: body });
+      store.run(`INSERT INTO procurement(variant_id,bought,shortage,note,version,cost) VALUES(?,?,?,?,1,?)
+        ON CONFLICT(variant_id) DO UPDATE SET bought=excluded.bought,shortage=excluded.shortage,note=excluded.note,cost=excluded.cost,version=procurement.version+1`,
+        row.variant_id, body.bought, body.shortage, String(body.note || '').slice(0, 500), cost ? JSON.stringify(cost) : null);
+      store.event('procurement.update', row.variant_id, { before: row, after: {...body,cost} });
       return { ok: true };
     });
   }
@@ -337,19 +348,11 @@ export async function api({ store, req, role, path, method, body, session, local
     return { ok: true, cookie: 'sp_admin=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' };
   }
   if (path === '/api/admin/export.xlsx' && method === 'GET') {
-    const campaign = store.campaign(), exported = now();
-    const customerRows = [['活動','預購編號','LINE 暱稱','聯絡姓名','手機','商品編號','商品名稱','規格','數量','預估單價','預估小計','分配買到','分配缺貨','收件資料','匯出時間']];
-    for (const o of store.orders()) for (const i of o.items) customerRows.push([
-      campaign.name,o.code,o.customer.display_name,o.name,o.phone,i.product_code,i.product_name,
-      i.color + ' / ' + i.size,i.quantity,i.price,i.quantity*i.price,i.bought,i.shortage,o.customer.delivery,exported,
-    ]);
-    const reportRows = [['活動','商品編號','商品名稱','顏色','尺寸／規格','需求','已買','待採買','確認缺貨','未分配已買','備註','匯出時間'],
-      ...store.report().map(r => [campaign.name,r.code,r.name,r.color,r.size,r.demand,r.bought,r.remaining,r.shortage,r.unallocated,r.note,exported])];
-    return { buffer: workbook([{ name: '客戶預購明細', rows: customerRows }, { name: '採買彙總', rows: reportRows }]),
+    return { buffer: workbook(reportSheets(store.campaign(),store.orders(),store.report(),store.costSettings())),
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','cost_settings','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.6",
+  "documentVersion": "0.3.8",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 46,
+    "integrationTestsPassed": 54,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -172,7 +172,17 @@
       390
     ],
     "physicalIPhoneSwipeChecked": false,
-    "liveGalleryScrollChecked": true
+    "liveGalleryScrollChecked": true,
+    "costPrivacyChecked": true,
+    "costSnapshotsChecked": true,
+    "costExportChecked": true,
+    "costBrowserChecked": true,
+    "costViewports": [
+      320,
+      390,
+      768,
+      1440
+    ]
   },
   "brandName": "CCBABY",
   "testData": {
@@ -208,5 +218,22 @@
     "livePricePreview": true,
     "preserveExistingPrices": true,
     "preservePreorderSnapshots": true
+  },
+  "purchaseCosts": {
+    "adminOnly": true,
+    "entry": "procurement_variant",
+    "currency": "KRW",
+    "conversionCurrency": "TWD",
+    "manualExchangeRate": true,
+    "preserveRateSnapshots": true,
+    "rounding": "unit_TWD_cents_then_multiply",
+    "xlsxSheets": 3,
+    "sourcePaths": [
+      "apps/admin-web/purchase-cost.js",
+      "shared/costing.js",
+      "domain/costing.mjs",
+      "server/reports.mjs",
+      "tests/costing.test.mjs"
+    ]
   }
 }

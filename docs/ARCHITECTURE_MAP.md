@@ -1,5 +1,8 @@
 # 架構地圖與樹狀圖
 
+0.3.8 店主進價：管理匯率設定 → admin/cost-settings → 私有設定；採買紀錄 purchase-cost.js → domain/costing.mjs 驗證 → procurement.cost 與數量同版本提交。shared/costing.js 以整數計算換算與合計，server/reports.mjs 共用三表匯出。雲端 JSONB 原子 revision 與本機 SQLite 交易保留，無 Postgres DDL；成本不加入商品或客戶 API。
+
+
 0.3.6 客戶相簿：app.js 產生全部照片 → gallery.js 綁定原生 scroll-snap 橫向捲動 → 同步 photoIndex／縮圖／張數。縮圖與方向鍵走同一個 select，放大及返回沿用目前索引，ResizeObserver 保留旋轉後位置；換視窗或關閉時解除監聽。只有靜態前端更新，資料與後端不變。
 
 

@@ -1,5 +1,6 @@
 import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/validation.mjs';
 import { categoryNames } from '../shared/product-categories.js';
+import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -26,7 +27,8 @@ export function report(s) {
     const p = s.products.find(p => p.id === v.product_id), r = s.procurement.find(r => r.variant_id === v.id);
     const demand = items.reduce((a, i) => a + i.quantity, 0), bought = r?.bought || 0, shortage = r?.shortage || 0;
     const allocated_bought = items.reduce((a, i) => a + i.bought, 0), allocated_shortage = items.reduce((a, i) => a + i.shortage, 0);
-    return [{ variant_id: v.id, code: p.code, name: p.name, category: p.category, kind: p.kind, tone: p.tone, color: v.color, size: v.size, demand, bought, shortage, allocated_bought, allocated_shortage, remaining: Math.max(demand - bought - shortage, 0), unallocated: bought - allocated_bought, note: r?.note || '', version: r?.version || 0 }];
+    return [{ variant_id: v.id, code: p.code, name: p.name, category: p.category, kind: p.kind, tone: p.tone, color: v.color, size: v.size, demand, bought, shortage, allocated_bought, allocated_shortage, remaining: Math.max(demand - bought - shortage, 0), unallocated: bought - allocated_bought, note: r?.note || '', version: r?.version || 0,
+      cost:r?.cost || null, priceMin:Math.min(...items.map(i=>i.price)), priceMax:Math.max(...items.map(i=>i.price)), salesTotal:items.reduce((sum,i)=>sum+i.price*i.quantity,0) }];
   });
 }
 export function validateProduct(input, imagePrefix) {
@@ -120,7 +122,11 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   if (path==='admin/state'&&method==='GET') {
     const os=orders(s), rs=report(s), active=os.filter(o=>o.quantity>0);
-    return {campaign:s.campaign,categories:categoryNames(s.categories,s.products),products:catalog(s,true),orders:os,report:rs,stats:{customers:active.length,quantity:active.reduce((a,o)=>a+o.quantity,0),total:active.reduce((a,o)=>a+o.total,0),products:s.products.filter(p=>p.active).length,...Object.fromEntries(['bought','shortage','remaining'].map(k=>[k,rs.reduce((a,r)=>a+r[k],0)]))},events:s.events.slice(-12).reverse().map(({detail,...e})=>e)};
+    return {campaign:s.campaign,costSettings:s.costSettings || {exchangeRate:null},categories:categoryNames(s.categories,s.products),products:catalog(s,true),orders:os,report:rs,stats:{customers:active.length,quantity:active.reduce((a,o)=>a+o.quantity,0),total:active.reduce((a,o)=>a+o.total,0),products:s.products.filter(p=>p.active).length,...Object.fromEntries(['bought','shortage','remaining'].map(k=>[k,rs.reduce((a,r)=>a+r[k],0)]))},events:s.events.slice(-12).reverse().map(({detail,...e})=>e)};
+  }
+  if(path==='admin/cost-settings'&&method==='PUT') {
+    s.costSettings={exchangeRate:validateExchangeRate(body.exchangeRate)};
+    event(s,'cost.settings','1',s.costSettings);return {ok:true};
   }
   if(path==='admin/categories'&&method==='POST') {
     const existing=categoryNames(s.categories,s.products),name=validateNewCategory(body.name,existing);
@@ -140,8 +146,10 @@ export function operate(s, path, method, body, session, imagePrefix) {
     const r=report(s).find(r=>r.variant_id===Number(procurement[1]));if(!r)throw new AppError('找不到採買需求',404);
     if(r.version!==body.version)throw new AppError('資料已在另一個畫面更新，請重新整理',409);
     validateProcurement({demand:r.demand,bought:body.bought,shortage:body.shortage,allocatedBought:r.allocated_bought,allocatedShortage:r.allocated_shortage});
+    const cost=validateCost(body.cost,r.cost,s.costSettings);
     let row=s.procurement.find(x=>x.variant_id===r.variant_id);if(!row){row={variant_id:r.variant_id};s.procurement.push(row);}
-    Object.assign(row,{bought:body.bought,shortage:body.shortage,note:String(body.note||'').slice(0,500),version:r.version+1});event(s,'procurement.update',r.variant_id);return{ok:true};
+    const before=structuredClone(row);
+    Object.assign(row,{bought:body.bought,shortage:body.shortage,note:String(body.note||'').slice(0,500),cost,version:r.version+1});event(s,'procurement.update',r.variant_id,{before,after:structuredClone(row)});return{ok:true};
   }
   if(path==='admin/allocation'&&method==='POST') {
     const i=s.items.find(i=>i.id===body.itemId&&i.quantity>0);if(!i)throw new AppError('找不到有效明細',404);
