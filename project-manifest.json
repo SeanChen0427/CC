@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "ae7605f7b94f1d1bb7c753e9445ffd1dc39f813f",
+    "pagesCommit": "3fef1c65d1327d9467735ea20cb9ac33296b9c5e",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -157,7 +157,8 @@
     "sizePricingViewports": [
       320,
       390
-    ]
+    ],
+    "liveSizePricingChecked": true
   },
   "brandName": "CCBABY",
   "testData": {

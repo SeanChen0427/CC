@@ -130,3 +130,5 @@ LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播
 ## 0.3.5 尺寸加價更新 — 2026-11-06
 
 Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供每尺寸加價及售價。舊請求保留相容；不遷移既有商品價格、不改成立預購，也沒有 Postgres schema 變更。本機 SQLite 增加 pricing 欄位保留現有資料。
+
+0.3.5 已發布：Pages 3fef1c65d1327d9467735ea20cb9ac33296b9c5e（built）、Edge v8（ACTIVE）；正式登入及尺寸加價編輯器已驗證，既有售價未異動。
