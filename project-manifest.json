@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
   "documentVersion": "0.3.14",
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-07",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
@@ -13,8 +13,13 @@
     "pagesBranch": "gh-pages",
     "supabaseProjectRef": "tukluknvmbsbsdzawmjf",
     "edgeFunction": "ccbaby-api",
-    "status": "live",
-    "customDomain": "ccbaby.beecharge.live"
+    "status": "live_with_pending_frontend_release",
+    "customDomain": "ccbaby.beecharge.live",
+    "pendingPagesCommit": "b6b9954c56a5b6092b37e849bc936cecdd569b33",
+    "pendingPagesRun": 42248157954,
+    "pendingPagesStatus": "failed_timeout",
+    "pendingPagesReason": "deployment_state_stalled_suspected",
+    "pendingPagesRerun": 42245013491
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -93,7 +98,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "record_owner_product_source_urls_and_export_buying_records",
+  "nextStep": "resolve_github_pages_deployment_state_then_verify_static_0_3_14",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -119,9 +124,9 @@
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
-    "date": "2026-11-06",
+    "date": "2026-11-07",
     "cloudSmokeChecked": true,
-    "pagesLiveChecked": true,
+    "pagesLiveChecked": false,
     "pagesCommit": "c09c214c7f043974247c6b67a1b015171671ee0e",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
@@ -264,7 +269,11 @@
     ],
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
-    "liveProductSourceProductCount": 16
+    "liveProductSourceProductCount": 16,
+    "lastLiveFrontendVersion": "0.3.13",
+    "newProductColorsLiveChecked": false,
+    "pagesTimeoutDiagnosed": true,
+    "pagesTimeoutRootCauseOfficiallyConfirmed": false
   },
   "brandName": "CCBABY",
   "testData": {

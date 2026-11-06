@@ -166,3 +166,17 @@ Edge v12、Pages built 9696420f。商品 POST 支援 costUpdate，與採買共�
 ## 0.3.14 商品來源記錄
 
 商品 POST 支援 sourceUrl，僅店主目錄／採買表回傳，客戶目錄明確排除。雲端私有 JSONB 新增選填商品欄，無 DDL／RPC／Storage／登入設定變更；本機 SQLite 啟動時加 products.source_url，保留舊資料。來源不由伺服器抓取。XLSX 超連結與首圖內嵌關聯相容，原 CSV 必填欄不變。前台移除新增商品預設顏色，草稿白名單加來源；Edge v15 ACTIVE，正式管理目錄及商品匯出欄位、非法連結拒絕與資料雜湊比對通過；檢查時 16 商品、1 預購、open 保留，Pages 待發布。
+
+2026-11-07 發布恢復進度：gh-pages 目標為 b6b9954c56a5b6092b37e849bc936cecdd569b33。原 run 42245013491 的 deploy-pages 於 deployment_queued／updating_pages 等待超過 600000ms 後逾時，重跑停在 queued；取消回覆已完成但查詢仍 queued。依官方 Pages builds API 重新觸發 run 42248157954，建置通過但部署再次逾時，正式 index 仍為 0.3.13。未改 Pages 來源或 CNAME，既有功能與正式業務資料保留
+
+### 2026-11-07 逾時原因排查
+
+- 兩次 build 及 artifact 上傳成功，失敗均在 GitHub 接受部署後；第一次由 deployment_queued 進入 updating_pages 後逾時，第二次輪詢回傳空白狀態後逾時
+- 發布工具預設等待 600000ms，到限自動取消；不是本機 npm／測試或商品 API 請求逾時。[官方 deploy-pages 定義](https://github.com/actions/deploy-pages/blob/main/action.yml)
+- 本次 artifact 61444 bytes、未過期；上一成功版本 61320 bytes，僅增加 124 bytes
+- 成功與失敗均使用 runner 2.338.2、deploy-pages@v5 SHA 368f82528645a54fb793d4d04e342629a3f51346，排除 Action 自動換版
+- Pages 仍為 legacy／gh-pages／根目錄；github-pages 環境只允許 gh-pages，無 required reviewers／wait timer；自訂網域憑證 approved，HTTPS 開啟，沒有待驗證網域
+- 原 run 42245013491 重跑一直 queued、attempt 1、jobs 空陣列，取消卻回覆工作已完成，呈現狀態不一致；新建置 run 42248157954 亦在部署端逾時
+- [本次第二次失敗日誌](https://github.com/SeanChen0427/CC/actions/runs/42248157954)，[第一次失敗與卡住的重跑](https://github.com/SeanChen0427/CC/actions/runs/42245013491)
+- GitHub 官方狀態頁當下標示正常，不能據此宣稱全面故障；其他使用者有同樣的建置成功、updating_pages／空白狀態、重跑永久排隊現象。[近期相同案例](https://github.com/orgs/community/discussions/212127)、[另一個案例](https://github.com/orgs/community/discussions/212207)
+- 判斷：發布卡在 GitHub Pages 服務端／部署狀態，確切內部根因尚無官方確認；不是已證實的程式、檔案大小、分支、審核或憑證問題。停止增加重試，保留現站與資料；待 GitHub 端狀態恢復或取得可驗證的處理方式，再發布並核對 index／app.js／product-draft.js 的 0.3.14 成品
