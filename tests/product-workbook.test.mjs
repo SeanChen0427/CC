@@ -20,8 +20,8 @@ test('product summary keeps missing costs blank, preserves zero and defers mixed
   const sheets=productSheets(products);
   assert.deepEqual(sheets[0].rows.slice(1).map(r=>r.slice(7,10)),[['','',''],[0,0,.024],[10000,240,.024],['','','']]);
   assert.match(sheets[0].rows[4][11],/規格進價/);
-  assert.deepEqual(sheets[3].rows[1].slice(6),['','','']);
-  assert.deepEqual(sheets[3].rows[2].slice(6),[0,.024,0]);
+  assert.deepEqual(sheets[3].rows[1].slice(6,9),['','','']);
+  assert.deepEqual(sheets[3].rows[2].slice(6,9),[0,.024,0]);
 });
 test('workbook embeds first-photo JPEG bytes, leaves products without photos blank and binds each drawing to its product row',()=>{
   const products=[p(1,null,['first','second']),p(2,null),p(3,{unitKrw:0,exchangeRate:.024},['third'])];
@@ -42,4 +42,13 @@ test('export rejects missing, stale, duplicate, foreign, oversized or invalid th
   for(const thumbs of [[],[good,good],[{...good,url:'second'}],[{...good,productId:2}],[{...good,data:'data:image/jpeg;base64,AAAA'}],[{...good,data:thumbnail+'A'.repeat(9000)}]]) {
     const before=structuredClone(products);assert.throws(()=>productWorkbook(products,thumbs));assert.deepEqual(products,before);
   }
+});
+
+test('source hyperlinks and embedded first-photo drawings coexist without formulas',()=>{
+  const product={...p(1,null,['first']),sourceUrl:'https://example.test/item?color=white&size=M'};
+  const files=entries(productWorkbook([product],[{productId:1,url:'first',data:thumbnail}]));
+  const sheet=files['xl/worksheets/sheet1.xml'].toString(),rels=files['xl/worksheets/_rels/sheet1.xml.rels'].toString();
+  assert.match(sheet,/<hyperlink ref="M2"/);assert.match(sheet,/<drawing r:id="rId1"/);
+  assert.match(rels,/relationships\/drawing/);assert.match(rels,/relationships\/hyperlink/);assert.match(rels,/white&amp;size=M/);
+  assert.ok(files['xl/media/image1.jpg']);assert.doesNotMatch(sheet,/<f>/);
 });

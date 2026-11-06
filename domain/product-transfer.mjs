@@ -17,6 +17,7 @@ const fields = [
   ['tone','示意圖色碼','選填，例如 #b9a38b'],
   ['images','照片網址','選填，JSON 陣列，最多 8 張；沿用本站既有照片，留白可稍後上傳'],
   ['imageBindings','顏色照片綁定','選填，JSON 陣列，例如 [{"color":"白","url":"照片網址"}]；留白為獨立相簿'],
+  ['sourceUrl','韓國商品連結','選填，完整 http 或 https 網址，最多 2048 字；僅供店主採購記錄'],
 ];
 const fixedHeaders = fields.map(([key]) => key);
 const required = fixedHeaders.slice(0, 6);
@@ -31,7 +32,7 @@ export function productTable(products) {
     const values = {code:p.code, name:p.name, category:p.category, price:pricing.basePrice,
       colors:[...new Set(variants.map(v => v.color))].join(','), sizes:ownSizes.join(','),
       description:p.description || '', badge:p.badge || '', active:p.active ? 'true' : 'false',
-      kind:p.kind, tone:p.tone, images:JSON.stringify(p.images || []), imageBindings:JSON.stringify(p.imageBindings || [])};
+      kind:p.kind, tone:p.tone, images:JSON.stringify(p.images || []), imageBindings:JSON.stringify(p.imageBindings || []), sourceUrl:p.sourceUrl || ''};
     for (const size of sizes) values['extra:' + size] = ownSizes.includes(size) ? pricing.sizeSurcharges.find(e => e.size === size)?.extra || 0 : '';
     return headers.map(key => values[key]);
   });
@@ -49,15 +50,17 @@ export const productCsv = products => '\uFEFF' + productTable(products).map(row 
 
 export function productSheets(products) {
   const table = productTable(products);
+  const sourceLinks = (rows,col) => rows.flatMap((p,index) => p.sourceUrl ? [{row:index + 1,col,url:p.sourceUrl}] : []);
+  const variantRows = products.flatMap(p => activeVariants(p).map(v => ({p,v})));
   return [
-    {name:'商品清單', formatted:true, rowHeight:114, widths:[23,18,30,18,22,22,19,19,19,16,12,30],
-      rows:[['商品圖','商品編號','商品名稱','分類','顏色','尺寸／規格','基本售價（台幣）','單件進價（韓幣）','單件進價（台幣）','採用匯率','上架狀態','進價說明'],
+    {name:'商品清單', formatted:true, rowHeight:114, widths:[23,18,30,18,22,22,19,19,19,16,12,30,40],links:sourceLinks(products,12),
+      rows:[['商品圖','商品編號','商品名稱','分類','顏色','尺寸／規格','基本售價（台幣）','單件進價（韓幣）','單件進價（台幣）','採用匯率','上架狀態','進價說明','韓國商品連結'],
         ...products.map(p => {
           const {commonCost,mixed} = productCostState(p.variants), variants = activeVariants(p);
           return ['',p.code,p.name,p.category,[...new Set(variants.map(v=>v.color))].join('、'),sizesFor(p).join('、'),editorPricing(p).basePrice,
-            commonCost?.unitKrw ?? '',unitCostTwd(commonCost) ?? '',commonCost?.exchangeRate ?? '',p.active?'上架':'下架',mixed?'各規格進價不同或部分未填，見規格進價表':''];
+            commonCost?.unitKrw ?? '',unitCostTwd(commonCost) ?? '',commonCost?.exchangeRate ?? '',p.active?'上架':'下架',mixed?'各規格進價不同或部分未填，見規格進價表':'',p.sourceUrl || ''];
         })]},
-    {name:'匯入底稿', rows:table},
+    {name:'匯入底稿', rows:table,links:sourceLinks(products,table[0].indexOf('sourceUrl'))},
     {name:'欄位說明', rows:[['欄位','中文名稱','填寫方式'], ...fields,
       ...table[0].filter(key => key.startsWith('extra:')).map(key => [key,key.slice(6)+' 尺寸加價','選填，0～100000 的整數；空白視為 0，沒有該尺寸的商品請留白']),
       ['操作流程','批量新增','複製匯入底稿列 → 改成新商品編號 → 編輯 → 另存 CSV UTF-8 → CSV 批次匯入 → 預覽並檢查 → 確認匯入'],
@@ -66,8 +69,8 @@ export function productSheets(products) {
       ['照片','第一張照片','商品清單嵌入每款商品第一張照片，無照片留空；匯入底稿仍只存網址，新照片於商品編輯上傳'],
       ['CSV 文字','試算表安全處理','公式開頭文字會加單引號，本站匯入時自動還原；純數字編號在 Excel 請設文字格式'],
     ]},
-    {name:'規格進價', rows:[['商品編號','商品名稱','上架狀態','顏色','尺寸／規格','售價（台幣）','單件進價（韓幣）','採用匯率','單件進價（台幣）'],
-      ...products.flatMap(p => activeVariants(p).map(v => [p.code,p.name,p.active?'上架':'下架',v.color,v.size,v.price,v.cost?.unitKrw ?? '',v.cost?.exchangeRate ?? '',unitCostTwd(v.cost) ?? '']))]},
+    {name:'規格進價',links:sourceLinks(variantRows.map(row=>row.p),9), rows:[['商品編號','商品名稱','上架狀態','顏色','尺寸／規格','售價（台幣）','單件進價（韓幣）','採用匯率','單件進價（台幣）','韓國商品連結'],
+      ...variantRows.map(({p,v}) => [p.code,p.name,p.active?'上架':'下架',v.color,v.size,v.price,v.cost?.unitKrw ?? '',v.cost?.exchangeRate ?? '',unitCostTwd(v.cost) ?? '',p.sourceUrl || ''])]},
   ];
 }
 

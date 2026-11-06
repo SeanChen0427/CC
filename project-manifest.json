@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.13",
+  "documentVersion": "0.3.14",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -93,7 +93,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "export_current_products_and_prepare_new_product_csv",
+  "nextStep": "record_owner_product_source_urls_and_export_buying_records",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 75,
+    "integrationTestsPassed": 80,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -150,7 +150,7 @@
       390,
       768
     ],
-    "edgeVersion": 14,
+    "edgeVersion": 15,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -159,10 +159,12 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 75,
+    "affectedTestsPassed": 80,
     "affectedTests": [
-      "product-workbook",
+      "product-source",
       "product-transfer",
+      "product-workbook",
+      "product-draft",
       "app"
     ],
     "nativeGalleryScrollBrowserChecked": true,
@@ -251,12 +253,23 @@
     "liveProductFirstPhotoCorsChecked": true,
     "productFirstPhotoViewports": [
       320
-    ]
+    ],
+    "productSourceBrowserChecked": true,
+    "productSourceDraftChecked": true,
+    "productSourcePrivacyChecked": true,
+    "productSourceExportChecked": true,
+    "newProductColorsBlankChecked": true,
+    "productSourceViewports": [
+      320
+    ],
+    "liveProductSourceChecked": true,
+    "liveProductSourceBusinessDataUnchanged": true,
+    "liveProductSourceProductCount": 16
   },
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
-    "productionProducts": 13,
+    "productionProducts": 16,
     "productionCustomers": 1,
     "productionPreorders": 1,
     "automaticSeed": false
@@ -265,7 +278,8 @@
     "conciseHeadings": true,
     "forcedSentenceBreaks": false,
     "decorativeFullStops": false,
-    "mobileActionsBelowHeading": true
+    "mobileActionsBelowHeading": true,
+    "newProductColorsDefault": "empty"
   },
   "productImages": {
     "maxCount": 8,
@@ -367,5 +381,32 @@
     "preserveZeroCosts": true,
     "mixedCostsInVariantSheet": true,
     "thumbnailMaxBytes": 6000
+  },
+  "productSource": {
+    "adminOnly": true,
+    "optional": true,
+    "maxLength": 2048,
+    "protocols": [
+      "http",
+      "https"
+    ],
+    "recordOnly": true,
+    "draftPreserved": true,
+    "csvImportExport": true,
+    "xlsxHyperlinks": true,
+    "procurementExport": true,
+    "omitPreservesExisting": true,
+    "sourcePaths": [
+      "domain/validation.mjs",
+      "apps/admin-web/app.js",
+      "apps/admin-web/product-draft.js",
+      "cloud/core.mjs",
+      "server/api.mjs",
+      "server/store.mjs",
+      "domain/product-transfer.mjs",
+      "server/reports.mjs",
+      "server/xlsx.mjs",
+      "tests/product-source.test.mjs"
+    ]
   }
 }

@@ -10,9 +10,9 @@ export function reportSheets(campaign, orders, report, settings = {}, at = new D
     customerRows.push([campaign.name,o.code,o.customer.display_name,o.name,o.phone,i.product_code,i.product_name,
       i.color+' / '+i.size,i.quantity,i.price,i.quantity*i.price,i.bought,i.shortage,o.customer.delivery,at,...costCells(cost,i.quantity)]);
   }
-  const reportRows = [['活動','商品編號','商品名稱','顏色','尺寸／規格','需求','已買','待採買','確認缺貨','未分配已買','備註','匯出時間','單件進價（韓幣）','採用匯率（1 韓元＝台幣）','單件進價（台幣）','需求進價小計（韓幣）','需求進價小計（台幣）','進價狀態','已買進價小計（韓幣）','已買進價小計（台幣）','預購售價最低（台幣快照）','預購售價最高（台幣快照）','預購售價合計（台幣）'],
+  const reportRows = [['活動','商品編號','商品名稱','顏色','尺寸／規格','需求','已買','待採買','確認缺貨','未分配已買','備註','匯出時間','單件進價（韓幣）','採用匯率（1 韓元＝台幣）','單件進價（台幣）','需求進價小計（韓幣）','需求進價小計（台幣）','進價狀態','已買進價小計（韓幣）','已買進價小計（台幣）','預購售價最低（台幣快照）','預購售價最高（台幣快照）','預購售價合計（台幣）','韓國商品連結'],
     ...report.map(r => [campaign.name,r.code,r.name,r.color,r.size,r.demand,r.bought,r.remaining,r.shortage,r.unallocated,r.note,at,
-      ...costCells(r.cost,r.demand),r.cost ? r.cost.unitKrw*r.bought : '',costTotal(r.cost,r.bought) ?? '',r.priceMin,r.priceMax,r.salesTotal])];
+      ...costCells(r.cost,r.demand),r.cost ? r.cost.unitKrw*r.bought : '',costTotal(r.cost,r.bought) ?? '',r.priceMin,r.priceMax,r.salesTotal,r.sourceUrl || ''])];
   const totals = costSummary(report);
   const summaryRows = [['項目','金額／數量','說明'],['活動',campaign.name,''],['匯出時間',at,''],
     ['目前預設匯率',settings.exchangeRate ?? '未設定','1 韓元等於多少台幣；各筆採用匯率見明細'],
@@ -24,5 +24,5 @@ export function reportSheets(campaign, orders, report, settings = {}, at = new D
     ['已買進價已填小計（台幣）',totals.boughtTwd,'台幣單件進價 × 累計已買'],
     ['未填進價已買件數',totals.missingBought,totals.missingBought ? '已買成本尚未齊全' : '已買進價已填齊'],
     ['換算規則','單件台幣四捨五入至小數 2 位後乘件數','需求進價含待採買及缺貨需求；已買進價依累計已買，未含運費或其他費用']];
-  return [{name:'客戶預購明細',rows:customerRows},{name:'採買彙總',rows:reportRows},{name:'進銷總覽',rows:summaryRows}];
+  return [{name:'客戶預購明細',rows:customerRows},{name:'採買彙總',rows:reportRows,links:report.flatMap((r,index)=>r.sourceUrl?[{row:index+1,col:23,url:r.sourceUrl}]:[])},{name:'進銷總覽',rows:summaryRows}];
 }

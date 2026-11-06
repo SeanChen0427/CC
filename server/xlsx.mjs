@@ -3,6 +3,11 @@ import { Buffer } from 'node:buffer';
 // No formulas are emitted from customer-provided values.
 const xml = value => String(value ?? '').replace(/[&<>"']/g,
   ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[ch]);
+const cellReference = (row,col) => {
+  let name='',n=col+1;
+  while(n){n--;name=String.fromCharCode(65+n%26)+name;n=Math.floor(n/26);}
+  return name+(row+1);
+};
 
 function crc32(buffer) {
   let crc = 0xffffffff;
@@ -45,15 +50,14 @@ export function workbook(sheets) {
   sheets.forEach((sheet, index) => {
     const rows = sheet.rows.map((row, r) => '<row r="' + (r + 1) + '"' + (sheet.rowHeight ? ` ht="${r ? sheet.rowHeight : 32}" customHeight="1"` : '') + '>' +
       row.map((value, c) => {
-        let col = '', n = c + 1;
-        while (n) { n--; col = String.fromCharCode(65 + n % 26) + col; n = Math.floor(n / 26); }
-        const ref = col + (r + 1);
+        const ref = cellReference(r,c);
         const style = sheet.formatted ? ` s="${r === 0 ? 1 : c === 0 ? 2 : 0}"` : '';
         return typeof value === 'number' && Number.isFinite(value)
           ? `<c r="${ref}"${style}><v>${value}</v></c>`
           : `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xml(value)}</t></is></c>`;
       }).join('') + '</row>').join('');
     let drawing = '';
+    const worksheetRelationships = [];
     if (sheet.images?.length) {
       const relationships = [], anchors = sheet.images.map((image, i) => {
         const name = `image${++media}.jpg`;
@@ -63,12 +67,19 @@ export function workbook(sheets) {
       }).join('');
       files[`xl/drawings/drawing${index + 1}.xml`] = `<?xml version="1.0" encoding="UTF-8"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${anchors}</xdr:wsDr>`;
       files[`xl/drawings/_rels/drawing${index + 1}.xml.rels`] = `<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relationships.join('')}</Relationships>`;
-      files[`xl/worksheets/_rels/sheet${index + 1}.xml.rels`] = `<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${index + 1}.xml"/></Relationships>`;
+      worksheetRelationships.push(`<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${index + 1}.xml"/>`);
       drawing = '<drawing r:id="rId1"/>';
     }
+    const hyperlinks = (sheet.links || []).map((link,i) => {
+      const url = new URL(link.url);
+      if(!['http:','https:'].includes(url.protocol) || url.username || url.password) throw new Error('Invalid workbook hyperlink');
+      worksheetRelationships.push(`<Relationship Id="rIdLink${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xml(link.url)}" TargetMode="External"/>`);
+      return `<hyperlink ref="${cellReference(link.row,link.col)}" r:id="rIdLink${i+1}"/>`;
+    }).join('');
+    if(worksheetRelationships.length) files[`xl/worksheets/_rels/sheet${index+1}.xml.rels`] = `<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${worksheetRelationships.join('')}</Relationships>`;
     const cols = sheet.widths ? sheet.widths.map((width, c) => `<col min="${c + 1}" max="${c + 1}" width="${width}" customWidth="1"/>`).join('') : '<col min="1" max="30" width="20" customWidth="1"/>';
     files[`xl/worksheets/sheet${index + 1}.xml`] =
-      `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="${ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${sheet.formatted ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${rows}</sheetData>${sheet.formatted ? '<pageMargins left="0.25" right="0.25" top="0.25" bottom="0.25" header="0.1" footer="0.1"/><pageSetup paperSize="8" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' : ''}${drawing}</worksheet>`;
+      `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="${ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${sheet.formatted ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${rows}</sheetData>${hyperlinks ? '<hyperlinks>'+hyperlinks+'</hyperlinks>' : ''}${sheet.formatted ? '<pageMargins left="0.25" right="0.25" top="0.25" bottom="0.25" header="0.1" footer="0.1"/><pageSetup paperSize="8" orientation="landscape" fitToWidth="1" fitToHeight="0"/>' : ''}${drawing}</worksheet>`;
   });
   const formatted = sheets.some(s => s.formatted);
   if (formatted) files['xl/styles.xml'] = '<?xml version="1.0"?><styleSheet xmlns="'+ns+'"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF273F33"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="3"><xf fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';

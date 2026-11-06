@@ -1,7 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
+import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory, productSourceUrl } from '../domain/rules.mjs';
 import { productCsv, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
 import { productWorkbook } from './product-workbook.mjs';
 import { DEMO_USERS } from './store.mjs';
@@ -69,7 +69,7 @@ function validateProduct(input) {
     throw new AppError('商品圖片位置無效');
   }
   return {
-    code, name, category, price, colors, sizes, kind: input.kind, tone,
+    code, name, category, price, colors, sizes, sourceUrl:productSourceUrl(input.sourceUrl), kind: input.kind, tone,
     sizeSurcharges: validateSizeSurcharges(input, sizes, price),
     description: String(input.description || '').slice(0, 3000),
     badge: String(input.badge || '').slice(0, 20),
@@ -83,13 +83,14 @@ function saveProduct(store, input, id) {
   const duplicate = store.get('SELECT id FROM products WHERE code=?', p.code);
   if (duplicate && duplicate.id !== id) throw new AppError('商品編號已存在，請使用不同編號', 409);
   if (id && !store.get('SELECT id FROM products WHERE id=?', id)) throw new AppError('找不到商品', 404);
+  p.sourceUrl ??= id ? store.get('SELECT source_url FROM products WHERE id=?',id).source_url : '';
   const previous=id?store.all('SELECT * FROM variants WHERE product_id=?',id):[];
   const records=store.all('SELECT * FROM procurement').map(r=>({...r,cost:r.cost?JSON.parse(r.cost):null}));
   const costs=planProductCosts(input.costUpdate,previous,records,store.costSettings());
-  const values = [p.code, p.name, p.category, p.description, p.kind, p.tone, p.badge, p.active, JSON.stringify(p.images), JSON.stringify(p.imageBindings), JSON.stringify({basePrice:p.price,sizeSurcharges:p.sizeSurcharges})];
-  if (id) store.run(`UPDATE products SET code=?,name=?,category=?,description=?,kind=?,tone=?,badge=?,active=?,images=?,image_bindings=?,pricing=? WHERE id=?`, ...values, id);
-  else id = Number(store.run(`INSERT INTO products(code,name,category,description,kind,tone,badge,active,images,image_bindings,pricing,created_at)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, ...values, now()).lastInsertRowid);
+  const values = [p.code, p.name, p.category, p.description, p.kind, p.tone, p.badge, p.active, JSON.stringify(p.images), JSON.stringify(p.imageBindings), JSON.stringify({basePrice:p.price,sizeSurcharges:p.sizeSurcharges}), p.sourceUrl];
+  if (id) store.run(`UPDATE products SET code=?,name=?,category=?,description=?,kind=?,tone=?,badge=?,active=?,images=?,image_bindings=?,pricing=?,source_url=? WHERE id=?`, ...values, id);
+  else id = Number(store.run(`INSERT INTO products(code,name,category,description,kind,tone,badge,active,images,image_bindings,pricing,source_url,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`, ...values, now()).lastInsertRowid);
   store.run('UPDATE variants SET active=0 WHERE product_id=?', id);
   for (const color of p.colors) for (const size of p.sizes) {
     const price = p.price + (p.sizeSurcharges.find(entry => entry.size === size)?.extra || 0);

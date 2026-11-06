@@ -1,4 +1,4 @@
-import { AppError, text, integer, contact, assertOpen, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/validation.mjs';
+import { AppError, text, integer, contact, assertOpen, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory, productSourceUrl } from '../domain/validation.mjs';
 import { previewProductImport } from '../domain/product-transfer.mjs';
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
@@ -16,11 +16,13 @@ function required(session, role) {
   if (!session || session.role !== role) throw new AppError('請先登入', 401);
 }
 export function catalog(s, all = false) {
-  return s.products.filter(p => all || p.active).map(p => ({ ...p, variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)).map(v => {
+  return s.products.filter(p => all || p.active).map(p => {
+    const {sourceUrl,...fields}=p;
+    return { ...fields, ...(all ? {sourceUrl:sourceUrl || ''} : {}), variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)).map(v => {
     if(!all)return v;
     const row=s.procurement.find(r=>r.variant_id===v.id);
     return {...v,cost:row?.cost || null,costVersion:row?.version || 0};
-  }) }));
+  }) }; });
 }
 export function orders(s, customerId) {
   return s.preorders.filter(o => !o.deleted_at && (!customerId || o.customer_id === customerId)).map(o => {
@@ -37,7 +39,7 @@ export function report(s) {
     const demand = items.reduce((a, i) => a + i.quantity, 0), bought = r?.bought || 0, shortage = r?.shortage || 0;
     const allocated_bought = items.reduce((a, i) => a + i.bought, 0), allocated_shortage = items.reduce((a, i) => a + i.shortage, 0);
     return [{ variant_id: v.id, code: p.code, name: p.name, category: p.category, kind: p.kind, tone: p.tone, color: v.color, size: v.size, demand, bought, shortage, allocated_bought, allocated_shortage, remaining: Math.max(demand - bought - shortage, 0), unallocated: bought - allocated_bought, note: r?.note || '', version: r?.version || 0,
-      cost:r?.cost || null, priceMin:Math.min(...items.map(i=>i.price)), priceMax:Math.max(...items.map(i=>i.price)), salesTotal:items.reduce((sum,i)=>sum+i.price*i.quantity,0) }];
+      cost:r?.cost || null, sourceUrl:p.sourceUrl || '', priceMin:Math.min(...items.map(i=>i.price)), priceMax:Math.max(...items.map(i=>i.price)), salesTotal:items.reduce((sum,i)=>sum+i.price*i.quantity,0) }];
   });
 }
 export function validateProduct(input, imagePrefix) {
@@ -54,13 +56,14 @@ export function validateProduct(input, imagePrefix) {
   if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
   const imageBindings = validateImageBindings(input.imageBindings, images, colors);
   const sizeSurcharges = validateSizeSurcharges(input, sizes, price);
-  return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
+  return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, sourceUrl:productSourceUrl(input.sourceUrl), kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
 }
 function saveProduct(s, input, imagePrefix) {
   const p = validateProduct(input, imagePrefix), id = input.id ? integer(Number(input.id), '商品識別', 1000000, 1) : next(s, 'products');
   if (s.products.some(x => x.code === p.code && x.id !== id)) throw new AppError('商品編號已存在', 409);
   const old = s.products.find(x => x.id === id);
   if (input.id && !old) throw new AppError('找不到商品', 404);
+  p.sourceUrl ??= old?.sourceUrl || '';
   const previous=s.variants.filter(v=>v.product_id===id);
   const costs=planProductCosts(input.costUpdate,previous,s.procurement,s.costSettings);
   const { colors, sizes, price, ...fields } = p;

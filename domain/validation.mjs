@@ -5,6 +5,19 @@ export class AppError extends Error {
   }
 }
 
+export function productSourceUrl(value) {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') throw new AppError('韓國商品連結請填完整的 http 或 https 網址');
+  const url = value.trim();
+  if (!url) return '';
+  if (url.length > 2048 || /[\u0000-\u0020\u007f]/.test(url)) throw new AppError('韓國商品連結格式無效或超過 2048 字');
+  if (!/^https?:\/\//i.test(url)) throw new AppError('韓國商品連結請填完整的 http 或 https 網址');
+  let parsed;
+  try { parsed = new URL(url); } catch { throw new AppError('韓國商品連結請填完整的 http 或 https 網址'); }
+  if (!['http:','https:'].includes(parsed.protocol) || !parsed.hostname || parsed.username || parsed.password) throw new AppError('韓國商品連結請填不含帳密的 http 或 https 網址');
+  return url;
+}
+
 export function validateImageBindings(value, images, colors) {
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length > 12) throw new AppError('照片綁定設定無效');

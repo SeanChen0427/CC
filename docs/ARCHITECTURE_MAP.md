@@ -1,5 +1,7 @@
 # 架構地圖與樹狀圖
 
+0.3.14 商品來源記錄：商品編輯 sourceUrl → 同分頁草稿白名單 → 共用 productSourceUrl 驗證 → 雲端 products.sourceUrl／本機 products.source_url。僅管理 catalog 與採買報表回傳；客戶 catalog 明確排除此欄。商品／CSV／採買 XLSX 帶來源，xlsx.mjs 建立安全 http(s) 超連結關聯，與首圖 drawing 共存；不請求來源網址、不改採購或預購。新增顏色欄空白，既有規格及草稿照原資料。
+
 0.3.13 含圖商品 Excel：product-export.js 先取得已授權 admin/state → 各商品 images[0] 於瀏覽器以四張並行轉 144×144、6 KB 內 JPEG → POST admin/products.xlsx → server/product-workbook.mjs 核對當前商品／第一張 URL、JPEG 格式尺寸 → productSheets 四表 → xlsx.mjs DrawingML／media 內嵌。POST 分支只讀不走 revision 提交，圖片不放 Storage；成本仍取後端目前有效規格的私有紀錄。
 
 0.3.12 商品輸出：選物管理 → admin/products.xlsx 或 products.csv（只讀）→ domain/product-transfer.mjs 共用欄位與列格式 → 既有 XLSX 寫出器／UTF-8 BOM CSV。admin/products-template.csv 提供相同欄位範例；兩端 admin/import 共用預覽／解析，再走原商品驗證與原子交易，只新增、不以編號覆寫。extra:<size> 對應 sizeSurcharges；商品／規格、採購與預購不因匯出改動，無 DDL。

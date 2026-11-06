@@ -27,7 +27,7 @@ for (const engine of ['cloud','sqlite']) test(`${engine}: exported products pres
     assert.equal(csvRows(csv).length,3);
     assert.deepEqual(sheets.map(s=>s.name),['商品清單','匯入底稿','欄位說明','規格進價']);
     assert.equal(sheets[0].rows.length,3);
-    assert.equal(sheets[3].rows.length,6);assert.deepEqual(sheets[3].rows[1].slice(6),[10000,.024,240]);
+    assert.equal(sheets[3].rows.length,6);assert.deepEqual(sheets[3].rows[1].slice(6,9),[10000,.024,240]);
     assert.doesNotMatch(csv, /unitKrw|costVersion|fixture-only|customer/);
     const duplicated = await run('admin/import','POST',{csv});
     assert.equal(duplicated.errors.length,2);

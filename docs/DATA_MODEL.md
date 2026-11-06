@@ -213,3 +213,13 @@ LINE Token 不作報表欄位；驗證所需資料與紀錄最小化。
 - POST admin/products.xlsx 的 thumbnails 僅暫存於請求／生成檔，每項 productId／url 必須對應目前商品第一張圖；每張 JPEG 144×144、最多 6000 bytes，數量不得超過商品數
 - 缺少／過期／重複縮圖阻擋下載；無照片商品不要求縮圖。舊 GET 若有照片回 409 要求由管理頁重新匯出，避免成功卻沒有圖片
 - XLSX DrawingML 使用檔內關聯與 JPEG media，不含外部圖片連結／公式；原圖與商品資料、進價、預購、採買版本完全不因下載改動
+
+## 0.3.14 店主商品來源連結（已實作）
+
+- 私有商品 sourceUrl 為選填字串，前後空白去除；空字串清除，省略欄位保留原值，舊商品預設空字串
+- 限完整 http／https 網址、2048 字以內，不允許網址內帳密與控制字元；後端只驗證保存，不抓取或解讀來源
+- 雲端 JSONB 保存 sourceUrl，無 Postgres DDL；本機 products.source_url 非空字串預設空值，舊表加欄保留商品、規格、成本及預購
+- 管理 catalog 與採買 report 回傳 sourceUrl；客戶 catalog 排除 sourceUrl／source_url，orders 與 me 不加入來源
+- 草稿白名單加入 sourceUrl；商品 Excel、CSV、規格進價、採買彙總皆輸出目前商品來源，不回寫預購售價快照
+- XLSX 以 http(s) 超連結關聯保存網址，點開才由店主瀏覽；不是公式或外部圖片來源，與照片 drawing 關聯分開
+- 新增表單只移除顏色預填值；編輯／草稿從原規格或輸入恢復，不做既有商品顏色遷移

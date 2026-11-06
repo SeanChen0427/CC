@@ -1,6 +1,6 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-06（Asia/Taipei）｜版本：0.3.13
+更新：2026-11-06（Asia/Taipei）｜版本：0.3.14
 
 品牌名稱已確認為 **CCBABY**。
 
@@ -78,6 +78,11 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 
 - [瀏覽器首圖縮圖與下載](apps/admin-web/product-export.js)、[後端圖片核對與生成](server/product-workbook.mjs)、[XLSX 圖片封裝](server/xlsx.mjs)
 - [首圖與空白／零元驗證](tests/product-workbook.test.mjs)，測試縮圖為 tests/fixtures/product-thumbnail.mjs
+
+### 韓國商品連結與顏色（0.3.14）
+
+- 共用驗證 domain/validation.mjs 的 productSourceUrl；保存 cloud/core.mjs、server/api.mjs、server/store.mjs；草稿 product-draft.js
+- 表格 domain/product-transfer.mjs／server/reports.mjs，XLSX 超連結 server/xlsx.mjs；[來源保存與隱私驗證](tests/product-source.test.mjs)
 
 ## 4. 索引樹
 
