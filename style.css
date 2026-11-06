@@ -927,9 +927,11 @@ dialog::backdrop {
   display:flex;
   gap:8px;
   padding:10px 20px 18px;
-  justify-content:center
+  justify-content:flex-start;
+  overflow-x:auto
 }
 .image-thumbs button {
+  flex:0 0 auto;
   border:1px solid transparent;
   background:#f9f4e9;
   width:45px;

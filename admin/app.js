@@ -1,5 +1,6 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.3';
-import { art } from './product-art.js?v=0.3.3';
+import { request, config, cloud, download } from './runtime.js?v=0.3.4';
+import { art } from './product-art.js?v=0.3.4';
+import { mountImageEditor } from './image-editor.js?v=0.3.4';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -20,7 +21,7 @@ const paths = {
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.list}</svg>`;
 const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',procurement:'採買清單',settings:'活動與設定'};
-const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,editingImages:[]};
+const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null};
 const modal=$('#modal');
 let toastTimer;
 const labels={draft:'準備中',open:'開放預購中',closed:'已結單',purchasing:'韓國採購中',arrived:'商品已到台',archived:'已封存'};
@@ -34,7 +35,7 @@ async function api(path, options={}){
 
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),3500);}
 function photo(p){return p.images?.[0]||'data:image/svg+xml,'+encodeURIComponent(art(p.kind,p.tone));}
-function showModal(content,small=false){modal.className=small?'modal-small':'';modal.innerHTML=`<button class="modal-close" data-action="close" aria-label="關閉">${icon('close')}</button><div class="modal-content">${content}</div>`;if(!modal.open)modal.showModal();}
+function showModal(content,small=false){state.imageEditor?.dispose();state.imageEditor=null;modal.className=small?'modal-small':'';modal.innerHTML=`<button class="modal-close" data-action="close" aria-label="關閉">${icon('close')}</button><div class="modal-content">${content}</div>`;if(!modal.open)modal.showModal();}
 function formData(form){return Object.fromEntries(new FormData(form));}
 const exportButton=()=>`<button class="button light" data-action="export">${icon('download')}匯出 Excel</button>`;
 const brand=()=>`<div class="brand"><span class="brand-symbol">${icon('bag')}</span><span><span class="brand-title">CCBABY</span><small>店主採購工作台</small></span></div>`;
@@ -127,26 +128,23 @@ function showProductEditor(id){
   const variants=p?.variants.filter(v=>v.active)||[];
   const low=variants.length?Math.min(...variants.map(v=>v.price)):590;
   const high=variants.length?Math.max(...variants.map(v=>v.price)):590;
-  state.editingImages=p?.images?[...p.images]:[];
-  showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><div class="image-upload"><img id="image-preview" src="${p?photo(p):photo({kind:'vest',tone:'#b9a38b'})}" alt="商品預覽"><div><label class="field">上傳商品照片<input type="file" id="image-upload" accept="image/png,image/jpeg,image/webp"></label><p>PNG／JPG／WebP，每張小於 1.4 MB，最多 8 張</p><div id="image-list">${state.editingImages.map(url=>`<img class="image-chip" src="${esc(url)}" alt="已上傳">`).join('')}</div></div></div>
+  showModal(`<div class="eyebrow">CURATE YOUR COLLECTION</div><h2>${p?'編輯商品':'新增商品'}</h2><form id="product-form"><section id="product-photos" class="photo-editor" aria-label="商品照片管理"></section>
     <div class="form-grid"><label class="field">商品編號<input name="code" required maxlength="30" value="${esc(p?.code||'')}" placeholder="例如 SP121"></label><label class="field">商品名稱<input name="name" required maxlength="80" value="${esc(p?.name||'')}"></label>
     <label class="field">商品分類<input name="category" list="categories" required maxlength="30" value="${esc(p?.category||'毛孩衣著')}"><datalist id="categories">${[...new Set(state.data.products.map(p=>p.category))].map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist></label><label class="field">上架狀態<select name="active"><option value="true" ${!p||p.active?'selected':''}>上架中</option><option value="false" ${p&&!p.active?'selected':''}>下架</option></select></label>
     <label class="field">基本售價（台幣）<input name="price" type="number" required min="1" max="1000000" value="${low}"></label><label class="field">XL／2XL 加價<input name="extra" type="number" required min="0" max="100000" value="${high-low}"></label>
     <label class="field">顏色（逗號分隔）<input name="colors" required value="${esc([...new Set(variants.map(v=>v.color))].join(',')||'奶油白,燕麥棕,鼠尾草綠')}"></label><label class="field">尺寸／規格（逗號分隔）<input name="sizes" required value="${esc([...new Set(variants.map(v=>v.size))].join(',')||'S,M,L,XL')}"></label>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
     <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="button light" data-action="close">取消</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
-  $('#image-upload').addEventListener('change',async e=>{
-    const file=e.target.files[0];if(!file)return;
-    if(file.size>1400000){toast('圖片需小於 1.4 MB');return;}
-    if(state.editingImages.length>=8){toast('最多上傳 8 張照片');return;}
-    const reader=new FileReader();reader.onload=async()=>{
-      try{const result=await api('admin/upload',{method:'POST',body:{data:reader.result}});state.editingImages.push(result.url);$('#image-preview').src=state.editingImages[0];$('#image-list').innerHTML=state.editingImages.map(url=>`<img class="image-chip" src="${url}" alt="已上傳">`).join('');}
-      catch(error){toast(error.message);}
-    };reader.readAsDataURL(file);
+  const editor=mountImageEditor($('#product-photos'),{
+    images:p?.images,bindings:p?.imageBindings,colorsInput:$('#product-form [name="colors"]'),
+    upload:(data,signal)=>api('admin/upload',{method:'POST',body:{data},signal}),
+    onChange:({busy,failed})=>{const button=$('#product-form button[type="submit"]');button.disabled=busy||failed;button.textContent=busy?'等待照片上傳':failed?'請先處理失敗照片':'儲存商品';},
   });
+  state.imageEditor=editor;
   $('#product-form').addEventListener('submit',async e=>{
+    if(editor.busy){e.preventDefault();return;}
     e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]');button.disabled=true;
-    const data=formData(form);data.active=data.active==='true';data.images=state.editingImages;if(p)data.id=p.id;
+    const data=formData(form);data.active=data.active==='true';Object.assign(data,editor.value());if(p)data.id=p.id;
     try{await api('admin/products',{method:'POST',body:data});await load();modal.close();renderShell();toast('商品已儲存，客戶端重新整理即可看到');}
     catch(error){$('#product-error').textContent=error.message;button.disabled=false;}
   });
@@ -234,6 +232,7 @@ document.addEventListener('click',async event=>{
     }
   }catch(error){toast(error.message);}
 });
+modal.addEventListener('close',()=>{state.imageEditor?.dispose();state.imageEditor=null;});
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
 window.addEventListener('hashchange',()=>{
   const view=location.hash.slice(1);

@@ -1,6 +1,7 @@
-import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.3';
-import { art } from './product-art.js?v=0.3.3';
-import { enterCustomerSite } from './entry.js?v=0.3.3';
+import { request, config, cloud, lineLogin, finishLineLogin } from './runtime.js?v=0.3.4';
+import { art } from './product-art.js?v=0.3.4';
+import { enterCustomerSite } from './entry.js?v=0.3.4';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.4';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -59,6 +60,8 @@ function toast(message) {
 }
 
 function photo(product, color, angle = 0) {
+  const linked = imageForColor(product, color);
+  if (linked) return linked;
   if (product.images?.length) return product.images[0];
   const tones = { '奶油白':'#d5c8ad', '燕麥棕':'#b69c81', '鼠尾草綠':'#a3b199' };
   return 'data:image/svg+xml,'+encodeURIComponent(art(product.kind, color ? tones[color] || product.tone : product.tone, angle));
@@ -145,14 +148,16 @@ function setModal(content, className = '') {
 function showProduct(id, retain = false) {
   const product = state.products.find(p => p.id === id);
   if (!product) return toast('商品已更新，請重新選購');
-  if (!retain || state.selection?.id !== id) state.selection = { id, color:'', size:'', quantity:1 };
+  if (!retain || state.selection?.id !== id) state.selection = { id, color:'', size:'', quantity:1, photoIndex:0 };
   const selected = state.selection;
   const colors = [...new Set(product.variants.map(v => v.color))];
   const sizes = [...new Set(product.variants.map(v => v.size))];
   if (colors.length === 1) selected.color = colors[0];
   if (sizes.length === 1) selected.size = sizes[0];
   const variant = product.variants.find(v => v.color === selected.color && v.size === selected.size);
-  setModal(`<div class="product-dialog"><div class="product-gallery"><div class="product-main-image" data-action="zoom"><img src="${photo(product,selected.color)}" alt="${esc(product.name)}"></div><div class="image-thumbs">${colors.map((color,i) => `<button class="${color===selected.color?'selected':''}" data-action="option" data-option="color" data-value="${esc(color)}" aria-label="查看${esc(color)}"><img src="${product.images[i] || photo(product,color)}" alt="${esc(color)}"></button>`).join('')}</div></div>
+  const images = product.images?.length ? product.images : [photo(product)];
+  selected.photoIndex = Math.max(0, Math.min(selected.photoIndex || 0, images.length - 1));
+  setModal(`<div class="product-dialog"><div class="product-gallery"><div class="product-main-image" data-action="zoom"><img src="${esc(images[selected.photoIndex])}" alt="${esc(product.name)} 照片 ${selected.photoIndex + 1}"></div><div class="image-thumbs">${images.map((url,i) => `<button class="${i===selected.photoIndex?'selected':''}" data-action="photo" data-index="${i}" aria-label="查看商品照片 ${i+1}" aria-pressed="${i===selected.photoIndex}"><img src="${esc(url)}" alt="商品照片 ${i+1}"></button>`).join('')}</div></div>
     <div class="product-detail"><div class="eyebrow">${esc(product.code)} · ${esc(product.category)}</div><h2>${esc(product.name)}</h2><div class="detail-price">${money(variant?.price ?? Math.min(...product.variants.map(v=>v.price)))}<small>預購參考售價</small></div>
     <p class="detail-description">${esc(product.description)}</p>
     <div class="option-label">顏色 <span>${esc(selected.color || '請選擇')}</span></div><div class="options">${colors.map(color => `<button class="option ${selected.color===color?'selected':''}" data-action="option" data-option="color" data-value="${esc(color)}">${esc(color)}</button>`).join('')}</div>
@@ -247,7 +252,15 @@ document.addEventListener('click', async event => {
     if(action==='product'){showProduct(Number(target.dataset.id));return;}
     if(action==='clear-search'){state.search='';state.category='全部選物';state.limit=24;renderShop();return;}
     if(action==='more'){state.limit+=24;renderGrid();return;}
-    if(action==='option'){state.selection[target.dataset.option]=target.dataset.value;showProduct(state.selection.id,true);return;}
+    if(action==='photo'){state.selection.photoIndex=Number(target.dataset.index);showProduct(state.selection.id,true);return;}
+    if(action==='option'){
+      state.selection[target.dataset.option]=target.dataset.value;
+      if(target.dataset.option==='color'){
+        const product=state.products.find(p=>p.id===state.selection.id);
+        state.selection.photoIndex=photoIndexForColor(product,target.dataset.value,state.selection.photoIndex);
+      }
+      showProduct(state.selection.id,true);return;
+    }
     if(action==='detail-qty'){state.selection.quantity=Math.min(99,Math.max(1,state.selection.quantity+Number(target.dataset.delta)));showProduct(state.selection.id,true);return;}
     if(action==='login'){showLogin();return;}
     if(action==='line-login'){await startLineLogin();return;}
@@ -289,7 +302,7 @@ document.addEventListener('click', async event => {
     }
     if(action==='zoom'){
       const p=state.products.find(p=>p.id===state.selection.id);
-      setModal(`<img class="zoom-image" src="${photo(p,state.selection.color)}" alt="${esc(p.name)}放大圖"><button class="secondary-button" data-action="back-product" style="margin:15px">返回商品</button>`);return;
+      setModal(`<img class="zoom-image" src="${esc(p.images?.[state.selection.photoIndex] || photo(p))}" alt="${esc(p.name)}放大圖"><button class="secondary-button" data-action="back-product" style="margin:15px">返回商品</button>`);return;
     }
     if(action==='back-product'){showProduct(state.selection.id,true);return;}
     if(action==='size'&&!config.demoMode){setModal(`<div class="modal-copy"><div class="eyebrow">SIZE GUIDE</div><h2>尺寸選擇</h2><p>各款尺寸請以商品說明為準，若不確定尺寸，請透過 LINE 聯絡我們協助挑選</p><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;}
