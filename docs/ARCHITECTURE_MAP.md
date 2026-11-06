@@ -1,5 +1,8 @@
 # 架構地圖與樹狀圖
 
+0.3.11 商品進價：product-cost.js 選填韓幣與同頁匯率 → 商品儲存 costUpdate（含原採買版本）→ domain/product-costing.mjs 驗證 → 與採買清單共用 procurement.cost／version。admin catalog 僅於管理端附 variant.cost／costVersion，客戶 catalog 不加欄。私有紀錄可先於預購存在，無需求時不算報表；草稿保留輸入與原版本，衝突明確載入最新進價。無資料庫 DDL。
+
+
 0.3.10 商品草稿：app.js 表單／照片／尺寸輸入 → product-draft.js → 依部署、活動、商品分隔的 sessionStorage。input／change 即存，visibilitychange(hidden)／pagehide 補存；登入驗證與 admin/state 完成才恢復原編輯。草稿僅含商品白名單欄位，照片保存已完成 URL、綁定開關及未完成張數；不保存 File／帳密或客戶資料。close／cancel／hashchange 走保留確認，外圍不關閉；成功儲存或明確放棄清除本商品並解除監聽。僅靜態管理端，後端及既有權限不變。
 
 0.3.9 預購刪除：管理明細 → 完整編號＋原因確認 → admin/orders/:id/delete → domain/order-deletion.mjs 驗證店主路由、版本及採購／分配 → 標記 deleted_at 並遞增受影響採購版本 → 客戶查單、總覽與有效匯出排除。舊送單請求不復活，重新送單建立新編號。雲端沿用私有 JSONB；本機舊表無損升級，歷史保留。

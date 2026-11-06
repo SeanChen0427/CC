@@ -1,6 +1,6 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-06（Asia/Taipei）｜版本：0.3.10
+更新：2026-11-06（Asia/Taipei）｜版本：0.3.11
 
 品牌名稱已確認為 **CCBABY**。
 
@@ -63,6 +63,11 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 
 - [同分頁草稿與生命週期](apps/admin-web/product-draft.js)、[草稿驗證](tests/product-draft.test.mjs)
 - 管理表單 apps/admin-web/app.js；照片快照 image-editor.js；逐尺寸原始輸入 size-pricing.js
+
+### 商品編輯選填進價程式入口（0.3.11）
+
+- [商品進價表單](apps/admin-web/product-cost.js)、[共用進價狀態](shared/product-costing.js)
+- [進價提交驗證](domain/product-costing.mjs)、[雙向同步與隱私驗證](tests/product-costing.test.mjs)
 
 ## 4. 索引樹
 

@@ -2,6 +2,8 @@ import { AppError, text, integer, contact, assertOpen, validateProcurement, csvR
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
+import { planProductCosts } from '../domain/product-costing.mjs';
+import { sameCost } from '../shared/product-costing.js';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -13,7 +15,11 @@ function required(session, role) {
   if (!session || session.role !== role) throw new AppError('請先登入', 401);
 }
 export function catalog(s, all = false) {
-  return s.products.filter(p => all || p.active).map(p => ({ ...p, variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)) }));
+  return s.products.filter(p => all || p.active).map(p => ({ ...p, variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)).map(v => {
+    if(!all)return v;
+    const row=s.procurement.find(r=>r.variant_id===v.id);
+    return {...v,cost:row?.cost || null,costVersion:row?.version || 0};
+  }) }));
 }
 export function orders(s, customerId) {
   return s.preorders.filter(o => !o.deleted_at && (!customerId || o.customer_id === customerId)).map(o => {
@@ -54,15 +60,29 @@ function saveProduct(s, input, imagePrefix) {
   if (s.products.some(x => x.code === p.code && x.id !== id)) throw new AppError('商品編號已存在', 409);
   const old = s.products.find(x => x.id === id);
   if (input.id && !old) throw new AppError('找不到商品', 404);
+  const previous=s.variants.filter(v=>v.product_id===id);
+  const costs=planProductCosts(input.costUpdate,previous,s.procurement,s.costSettings);
   const { colors, sizes, price, ...fields } = p;
   if (old) Object.assign(old, fields); else s.products.push({ ...fields, id, created_at: stamp() });
   s.variants.filter(v => v.product_id === id).forEach(v => { v.active = false; });
   for (const color of colors) for (const size of sizes) {
     const value = price + (p.sizeSurcharges.find(entry => entry.size === size)?.extra || 0);
     const v = s.variants.find(v => v.product_id === id && v.color === color && v.size === size);
+    let variant=v;
     if (v) Object.assign(v, { price: value, active: true });
-    else s.variants.push({ id: next(s,'variants'), product_id: id, color, size, price: value, active: true });
+    else {variant={ id: next(s,'variants'), product_id: id, color, size, price: value, active: true };s.variants.push(variant);}
+    if(costs.hasCost || (!v && costs.inherit)) {
+      const cost=costs.hasCost?costs.cost:costs.inherit;
+      let row=s.procurement.find(r=>r.variant_id===variant.id);
+      if(!sameCost(row?.cost,cost)) {
+        const before=row?.cost || null;
+        if(!row){row={variant_id:variant.id,bought:0,shortage:0,note:'',version:0};s.procurement.push(row);}
+        row.cost=cost;row.version++;
+        event(s,'procurement.cost',variant.id,{before,after:cost,source:'product'});
+      }
+    }
   }
+  if(costs.rate!==undefined){s.costSettings={exchangeRate:costs.rate};event(s,'cost.settings','1',s.costSettings);}
   event(s, 'product.save', id, { code: p.code });
   return id;
 }

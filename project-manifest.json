@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.10",
+  "documentVersion": "0.3.11",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 65,
+    "integrationTestsPassed": 68,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -213,7 +213,18 @@
     "adminBackdropGuardChecked": true,
     "liveAdminDraftChecked": false,
     "liveAdminDraftBundleChecked": true,
-    "liveAdminLoginPageChecked": true
+    "liveAdminLoginPageChecked": true,
+    "productCostOptionalChecked": true,
+    "productProcurementCostSyncChecked": true,
+    "productCostDraftChecked": true,
+    "productCostConflictChecked": true,
+    "productCostCustomerPrivacyChecked": true,
+    "productCostExportChecked": true,
+    "productCostViewports": [
+      320,
+      390,
+      768
+    ]
   },
   "brandName": "CCBABY",
   "testData": {
@@ -252,7 +263,7 @@
   },
   "purchaseCosts": {
     "adminOnly": true,
-    "entry": "procurement_variant",
+    "entry": "product_editor_and_procurement_variant",
     "currency": "KRW",
     "conversionCurrency": "TWD",
     "manualExchangeRate": true,
@@ -264,8 +275,16 @@
       "shared/costing.js",
       "domain/costing.mjs",
       "server/reports.mjs",
-      "tests/costing.test.mjs"
-    ]
+      "tests/costing.test.mjs",
+      "apps/admin-web/product-cost.js",
+      "shared/product-costing.js",
+      "domain/product-costing.mjs",
+      "tests/product-costing.test.mjs"
+    ],
+    "optionalOnProduct": true,
+    "inlineExchangeRate": true,
+    "singleSharedCostSource": true,
+    "preserveMixedVariantCosts": true
   },
   "orderDeletion": {
     "adminOnly": true,

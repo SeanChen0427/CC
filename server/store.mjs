@@ -124,11 +124,12 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);
       const variants = this.all('SELECT * FROM variants ORDER BY id');
+      const costs=includeInactive?this.all('SELECT variant_id,cost,version FROM procurement'):[];
       return products.map(p => ({
         ...p, active: Boolean(p.active), images: JSON.parse(p.images), imageBindings: JSON.parse(p.image_bindings),
         ...(p.pricing ? JSON.parse(p.pricing) : {}),
         variants: variants.filter(v => v.product_id === p.id && (includeInactive || v.active))
-          .map(v => ({ ...v, active: Boolean(v.active) })),
+          .map(v => {const row=costs.find(r=>r.variant_id===v.id);return { ...v, active: Boolean(v.active),...(includeInactive?{cost:row?.cost?JSON.parse(row.cost):null,costVersion:row?.version || 0}:{}) };}),
       }));
     },
     orders(customerId) {

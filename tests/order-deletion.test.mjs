@@ -47,7 +47,8 @@ for(const engine of ['cloud','sqlite']){
       assert.equal(admin.orders.length,1);assert.equal(admin.report[0].demand,3);assert.equal(admin.stats.quantity,3);assert.equal(admin.stats.total,1770);
       assert.deepEqual(costSummary(admin.report),{demandKrw:30000,demandTwd:720,boughtKrw:0,boughtTwd:0,salesTotal:1770,missingDemand:0,missingBought:0});
       assert.deepEqual(admin.report[0].cost,{unitKrw:10000,exchangeRate:.024});assert.equal(admin.report[0].version,2);
-      assert.deepEqual(admin.products,products);
+      const withoutCostVersions=ps=>ps.map(p=>({...p,variants:p.variants.map(({costVersion,...v})=>v)}));
+      assert.deepEqual(withoutCostVersions(admin.products),withoutCostVersions(products));
       assert.deepEqual((await run('customer/orders','GET',{},a)).orders,[]);
       assert.equal((await run('customer/orders','GET',{},b)).orders[0].quantity,3);
       await assert.rejects(()=>run('customer/items/'+originalItems[0].id,'PATCH',{quantity:1},a),e=>e.status===404);

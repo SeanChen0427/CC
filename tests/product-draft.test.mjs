@@ -10,6 +10,14 @@ const sample = (id = null) => ({ id, fields: { code: 'D01', name: '尚未上架'
   sizeSurcharges: [{ size: 'S', extra: 0 }, { size: '3XL', extra: '120' }], images: ['https://example.test/2.jpg', 'https://example.test/1.jpg'],
   imageBindings: [{ color: '黑', url: 'https://example.test/1.jpg' }], bindingEnabled: true, pendingCount: 1 });
 
+test('cost drafts retain raw optional prices, rates and original concurrency versions without extra fields',()=>{
+  const storage=memoryStorage(),drafts=createProductDrafts('costs',()=>storage);
+  const productCost={unitKrw:'10001',exchangeRate:'0.024',initialUnitKrw:'',initialExchangeRate:'',versions:[{variantId:7,version:3}],clearMixed:false};
+  drafts.save({...sample(1),productCost:{...productCost,token:'never-store'}});
+  assert.deepEqual(drafts.read(1).productCost,productCost);
+  assert.ok(![...storage.values.values()][0].includes('never-store'));
+});
+
 test('reload restores unfinished fields, per-size amounts, photo order, bindings and incomplete-photo warning', () => {
   const storage = memoryStorage(), first = createProductDrafts('campaign-1', () => storage);
   assert.equal(first.save(sample()), true);
