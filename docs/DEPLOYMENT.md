@@ -126,3 +126,7 @@ LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播
 前端處理每張原圖上限 20 MB，自動縮圖再逐張傳送，Edge 與 bucket 仍限單張 1.4 MB。商品 images 保留順序，imageBindings 為選填顏色／URL 對應；只更新 Edge 業務程式與靜態網站，不更動既有資料或雲端 schema。後台已存在店主的 1 款正式商品，保留不清空。
 
 0.3.4 已發布：Pages ae7605f7b94f1d1bb7c753e9445ffd1dc39f813f（built）、Edge v7（ACTIVE）。正式管理登入、新編輯器、多選及既有 2 張圖片均已驗證，未改動店主商品。
+
+## 0.3.5 尺寸加價更新 — 2026-11-06
+
+Edge v8 支援明確 sizeSurcharges 與 basePrice，靜態商品編輯器提供每尺寸加價及售價。舊請求保留相容；不遷移既有商品價格、不改成立預購，也沒有 Postgres schema 變更。本機 SQLite 增加 pricing 欄位保留現有資料。

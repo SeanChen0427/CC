@@ -1,5 +1,8 @@
 # 架構地圖與樹狀圖
 
+0.3.5 尺寸定價：商品基本售價 → size-pricing.js 依尺寸列表產生加價欄位及即時售價 → 後端驗證 sizeSurcharges → 同一顏色／尺寸 variant 保留 ID、更新未來售價。product-pricing.js 負責舊商品回填；雲端 JSONB 保存 basePrice／sizeSurcharges，本機 pricing JSON 加欄保存。既有預購快照不回寫。
+
+
 ## 0.3.4 商品照片流程（已實作）
 
 ```text

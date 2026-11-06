@@ -184,12 +184,21 @@ test('two local applications, durable preorders and buying reports', async t => 
       assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,imageBindings:[{color:'黑',url:images[0]}]}})).status,400);
       assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,images:[...images,images[0]]}})).status,400);
     });
+    await t.test('per-size pricing stores 2XL and larger extras independently',async()=>{
+      const p=catalog[1],payload={id:p.id,code:p.code,name:p.name,category:p.category,price:590,colors:'白',sizes:'XL,2XL,3XL,4XL',kind:p.kind,tone:p.tone,sizeSurcharges:[{size:'2XL',extra:50},{size:'3XL',extra:100},{size:'4XL',extra:150}]};
+      assert.equal((await request('admin','admin/products',{method:'POST',body:payload})).status,200);
+      const saved=(await request('customer','catalog')).data.products.find(product=>product.id===p.id);
+      assert.deepEqual(saved.variants.map(v=>[v.size,v.price]),[['XL',590],['2XL',640],['3XL',690],['4XL',740]]);
+      assert.equal(saved.basePrice,590);assert.deepEqual(saved.sizeSurcharges,payload.sizeSurcharges);
+      assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,sizeSurcharges:[{size:'不存在',extra:100}]}})).status,400);
+    });
     await t.test('data and login survive local server restart',async()=>{
       await app.close();
       app=await startApp({directory,customerPort:0,adminPort:0,password,quiet:true,seed:true});
       assert.equal((await request('customer','customer/orders')).data.orders[0].quantity,4);
       assert.equal((await request('admin','admin/state')).data.products.length,200);
       assert.equal((await request('admin','admin/state')).data.products.find(p=>p.id===catalog[0].id).imageBindings[0].color,'棕');
+      assert.equal((await request('admin','admin/state')).data.products.find(p=>p.id===catalog[1].id).sizeSurcharges[2].extra,150);
       const credentials=await readFile(join(directory,'admin-credentials.txt'),'utf8');
       assert.ok(credentials.includes(password));
     });

@@ -1,5 +1,14 @@
 # 資料模型與報表規則
 
+## 0.3.5 實際尺寸定價欄位
+
+- products.basePrice 為基本售價，products.sizeSurcharges 為 [{size, extra}]，未列尺寸不加價，單價 = 基本售價 + 該尺寸加價
+- 各尺寸加價為 0～100000 的整數，最終售價為 1～1000000，尺寸必須存在且不可重複
+- 雲端保存於原有 products JSONB，本機保存於新增的 products.pricing JSON；舊資料不改價，編輯時以現有 variants 回填
+- 保留相同顏色／尺寸 variant ID，客戶端與後端驗證均以實際 variant 單價為準；成立預購快照保持原價
+- 舊客戶端／CSV 的單一 extra 欄位保留歷史 XL／2XL 規則以相容舊請求；新介面一律送明確 sizeSurcharges（包含空陣列），不使用固定尺寸規則
+
+
 ## 0.3.4 實際相簿欄位
 
 - 雲端 products[].images 保存最多 8 個受允許的 Storage URL，陣列順序就是展示順序，首張為封面

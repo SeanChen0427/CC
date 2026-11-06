@@ -1,7 +1,7 @@
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypto';
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings } from '../domain/rules.mjs';
+import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges } from '../domain/rules.mjs';
 import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
 
@@ -49,7 +49,6 @@ function validateProduct(input) {
   const name = text(input.name, '商品名稱', 80);
   const category = text(input.category, '商品分類', 30);
   const price = integer(Number(input.price), '售價', 1000000, 1);
-  const extra = integer(Number(input.extra || 0), '大尺寸加價', 100000);
   const colors = [...new Set(text(input.colors, '顏色', 200).split(/[,，]/).map(x => x.trim()).filter(Boolean))];
   const sizes = [...new Set(text(input.sizes, '規格', 200).split(/[,，]/).map(x => x.trim()).filter(Boolean))];
   if (colors.length > 12 || sizes.length > 12 || colors.some(x => x.length > 30) || sizes.some(x => x.length > 30)) {
@@ -63,7 +62,8 @@ function validateProduct(input) {
     throw new AppError('商品圖片位置無效');
   }
   return {
-    code, name, category, price, extra, colors, sizes, kind: input.kind, tone,
+    code, name, category, price, colors, sizes, kind: input.kind, tone,
+    sizeSurcharges: validateSizeSurcharges(input, sizes, price),
     description: String(input.description || '').slice(0, 3000),
     badge: String(input.badge || '').slice(0, 20),
     active: input.active === false ? 0 : 1, images,
@@ -76,14 +76,14 @@ function saveProduct(store, input, id) {
   const duplicate = store.get('SELECT id FROM products WHERE code=?', p.code);
   if (duplicate && duplicate.id !== id) throw new AppError('商品編號已存在，請使用不同編號', 409);
   if (id && !store.get('SELECT id FROM products WHERE id=?', id)) throw new AppError('找不到商品', 404);
-  const values = [p.code, p.name, p.category, p.description, p.kind, p.tone, p.badge, p.active, JSON.stringify(p.images), JSON.stringify(p.imageBindings)];
-  if (id) store.run(`UPDATE products SET code=?,name=?,category=?,description=?,kind=?,tone=?,badge=?,active=?,images=?,image_bindings=? WHERE id=?`, ...values, id);
-  else id = Number(store.run(`INSERT INTO products(code,name,category,description,kind,tone,badge,active,images,image_bindings,created_at)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?)`, ...values, now()).lastInsertRowid);
+  const values = [p.code, p.name, p.category, p.description, p.kind, p.tone, p.badge, p.active, JSON.stringify(p.images), JSON.stringify(p.imageBindings), JSON.stringify({basePrice:p.price,sizeSurcharges:p.sizeSurcharges})];
+  if (id) store.run(`UPDATE products SET code=?,name=?,category=?,description=?,kind=?,tone=?,badge=?,active=?,images=?,image_bindings=?,pricing=? WHERE id=?`, ...values, id);
+  else id = Number(store.run(`INSERT INTO products(code,name,category,description,kind,tone,badge,active,images,image_bindings,pricing,created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`, ...values, now()).lastInsertRowid);
   const previous = store.all('SELECT * FROM variants WHERE product_id=?', id);
   store.run('UPDATE variants SET active=0 WHERE product_id=?', id);
   for (const color of p.colors) for (const size of p.sizes) {
-    const price = p.price + (['XL', '2XL'].includes(size) ? p.extra : 0);
+    const price = p.price + (p.sizeSurcharges.find(entry => entry.size === size)?.extra || 0);
     const old = previous.find(v => v.color === color && v.size === size);
     if (old) store.run('UPDATE variants SET price=?,active=1 WHERE id=?', price, old.id);
     else store.run('INSERT INTO variants(product_id,color,size,price) VALUES(?,?,?,?)', id, color, size, price);

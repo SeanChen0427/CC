@@ -12,6 +12,7 @@ for(const role of ['customer','admin']){
   writeFileSync(index,readFileSync(index,'utf8').replace('src="./app.js"',`src="./app.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`));
   cpSync(join(root,'shared/runtime.js'),join(target,'runtime.js'));
   cpSync(join(root,'shared/product-gallery.js'),join(target,'product-gallery.js'));
+  cpSync(join(root,'shared/product-pricing.js'),join(target,'product-pricing.js'));
   cpSync(join(root,'server/art.mjs'),join(target,'product-art.js'));
   for(const name of readdirSync(target).filter(name=>name.endsWith('.js'))){
     const path=join(target,name);

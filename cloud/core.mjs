@@ -1,4 +1,4 @@
-import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings } from '../domain/validation.mjs';
+import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings, validateSizeSurcharges } from '../domain/validation.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -32,7 +32,7 @@ export function validateProduct(input, imagePrefix) {
   const code = text(input.code, '商品編號', 30);
   if (!/^[A-Za-z0-9_-]+$/.test(code)) throw new AppError('商品編號請用英文、數字、底線或連字號');
   const name = text(input.name, '商品名稱', 80), category = text(input.category, '商品分類', 30);
-  const price = integer(Number(input.price), '售價', 1000000, 1), extra = integer(Number(input.extra || 0), '大尺寸加價', 100000);
+  const price = integer(Number(input.price), '售價', 1000000, 1);
   const colors = [...new Set(text(input.colors, '顏色', 200).split(/[,，]/).map(x => x.trim()).filter(Boolean))];
   const sizes = [...new Set(text(input.sizes, '規格', 200).split(/[,，]/).map(x => x.trim()).filter(Boolean))];
   if (colors.length > 12 || sizes.length > 12 || colors.some(x => x.length > 30) || sizes.some(x => x.length > 30)) throw new AppError('顏色及規格各最多 12 種，每種最多 30 字');
@@ -41,18 +41,19 @@ export function validateProduct(input, imagePrefix) {
   const images = Array.isArray(input.images) ? input.images : [];
   if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
   const imageBindings = validateImageBindings(input.imageBindings, images, colors);
-  return { code, name, category, price, extra, colors, sizes, kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
+  const sizeSurcharges = validateSizeSurcharges(input, sizes, price);
+  return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
 }
 function saveProduct(s, input, imagePrefix) {
   const p = validateProduct(input, imagePrefix), id = input.id ? integer(Number(input.id), '商品識別', 1000000, 1) : next(s, 'products');
   if (s.products.some(x => x.code === p.code && x.id !== id)) throw new AppError('商品編號已存在', 409);
   const old = s.products.find(x => x.id === id);
   if (input.id && !old) throw new AppError('找不到商品', 404);
-  const { colors, sizes, price, extra, ...fields } = p;
+  const { colors, sizes, price, ...fields } = p;
   if (old) Object.assign(old, fields); else s.products.push({ ...fields, id, created_at: stamp() });
   s.variants.filter(v => v.product_id === id).forEach(v => { v.active = false; });
   for (const color of colors) for (const size of sizes) {
-    const value = price + (['XL','2XL'].includes(size) ? extra : 0);
+    const value = price + (p.sizeSurcharges.find(entry => entry.size === size)?.extra || 0);
     const v = s.variants.find(v => v.product_id === id && v.color === color && v.size === size);
     if (v) Object.assign(v, { price: value, active: true });
     else s.variants.push({ id: next(s,'variants'), product_id: id, color, size, price: value, active: true });

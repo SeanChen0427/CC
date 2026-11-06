@@ -19,6 +19,25 @@ export function validateImageBindings(value, images, colors) {
   });
 }
 
+export function validateSizeSurcharges(input, sizes, basePrice) {
+  // Older clients send one extra amount; their historical XL/2XL rule remains compatible.
+  const fallback = integer(Number(input.extra || 0), '尺寸加價', 100000);
+  const entries = input.sizeSurcharges === undefined
+    ? sizes.filter(size => ['XL', '2XL'].includes(size)).map(size => ({size, extra:fallback}))
+    : input.sizeSurcharges;
+  if (!Array.isArray(entries) || entries.length > 12) throw new AppError('尺寸加價設定無效');
+  const seen = new Set();
+  return entries.map(entry => {
+    if (!entry || typeof entry.size !== 'string' || !sizes.includes(entry.size) || seen.has(entry.size)) {
+      throw new AppError('請為現有尺寸設定加價，每個尺寸限一筆');
+    }
+    seen.add(entry.size);
+    const extra = integer(Number(entry.extra), entry.size + ' 加價', 100000);
+    integer(basePrice + extra, entry.size + ' 售價', 1000000, 1);
+    return {size:entry.size, extra};
+  }).filter(entry => entry.extra > 0);
+}
+
 export function text(value, label, max = 150) {
   const result = typeof value === 'string' ? value.trim() : '';
   if (!result || result.length > max) throw new AppError(`請填寫有效的${label}`);
