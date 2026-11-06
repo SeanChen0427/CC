@@ -1,4 +1,4 @@
-import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows } from '../domain/validation.mjs';
+import { AppError, text, integer, contact, assertOpen, validateProcurement, csvRows, validateImageBindings } from '../domain/validation.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -40,7 +40,8 @@ export function validateProduct(input, imagePrefix) {
   const tone = /^#[a-fA-F0-9]{6}$/.test(input.tone) ? input.tone : '#b9a38b';
   const images = Array.isArray(input.images) ? input.images : [];
   if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
-  return { code, name, category, price, extra, colors, sizes, kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images };
+  const imageBindings = validateImageBindings(input.imageBindings, images, colors);
+  return { code, name, category, price, extra, colors, sizes, kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
 }
 function saveProduct(s, input, imagePrefix) {
   const p = validateProduct(input, imagePrefix), id = input.id ? integer(Number(input.id), '商品識別', 1000000, 1) : next(s, 'products');

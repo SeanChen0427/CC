@@ -22,3 +22,18 @@ test('closing freezes orders and creates a procurement snapshot',()=>{const s=fi
 test('invalid CSV is rejected before any item is committed',()=>{const s=emptyState();const csv='code,name,category,price,colors,sizes\nA,一,衣著,590,白,S\nB,二,衣著,錯誤,白,S';const before=structuredClone(s);assert.equal(operate(s,'admin/import','POST',{csv},owner).errors.length,1);assert.throws(()=>operate(s,'admin/import','POST',{csv,commit:true},owner));assert.deepEqual(s,before);});
 test('200-product import preserves variants and category counts',()=>{const s=emptyState();const csv='code,name,category,price,colors,sizes\n'+Array.from({length:200},(_,i)=>`CC${i},商品${i},分類${i%5},500,白,S`).join('\n');operate(s,'admin/import','POST',{csv,commit:true},owner);assert.equal(s.products.length,200);assert.equal(s.variants.length,200);assert.equal(new Set(s.products.map(p=>p.category)).size,5);});
 test('only this project product image URLs are accepted',()=>{const s=emptyState();for(const url of ['javascript:alert(1)','https://evil.test/x.png',imagePrefix+'../x.png',imagePrefix+'x.svg'])assert.throws(()=>operate(s,'admin/products','POST',{...product,images:[url]},owner,imagePrefix));operate(s,'admin/products','POST',{...product,images:[imagePrefix+'abc-123.png']},owner,imagePrefix);assert.equal(s.products.length,1);});
+
+test('eight ordered photos are independent of colors, with validated optional bindings',()=>{
+  const s=emptyState(),images=Array.from({length:8},(_,i)=>imagePrefix+`abc-${i}.png`);
+  operate(s,'admin/products','POST',{...product,images},owner,imagePrefix);
+  assert.deepEqual(s.products[0].images,images);assert.deepEqual(s.products[0].imageBindings,[]);
+  const imageBindings=[{color:'奶油白',url:images[6]}],reordered=[...images].reverse();
+  operate(s,'admin/products','POST',{...product,id:1,images:reordered,imageBindings},owner,imagePrefix);
+  assert.deepEqual(s.products[0].images,reordered);assert.deepEqual(s.products[0].imageBindings,imageBindings);
+  for(const invalid of [[{color:'不存在',url:images[0]}],[{color:'奶油白',url:imagePrefix+'abc-99.png'}],[...imageBindings,...imageBindings]]){
+    assert.throws(()=>operate(structuredClone(s),'admin/products','POST',{...product,id:1,images,imageBindings:invalid},owner,imagePrefix));
+  }
+  assert.throws(()=>operate(structuredClone(s),'admin/products','POST',{...product,id:1,images:[...images,images[0]]},owner,imagePrefix));
+  operate(s,'admin/products','POST',{...product,id:1,images:reordered,imageBindings:[]},owner,imagePrefix);
+  assert.deepEqual(s.products[0].imageBindings,[]);
+});

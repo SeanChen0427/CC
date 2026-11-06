@@ -170,11 +170,26 @@ test('two local applications, durable preorders and buying reports', async t => 
       assert.equal((await request('admin','admin/import',{method:'POST',body:{csv,commit:true}})).status,200);
       assert.equal((await request('customer','catalog')).data.products.length,200);
     });
+    await t.test('eight photos and optional bindings persist without changing variants',async()=>{
+      const product=catalog[0],images=Array.from({length:8},(_,i)=>`/uploads/${String(i).padStart(24,'0')}.png`);
+      const payload={id:product.id,code:product.code,name:product.name,category:product.category,price:590,extra:0,colors:'白,棕',sizes:'S,M',kind:product.kind,tone:product.tone,images};
+      assert.equal((await request('admin','admin/products',{method:'POST',body:payload})).status,200);
+      let saved=(await request('admin','admin/state')).data.products.find(p=>p.id===product.id);
+      assert.deepEqual(saved.images,images);assert.deepEqual(saved.imageBindings,[]);
+      const imageBindings=[{color:'棕',url:images[7]}];
+      assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,images:[...images].reverse(),imageBindings}})).status,200);
+      saved=(await request('customer','catalog')).data.products.find(p=>p.id===product.id);
+      assert.equal(saved.images[0],images[7]);assert.deepEqual(saved.imageBindings,imageBindings);
+      assert.equal(saved.variants.length,4);
+      assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,imageBindings:[{color:'黑',url:images[0]}]}})).status,400);
+      assert.equal((await request('admin','admin/products',{method:'POST',body:{...payload,images:[...images,images[0]]}})).status,400);
+    });
     await t.test('data and login survive local server restart',async()=>{
       await app.close();
       app=await startApp({directory,customerPort:0,adminPort:0,password,quiet:true,seed:true});
       assert.equal((await request('customer','customer/orders')).data.orders[0].quantity,4);
       assert.equal((await request('admin','admin/state')).data.products.length,200);
+      assert.equal((await request('admin','admin/state')).data.products.find(p=>p.id===catalog[0].id).imageBindings[0].color,'棕');
       const credentials=await readFile(join(directory,'admin-credentials.txt'),'utf8');
       assert.ok(credentials.includes(password));
     });

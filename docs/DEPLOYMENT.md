@@ -120,3 +120,7 @@ LINE 官方帳號已連結，但現階段仍為人工聯絡，沒有自動推播
 自訂網域更新（0.3.1）：發布時偵測 gh-pages 新增 CNAME=ccbaby.beecharge.live，保留設定。正式入口為根目錄 / 與 /admin/；原 GitHub Pages /CC/ 網址會轉址。已同步 CORS、LINE callback 預備網址與公開設定，建置保留 CNAME，後續發布前先整合遠端更新。
 
 前端靜態資源以 package.json 版本號加入 app.js／style.css 查詢參數，避免手機瀏覽器繼續使用舊快取。
+
+## 0.3.4 商品照片更新 — 2026-11-06
+
+前端處理每張原圖上限 20 MB，自動縮圖再逐張傳送，Edge 與 bucket 仍限單張 1.4 MB。商品 images 保留順序，imageBindings 為選填顏色／URL 對應；只更新 Edge 業務程式與靜態網站，不更動既有資料或雲端 schema。後台已存在店主的 1 款正式商品，保留不清空。

@@ -34,8 +34,9 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
         if (url.pathname === '/config.json') {
           res.setHeader('Content-Type','application/json');res.end(JSON.stringify({mode:'local',role,demoMode:seed,customerURL:'http://127.0.0.1:'+servers[0].address().port+'/'}));return;
         }
-        if (url.pathname === '/runtime.js' || url.pathname === '/product-art.js') {
-          res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(await readFile(join(ROOT,url.pathname === '/runtime.js' ? 'shared/runtime.js' : 'server/art.mjs')));return;
+        const sharedFiles={'/runtime.js':'shared/runtime.js','/product-art.js':'server/art.mjs','/product-gallery.js':'shared/product-gallery.js'};
+        if (sharedFiles[url.pathname]) {
+          res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(await readFile(join(ROOT,sharedFiles[url.pathname])));return;
         }
         if (url.pathname.startsWith('/api/')) {
           const method = req.method;

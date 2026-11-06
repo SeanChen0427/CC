@@ -1,5 +1,15 @@
 # 資料模型與報表規則
 
+## 0.3.4 實際相簿欄位
+
+- 雲端 products[].images 保存最多 8 個受允許的 Storage URL，陣列順序就是展示順序，首張為封面
+- products[].imageBindings 為選填陣列 [{color, url}]，未設定視為 []，舊商品不自動產生綁定
+- 伺服器驗證顏色屬於商品、URL 屬於該相簿，每個顏色最多一筆；排序不破壞 URL 綁定，移除照片清除該綁定
+- 本機 products.image_bindings 保存同一份 JSON，啟動時安全加欄；客戶及管理 API 統一回 imageBindings
+- 照片順序／綁定不改變 variants 身分、價格或已成立預購快照；商品分類與相簿沒有連動
+- 上傳單張檔案仍限 1.4 MB 並驗證格式／檔頭；前端處理每張原圖上限 20 MB，最長邊 2000px 以內
+- 移除相簿參照不立即刪除 Storage 原檔，完整圖片清理／備份還原另行處理
+
 > 0.3.0 最新狀態：使用者已授權 GitHub Pages /CC/、/CC/admin/ 與 Supabase，測試資料已清空，LINE 待設定，活動 draft。下方舊版本／完整目標保留供對照，以 [DEPLOYMENT.md](DEPLOYMENT.md) 與 HANDOFF.md 為目前實作依據。
 
 

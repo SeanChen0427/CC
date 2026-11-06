@@ -78,6 +78,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY, data TEXT NOT NULL, created_at TEXT NOT NULL
     );
   `);
+  if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'image_bindings')) {
+    db.exec("ALTER TABLE products ADD COLUMN image_bindings TEXT NOT NULL DEFAULT '[]'");
+  }
   if (filename !== ':memory:') chmodSync(filename, 0o600);
   const store = {
     db, demoMode: seed,
@@ -101,7 +104,7 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);
       const variants = this.all('SELECT * FROM variants ORDER BY id');
       return products.map(p => ({
-        ...p, active: Boolean(p.active), images: JSON.parse(p.images),
+        ...p, active: Boolean(p.active), images: JSON.parse(p.images), imageBindings: JSON.parse(p.image_bindings),
         variants: variants.filter(v => v.product_id === p.id && (includeInactive || v.active))
           .map(v => ({ ...v, active: Boolean(v.active) })),
       }));

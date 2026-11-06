@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.3",
-  "updatedAt": "2026-11-05",
+  "documentVersion": "0.3.4",
+  "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
@@ -115,11 +115,11 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 37,
+    "integrationTestsPassed": 41,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
-    "date": "2026-11-05",
+    "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
     "pagesCommit": "ded5ec50a6e25bb52d7ad5d2423a3e42df52a0a7",
@@ -139,12 +139,22 @@
     "automaticLineEntryLiveChecked": true,
     "catalogAnonymousDenied": true,
     "callbackReturnHashChecked": true,
-    "cancelCallbackGateChecked": true
+    "cancelCallbackGateChecked": true,
+    "imageEditorEightPhotosChecked": true,
+    "imageReorderChecked": true,
+    "largeImageCompressionChecked": true,
+    "imageFailureIsolationChecked": true,
+    "independentGalleryAndOptionalBindingChecked": true,
+    "imageEditorViewports": [
+      320,
+      390,
+      768
+    ]
   },
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
-    "productionProducts": 0,
+    "productionProducts": 1,
     "productionCustomers": 1,
     "productionPreorders": 0,
     "automaticSeed": false
@@ -154,5 +164,16 @@
     "forcedSentenceBreaks": false,
     "decorativeFullStops": false,
     "mobileActionsBelowHeading": true
+  },
+  "productImages": {
+    "maxCount": 8,
+    "sourceMaxBytes": 20000000,
+    "uploadMaxBytes": 1400000,
+    "multipleSelection": true,
+    "fileDrop": true,
+    "reorder": true,
+    "remove": true,
+    "independentGallery": true,
+    "optionalColorBindings": true
   }
 }

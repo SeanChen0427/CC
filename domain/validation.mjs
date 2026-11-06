@@ -5,6 +5,20 @@ export class AppError extends Error {
   }
 }
 
+export function validateImageBindings(value, images, colors) {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 12) throw new AppError('照片綁定設定無效');
+  const seen = new Set();
+  return value.map(binding => {
+    if (!binding || typeof binding.color !== 'string' || typeof binding.url !== 'string' ||
+      !colors.includes(binding.color) || !images.includes(binding.url) || seen.has(binding.color)) {
+      throw new AppError('請將照片綁定至現有顏色及商品照片');
+    }
+    seen.add(binding.color);
+    return {color:binding.color,url:binding.url};
+  });
+}
+
 export function text(value, label, max = 150) {
   const result = typeof value === 'string' ? value.trim() : '';
   if (!result || result.length > max) throw new AppError(`請填寫有效的${label}`);
