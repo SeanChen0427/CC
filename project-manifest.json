@@ -122,7 +122,7 @@
     "date": "2026-11-06",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "559904e9c59f74471558959db8ec69580fc897da",
+    "pagesCommit": "5f88fab48e6d9523b0d970a90e28005a341c0213",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -211,7 +211,9 @@
       390
     ],
     "adminBackdropGuardChecked": true,
-    "liveAdminDraftChecked": false
+    "liveAdminDraftChecked": false,
+    "liveAdminDraftBundleChecked": true,
+    "liveAdminLoginPageChecked": true
   },
   "brandName": "CCBABY",
   "testData": {

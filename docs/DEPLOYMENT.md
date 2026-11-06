@@ -149,4 +149,4 @@ Edge v11、Pages built 559904e9。私有 JSONB 標記 preorders.deleted_at／del
 
 ## 0.3.10 商品編輯不中斷部署
 
-只有 GitHub Pages 管理端靜態更新，product-draft.js 於同分頁暫存與恢復表單，外圍及關閉保護。Supabase Edge 維持 v11，不變更正式業務資料、帳密與 12 小時登入。65 項測試及隔離 Chrome 320／390px 驗證通過；正式發布結果待補。
+只有 GitHub Pages 管理端靜態更新，product-draft.js 於同分頁暫存與恢復表單，外圍及關閉保護。Supabase Edge 維持 v11，不變更正式業務資料、帳密與 12 小時登入。65 項測試及隔離 Chrome 320／390px 驗證通過；Pages 5f88fab48e6d9523b0d970a90e28005a341c0213 已 built；正式 index 使用 0.3.10，草稿模組與已驗證來源一致，Chrome 正式登入頁載入成功。未於正式站提交商品，完整互動使用隔離資料庫。
