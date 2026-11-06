@@ -172,6 +172,11 @@ test('two local applications, durable preorders and buying reports', async t => 
         const result=await request('admin',path);
         assert.equal(result.status,200);assert.ok(result.data.length>0);
         if(path==='admin/products.csv')assert.equal(csvRows(result.data.toString()).length,before.products.length+1);
+        if(path==='admin/products.xlsx') {
+          assert.equal((await request('admin',path,{method:'POST',body:{thumbnails:[]},jar:'anonymous'})).status,401);
+          assert.equal((await request('customer',path,{method:'POST',body:{thumbnails:[]}})).status,403);
+          assert.equal((await request('admin',path,{method:'POST',body:{thumbnails:[]}})).status,200);
+        }
       }
       assert.deepEqual((await request('admin','admin/state')).data,before);
     });

@@ -4,7 +4,8 @@ import { emptyState, operate } from '../cloud/core.mjs';
 import { openStore } from '../server/store.mjs';
 import { api } from '../server/api.mjs';
 import { csvRows } from '../domain/validation.mjs';
-import { productCsv, productSheets, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
+import { productCsv, productSheets, productTable, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
+import { thumbnail } from './fixtures/product-thumbnail.mjs';
 import { validateProduct } from '../cloud/core.mjs';
 
 const owner = {role:'admin',subject:'owner'}, customer = {role:'customer',subject:'customer'};
@@ -24,9 +25,9 @@ for (const engine of ['cloud','sqlite']) test(`${engine}: exported products pres
     const before = admin, csv = productCsv(admin.products), sheets = productSheets(admin.products);
     assert.ok(csv.startsWith('\uFEFF'));assert.match(csv,/'=商品/);assert.doesNotMatch(csv,/extra:3XL/);
     assert.equal(csvRows(csv).length,3);
-    assert.deepEqual(sheets.map(s=>s.name),['商品清單','欄位說明','規格進價']);
+    assert.deepEqual(sheets.map(s=>s.name),['商品清單','匯入底稿','欄位說明','規格進價']);
     assert.equal(sheets[0].rows.length,3);
-    assert.equal(sheets[2].rows.length,6);assert.deepEqual(sheets[2].rows[1].slice(6),[10000,.024,240]);
+    assert.equal(sheets[3].rows.length,6);assert.deepEqual(sheets[3].rows[1].slice(6),[10000,.024,240]);
     assert.doesNotMatch(csv, /unitKrw|costVersion|fixture-only|customer/);
     const duplicated = await run('admin/import','POST',{csv});
     assert.equal(duplicated.errors.length,2);
@@ -39,7 +40,7 @@ for (const engine of ['cloud','sqlite']) test(`${engine}: exported products pres
     admin = await run('admin/state');
     for (const [oldCode,newCode] of [['ORIGINAL','COPY1'],['OTHER','COPY2']]) {
       const original = admin.products.find(p=>p.code===oldCode), copy = admin.products.find(p=>p.code===newCode);
-      assert.deepEqual(productSheets([copy])[0].rows[1].slice(1),productSheets([original])[0].rows[1].slice(1));
+      assert.deepEqual(productTable([copy])[1].slice(1),productTable([original])[1].slice(1));
       assert.deepEqual(copy.variants.filter(v=>v.active).map(v=>[v.color,v.size,v.price]),original.variants.filter(v=>v.active).map(v=>[v.color,v.size,v.price]));
       assert.ok(copy.variants.every(v=>!v.cost));
     }
@@ -47,11 +48,11 @@ for (const engine of ['cloud','sqlite']) test(`${engine}: exported products pres
     if (store) {
       for (const path of ['admin/products.csv','admin/products.xlsx','admin/products-template.csv']) {
         await assert.rejects(()=>run(path,'GET',{},null));
-        const output = await run(path);
+        const output = path.endsWith('.xlsx') ? await run(path,'POST',{thumbnails:(await run('admin/state')).products.filter(p=>p.images[0]).map(p=>({productId:p.id,url:p.images[0],data:thumbnail}))}) : await run(path);
         assert.ok(output.buffer.length>0);
         assert.equal(output.buffer.toString().includes('fixture-only'),false);
       }
-      assert.equal((await run('admin/products.xlsx')).buffer.readUInt32LE(0),0x04034b50);
+      await assert.rejects(()=>run('admin/products.xlsx'),e=>e.status===409);
     }
   } finally {store?.db.close();}
 });

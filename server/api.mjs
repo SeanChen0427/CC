@@ -2,7 +2,8 @@ import { randomBytes, scryptSync, timingSafeEqual, createHash } from 'node:crypt
 import { writeFileSync, mkdirSync, unlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { AppError, text, integer, contact, assertOpen, fingerprint, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory } from '../domain/rules.mjs';
-import { productCsv, productSheets, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
+import { productCsv, previewProductImport, templateProducts } from '../domain/product-transfer.mjs';
+import { productWorkbook } from './product-workbook.mjs';
 import { DEMO_USERS } from './store.mjs';
 import { workbook } from './xlsx.mjs';
 import { reportSheets } from './reports.mjs';
@@ -361,10 +362,10 @@ export async function api({ store, req, role, path, method, body, session, local
     if (credentialPath && existsSync(credentialPath)) unlinkSync(credentialPath);
     return { ok: true, cookie: 'sp_admin=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0' };
   }
-  if (['/api/admin/products.csv','/api/admin/products.xlsx','/api/admin/products-template.csv'].includes(path) && method === 'GET') {
+  if ((['/api/admin/products.csv','/api/admin/products.xlsx','/api/admin/products-template.csv'].includes(path) && method === 'GET') || (path === '/api/admin/products.xlsx' && method === 'POST')) {
     const products = path.endsWith('-template.csv') ? templateProducts : store.catalog(true);
     const excel = path.endsWith('.xlsx');
-    return {buffer:excel ? workbook(productSheets(products)) : Buffer.from(productCsv(products)),
+    return {buffer:excel ? productWorkbook(products,body?.thumbnails) : Buffer.from(productCsv(products)),
       type:excel ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'text/csv; charset=utf-8',
       filename:path.split('/').at(-1).replace('products','ccbaby-products')};
   }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.12",
+  "documentVersion": "0.3.13",
   "updatedAt": "2026-11-06",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -115,7 +115,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 72,
+    "integrationTestsPassed": 75,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -150,7 +150,7 @@
       390,
       768
     ],
-    "edgeVersion": 13,
+    "edgeVersion": 14,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -159,11 +159,11 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 72,
+    "affectedTestsPassed": 75,
     "affectedTests": [
+      "product-workbook",
       "product-transfer",
-      "app",
-      "cloud"
+      "app"
     ],
     "nativeGalleryScrollBrowserChecked": true,
     "galleryZoomAndReturnChecked": true,
@@ -240,7 +240,12 @@
     "liveProductTransferBusinessDataUnchanged": true,
     "liveProductTransferProductCount": 13,
     "liveProductTransferBundleChecked": true,
-    "liveProductTransferLoginPageChecked": true
+    "liveProductTransferLoginPageChecked": true,
+    "productFirstPhotoBrowserChecked": true,
+    "productBlankAndZeroCostsChecked": true,
+    "liveProductFirstPhotoChecked": true,
+    "liveProductFirstPhotoCount": 13,
+    "liveProductFirstPhotoDataUnchanged": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -334,6 +339,7 @@
     "exportAllSavedProducts": true,
     "xlsxSheets": [
       "商品清單",
+      "匯入底稿",
       "欄位說明",
       "規格進價"
     ],
@@ -343,7 +349,17 @@
     "costImport": false,
     "sourcePaths": [
       "domain/product-transfer.mjs",
-      "tests/product-transfer.test.mjs"
-    ]
+      "apps/admin-web/product-export.js",
+      "server/product-workbook.mjs",
+      "server/xlsx.mjs",
+      "tests/product-transfer.test.mjs",
+      "tests/product-workbook.test.mjs",
+      "tests/fixtures/product-thumbnail.mjs"
+    ],
+    "embeddedFirstPhoto": true,
+    "blankMissingCosts": true,
+    "preserveZeroCosts": true,
+    "mixedCostsInVariantSheet": true,
+    "thumbnailMaxBytes": 6000
   }
 }

@@ -8,6 +8,7 @@ import { unitCostTwd, costTotal, costSummary } from './costing.js';
 import { mountPurchaseCost } from './purchase-cost.js';
 import { createProductDrafts, watchProductDraft } from './product-draft.js';
 import { mountProductCost } from './product-cost.js';
+import { exportProductExcel } from './product-export.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -294,7 +295,7 @@ function renderSettings(){
 }
 
 function showProductExport(){
-  showModal(`<div class="eyebrow">YOUR COLLECTION TO GO</div><h2>匯出本期商品</h2><p>下載全部已儲存的選物，包含下架商品，不受目前搜尋與分類篩選影響</p><div class="form-actions"><button class="button" data-action="products-xlsx">${icon('download')}下載商品 Excel</button><button class="button light" data-action="products-csv">下載匯入用 CSV</button></div><p class="settings-foot">Excel 內有商品清單、欄位說明與規格進價；CSV 每款一列，尺寸加價各自一欄</p><div class="page-note">批量新增：複製商品列 → 換成新編號 → 編輯資料 → 另存 CSV UTF-8 → 預覽匯入</div><p class="settings-foot">匯入僅新增，既有編號會報錯；進價在商品編輯填寫，照片只保留本站既有網址，新照片請另行上傳</p><div class="form-actions"><button class="button light" data-action="csv-template">下載欄位範例</button><button class="button light" data-action="import">前往 CSV 批次匯入</button></div>`);
+  showModal(`<div class="eyebrow">YOUR COLLECTION TO GO</div><h2>匯出本期商品</h2><p>下載全部已儲存的選物，包含下架商品，不受目前搜尋與分類篩選影響</p><div class="form-actions"><button class="button" data-action="products-xlsx">${icon('download')}下載商品 Excel</button><button class="button light" data-action="products-csv">下載匯入用 CSV</button></div><p class="settings-foot">商品 Excel 含第一張照片、韓幣與台幣進價，未填金額留空；另有匯入底稿、欄位說明與規格進價</p><div class="page-note">批量新增：複製匯入底稿的商品列 → 換成新編號 → 編輯資料 → 另存 CSV UTF-8 → 預覽匯入</div><p class="settings-foot">匯入僅新增，既有編號會報錯；CSV 保留本站照片網址，進價與新照片請在商品編輯填寫</p><div class="form-actions"><button class="button light" data-action="csv-template">下載欄位範例</button><button class="button light" data-action="import">前往 CSV 批次匯入</button></div>`);
 }
 
 function showImport(){
@@ -335,8 +336,15 @@ document.addEventListener('click',async event=>{
     if(action==='import'){showImport();return;}
     if(action==='export-products'){showProductExport();return;}
     if(action==='products-xlsx'||action==='products-csv'){
-      const ext=action==='products-xlsx'?'xlsx':'csv';
-      await download('admin/products.'+ext,'ccbaby-products.'+ext);return;
+      if(target.disabled)return;
+      const label=target.innerHTML;target.disabled=true;
+      try {
+        if(action==='products-xlsx') {
+          target.textContent='正在準備照片';
+          await exportProductExcel({request:api,download,onProgress:(done,total)=>{target.textContent=`準備照片 ${done} / ${total}`;}});
+        } else await download('admin/products.csv','ccbaby-products.csv');
+      } finally {target.disabled=false;target.innerHTML=label;}
+      return;
     }
     if(action==='categories'){showCategoryManager();return;}
     if(action==='copy-order'){

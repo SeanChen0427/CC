@@ -158,3 +158,7 @@ Edge v12、Pages built 9696420f。商品 POST 支援 costUpdate，與採買共�
 ## 0.3.12 商品輸出部署
 
 新增管理專用只讀 products.xlsx／products.csv／products-template.csv，保留每次 session／role 驗證與 no-store。共用 domain/product-transfer.mjs 及 shared/product-pricing.js／shared/costing.js，沿用 XLSX 寫出器；admin/import 支援尺寸加價、狀態、照片 JSON，仍只新增。無 DDL／RPC／Storage 政策或既有業務資料變更。Edge v13 ACTIVE，正式商品 Excel／CSV 與目前 13 款商品逐位元一致，範例可預覽、既有編號全部報錯、匿名與錯誤入口拒絕，匯出前後業務文件雜湊一致（13 商品、1 預購、open）。Pages built 6b6f80d737acf3878bdad596164df1fad178743d，正式管理 index 使用 0.3.12，app.js 與建置成品一致；沒有在正式站新增測試商品，私有商品匯出留在 .local/exports。
+
+## 0.3.13 含圖商品 Excel
+
+管理新增 product-export.js 處理第一張照片為 144px／6 KB 內 JPEG，POST products.xlsx 接收暫存縮圖。server/product-workbook.mjs 核對商品／第一張 URL／JPEG 尺寸後共用 xlsx.mjs 內嵌 DrawingML／media，沒有外部圖片公式。POST 匯出只讀、不走 ccbaby_commit，不上傳／修改照片；角色／session、來源與 2.2 MB 請求上限保留。無 DDL／RPC／Storage 政策變更；舊 GET 在有照片且無縮圖時回 409 提醒重整。Edge v14 ACTIVE，正式 13 款商品／13 張首圖下載與本機預期檔逐位元一致，缺圖與權限防呆通過，前後業務文件雜湊一致（13 商品、1 預購、open）；Pages 待發布。

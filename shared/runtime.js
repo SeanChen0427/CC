@@ -18,8 +18,8 @@ export async function request(path, options={}) {
   if(path==='logout'||path==='admin/password')clear();
   return data;
 }
-export async function download(path, filename) {
-  const r=await response(path);
+export async function download(path, filename, options={}) {
+  const r=await response(path,options);
   if(!r.ok){const d=await r.json().catch(()=>({}));if(r.status===401)clear();throw new Error(d.error||'下載失敗，請重新登入後再試');}
   const url=URL.createObjectURL(await r.blob());const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
