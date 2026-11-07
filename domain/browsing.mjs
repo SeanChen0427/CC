@@ -72,6 +72,9 @@ export function browsingPeople(metrics,customers,orders) {
     return {customerId:c.id,displayName:c.display_name,name:c.name||'',visits:0,pageViews:0,productViews:0,activeMs:0,cartAdds:0,submits:0,lastSeen:null,...m,hasPreorder:orders.some(o=>o.customer_id===c.id&&o.quantity>0)};
   }).sort((a,b)=>(b.lastSeen||'').localeCompare(a.lastSeen||''));
 }
+export function browsingContext(campaign,orders) {
+  return {campaign:{status:campaign.status,closesAt:campaign.closesAt},orders:orders.map(o=>({id:o.id,customer_id:o.customer_id,updated_at:o.updated_at,quantity:o.quantity,items:o.items.map(i=>({shortage:i.shortage || 0}))}))};
+}
 export function browsingInterests(events) {
   const map=new Map();
   for(const e of events.filter(e=>e.productId)){

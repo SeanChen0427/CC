@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.17",
+  "documentVersion": "0.3.18",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -92,9 +92,10 @@
     "changelog": "CHANGELOG.md",
     "localPreview": "docs/LOCAL_PREVIEW.md",
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
-    "deployment": "docs/DEPLOYMENT.md"
+    "deployment": "docs/DEPLOYMENT.md",
+    "salesPlaybook": "docs/SALES_PLAYBOOK.md"
   },
-  "nextStep": "verify_real_iphone_external_browser_line_recovery",
+  "nextStep": "publish_and_verify_sales_guidance_frontend",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -116,7 +117,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 94,
+    "integrationTestsPassed": 101,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -151,7 +152,7 @@
       390,
       768
     ],
-    "edgeVersion": 17,
+    "edgeVersion": 18,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -320,7 +321,21 @@
     "lineAuthRealIPhoneChecked": false,
     "liveLineRecoveryEntryChecked": true,
     "liveLineRecoveryRetryChecked": true,
-    "liveLineRecoveryWithoutCodeExchange": true
+    "liveLineRecoveryWithoutCodeExchange": true,
+    "salesGuidanceTestsPassed": 7,
+    "salesGuidanceBrowserChecked": true,
+    "salesGuidanceViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "salesGuidanceSqlRollbackChecked": true,
+    "liveSalesGuidanceChecked": false,
+    "liveSalesGuidanceApiChecked": true,
+    "liveSalesGuidanceInvalidWriteRejected": true,
+    "salesGuidanceUndoBrowserChecked": true,
+    "salesGuidanceUnappliedOrderPreserved": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -511,5 +526,42 @@
       "tests/line-auth.test.mjs"
     ],
     "realIPhoneVerified": false
+  },
+  "salesGuidance": {
+    "status": "backend_live_frontend_pending",
+    "ruleBased": true,
+    "manualLineOnly": true,
+    "outreachSent": false,
+    "storesOutreachStatus": false,
+    "sourcePaths": [
+      "docs/SALES_PLAYBOOK.md",
+      "apps/admin-web/browsing-insights.js",
+      "apps/admin-web/merchandising.js",
+      "domain/merchandising.mjs",
+      "tests/sales-guidance.test.mjs",
+      "supabase/migrations/20261107173208_ccbaby_merchandising.sql"
+    ]
+  },
+  "productOrdering": {
+    "status": "backend_live_frontend_pending",
+    "ownerApprovalRequired": true,
+    "personalized": false,
+    "sharedAcrossCustomers": true,
+    "uniquePeopleSignals": true,
+    "queryDays": [
+      7,
+      30,
+      180
+    ],
+    "scoreWeights": {
+      "buyers": 6,
+      "cartPeople": 3,
+      "viewersCap": 10
+    },
+    "explorationEvery": 5,
+    "manualReorder": true,
+    "previousOrder": true,
+    "versioned": true,
+    "productionOrderApplied": false
   }
 }

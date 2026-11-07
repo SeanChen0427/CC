@@ -5,6 +5,7 @@ import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
+import { orderedProducts, planProductOrder } from '../domain/merchandising.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -101,7 +102,7 @@ export function upsertCustomer(s, identity) {
 export function operate(s, path, method, body, session, imagePrefix) {
   if (path === 'catalog' && method === 'GET') {
     required(session,'customer');
-    return { campaign: s.campaign, categories: categoryNames(s.categories,s.products), products: catalog(s), localOnly: false };
+    return { campaign: s.campaign, categories: categoryNames(s.categories,s.products), products: orderedProducts(catalog(s),s.merchandising?.productIds), localOnly: false };
   }
   if (path === 'me' && method === 'GET') return { authenticated: Boolean(session), role: session?.role, localOnly: false, profiles: [], user: session?.role === 'customer' ? s.customers.find(c => c.id === session.subject) || null : null };
   const role = path.startsWith('admin/') ? 'admin' : 'customer'; required(session, role);
@@ -157,6 +158,11 @@ export function operate(s, path, method, body, session, imagePrefix) {
   if(path==='admin/cost-settings'&&method==='PUT') {
     s.costSettings={exchangeRate:validateExchangeRate(body.exchangeRate)};
     event(s,'cost.settings','1',s.costSettings);return {ok:true};
+  }
+  if(path==='admin/product-order'&&method==='PUT') {
+    s.merchandising=planProductOrder(body,catalog(s,true),s.merchandising);
+    event(s,'product.order','campaign',{version:s.merchandising.version,productIds:s.merchandising.productIds});
+    return {ok:true,settings:s.merchandising};
   }
   const deletion=path.match(/^admin\/orders\/(\d+)\/delete$/);
   if(deletion&&method==='POST') {

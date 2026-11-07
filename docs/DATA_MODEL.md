@@ -249,3 +249,12 @@ LINE Token 不作報表欄位；驗證所需資料與紀錄最小化。
 - 草稿增加 sizeCosts／initialSizeCosts 原始字串與基準，原版本仍保存；移除後重加尺寸保留本次輸入，衝突載入最新進價前解除舊監聽
 - 商品清單依 variant 實際售價、韓幣成本、保存匯率分組，僅合併具有相同顏色集合的尺寸，保證每個有效規格恰好出現一次。價格不同緊接同商品下方，空白／零元分開，沒有有效規格的舊商品仍保留一列
 - 首圖與來源連結隨拆列重複，縮圖請求仍每商品一張，檔內同商品圖片 bytes 重用。CSV／匯入底稿、按規格進價及採買報表粒度不變；本節取代 0.3.13 商品清單每款一列及混合成本提示
+
+## 0.3.18 店主審閱排序與建議
+
+- 雲端私有 store.data.merchandising、本機 merchandising_settings.data：version、productIds、previousIds、updatedAt；首次未設定視為 version=0／原始上架順序，不回填或重排既有資料
+- PUT admin/product-order 必須帶符合目前 version 的完整上架商品 ID 排列；成功保存舊排列、版本加一並記 product.order 事件，客戶不得操作
+- 商品統計取指定期間不重複 customer_id 的商品瀏覽／加購，正式預購人數及件數由有效明細按 variant 對商品，排除已刪除與零數量；不是事件次數或現存購物車
+- ccbaby_merchandising_read 為 service_role-only、security invoker，SQL 核對 owner session，沿用 browsing_time 索引及 7／30／180 天限制，沒有新增雲端表／直連策略
+- browsing API 增加最小 context（活動階段、截止、預購 id／customer_id／更新時間／數量／缺貨件數），不帶手機或地址；供管理端使用最新預購狀態
+- 排序設定加入既有私有 JSON 業務備份；瀏覽事件仍不加入既有業務匯出。價格與預購快照、採購與分配不變

@@ -11,7 +11,8 @@ import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
-import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing, browsingPeople, browsingInterests, browsingPage } from '../domain/browsing.mjs';
+import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing, browsingPeople, browsingInterests, browsingPage, browsingContext } from '../domain/browsing.mjs';
+import { orderedProducts, planProductOrder, productSignals, merchandising } from '../domain/merchandising.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -122,7 +123,7 @@ export async function api({ store, req, role, path, method, body, session, local
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
   if (path === '/api/catalog' && role === 'customer' && method === 'GET') {
-    return { campaign: store.campaign(), categories: store.categories(), products: store.catalog(), localOnly: true, lineConfigured: false };
+    return { campaign: store.campaign(), categories: store.categories(), products: orderedProducts(store.catalog(),store.merchandisingSettings().productIds), localOnly: true, lineConfigured: false };
   }
   if (path === '/api/me' && method === 'GET') {
     return { authenticated: Boolean(session), role, localOnly: true,
@@ -177,11 +178,27 @@ export async function api({ store, req, role, path, method, body, session, local
     const {days,customerId,before}=browsingQuery(query),since=new Date(Date.now()-days*86400000).toISOString();
     const events=store.all('SELECT * FROM browsing_events WHERE at>=?',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id,receivedAt:r.received_at}));
     const people=browsingPeople(summarizeBrowsing(events),store.all('SELECT id,display_name,name FROM customers'),store.orders());
-    if(!customerId)return {people,days,retentionDays:180};
+    const context=browsingContext(store.campaign(),store.orders());
+    if(!customerId)return {people,days,retentionDays:180,context};
     const person=people.find(p=>p.customerId===customerId);
     if(!person)throw new AppError('找不到客戶',404);
     const own=events.filter(e=>e.customerId===customerId);
-    return {person,days,retentionDays:180,interests:browsingInterests(own),...browsingPage(own,before)};
+    return {person,days,retentionDays:180,context,interests:browsingInterests(own),...browsingPage(own,before)};
+  }
+  if(path==='/api/admin/merchandising'&&method==='GET'){
+    requireBrowsingRole(session,'admin');
+    const {days}=browsingQuery(query),since=new Date(Date.now()-days*86400000).toISOString();
+    const events=store.all('SELECT * FROM browsing_events WHERE at>=?',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id}));
+    return merchandising(store.catalog(true),store.orders(),productSignals(events),store.merchandisingSettings(),days);
+  }
+  if(path==='/api/admin/product-order'&&method==='PUT'){
+    requireBrowsingRole(session,'admin');
+    return store.transaction(()=>{
+      const settings=planProductOrder(body,store.catalog(true),store.merchandisingSettings());
+      store.run('INSERT INTO merchandising_settings VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data',JSON.stringify(settings));
+      store.event('product.order','campaign',{version:settings.version,productIds:settings.productIds});
+      return {ok:true,settings};
+    });
   }
 
   if (path === '/api/customer/orders' && method === 'GET') return { orders: store.orders(session.subject), campaign: store.campaign() };
@@ -402,7 +419,7 @@ export async function api({ store, req, role, path, method, body, session, local
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','cost_settings','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','cost_settings','merchandising_settings','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };

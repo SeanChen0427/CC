@@ -27,6 +27,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     CREATE TABLE IF NOT EXISTS cost_settings (
       id INTEGER PRIMARY KEY CHECK(id=1), exchange_rate REAL NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS merchandising_settings (
+      id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS admin (
       id INTEGER PRIMARY KEY CHECK(id=1), username TEXT NOT NULL UNIQUE,
       salt TEXT NOT NULL, hash TEXT NOT NULL
@@ -130,6 +133,10 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     },
     costSettings() {
       return {exchangeRate:this.get('SELECT exchange_rate FROM cost_settings WHERE id=1')?.exchange_rate ?? null};
+    },
+    merchandisingSettings() {
+      const row=this.get('SELECT data FROM merchandising_settings WHERE id=1');
+      return row?JSON.parse(row.data):{version:0,productIds:[],previousIds:[]};
     },
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);

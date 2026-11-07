@@ -258,3 +258,9 @@ shared/runtime.js → shared/line-auth.js，依隨機 state 分隔 10 分鐘登�
 - 涉及官方帳號連結時，LINE Login 與 Messaging API 的 Provider 配置需一併規劃。
 - 秘密由伺服器秘密管理保存；正式資料、備份與含個資的報表不進公開儲存庫。
 - 目前只建立本機程式、資料庫及測試帳號，不建立雲端資源或公開部署。
+
+## 0.3.18 銷售協助與排序（已實作，部署見 HANDOFF）
+
+管理 browsing.js → browsing-insights.js，以最新 browsing API 的活動／最小預購摘要搭配期間彙總及已載入時間軸，產生依據、下一步與可複製草稿。僅開 LINE 官方管理首頁，無訊息 API。
+
+管理 #merchandising → GET admin/merchandising → 私有 ccbaby_merchandising_read（SQL 核對 owner session）取得不重複人數 → domain/merchandising.mjs 加入本期有效預購並產生建議。畫面手調草稿 → PUT admin/product-order → 完整上架名單及版本驗證 → 原 JSONB revision 原子提交。雲端 merchandising／本機 merchandising_settings 保存目前與上次順序。customer catalog 只用 orderedProducts 排列公開商品，分析不送客戶。
