@@ -1,10 +1,10 @@
-import { request, config, cloud, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.17';
-import { art } from './product-art.js?v=0.3.17';
-import { enterCustomerSite } from './entry.js?v=0.3.17';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.17';
-import { mountGallery } from './gallery.js?v=0.3.17';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.17';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.17';
+import { request, config, cloud, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.18';
+import { art } from './product-art.js?v=0.3.18';
+import { enterCustomerSite } from './entry.js?v=0.3.18';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.18';
+import { mountGallery } from './gallery.js?v=0.3.18';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.18';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.18';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);

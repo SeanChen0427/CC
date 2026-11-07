@@ -1,4 +1,4 @@
-import { saveLineAttempt, takeLineAttempt, markBrowserLineLogin, browserLineLoginNeeded, clearBrowserLineLogin } from './line-auth.js?v=0.3.17';
+import { saveLineAttempt, takeLineAttempt, markBrowserLineLogin, browserLineLoginNeeded, clearBrowserLineLogin } from './line-auth.js?v=0.3.18';
 export const config = await fetch(new URL('./config.json', import.meta.url), { cache: 'no-store' }).then(r => { if(!r.ok)throw new Error('config'); return r.json(); });
 export const cloud = config.mode === 'cloud';
 const sessionKey = 'ccbaby.session.' + config.role + '.v1';
