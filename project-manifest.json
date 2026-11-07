@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42394211661
+    "pagesRun": 42397189994
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -95,7 +95,7 @@
     "deployment": "docs/DEPLOYMENT.md",
     "salesPlaybook": "docs/SALES_PLAYBOOK.md"
   },
-  "nextStep": "publish_and_verify_sales_guidance_frontend",
+  "nextStep": "owner_review_sales_guidance_and_product_order",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -124,7 +124,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "a16834ff95d7f4ca6dacd89b3af3e7e5bc12e250",
+    "pagesCommit": "5cea239d39cc181db6c789b6a4eaaf2b9b968bc0",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -265,7 +265,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.17",
+    "lastLiveFrontendVersion": "0.3.18",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -331,11 +331,13 @@
       1440
     ],
     "salesGuidanceSqlRollbackChecked": true,
-    "liveSalesGuidanceChecked": false,
+    "liveSalesGuidanceChecked": true,
     "liveSalesGuidanceApiChecked": true,
     "liveSalesGuidanceInvalidWriteRejected": true,
     "salesGuidanceUndoBrowserChecked": true,
-    "salesGuidanceUnappliedOrderPreserved": true
+    "salesGuidanceUnappliedOrderPreserved": true,
+    "liveSalesGuidanceFilesChecked": 10,
+    "liveSalesGuidanceBusinessDataUnchanged": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -528,7 +530,7 @@
     "realIPhoneVerified": false
   },
   "salesGuidance": {
-    "status": "backend_live_frontend_pending",
+    "status": "live",
     "ruleBased": true,
     "manualLineOnly": true,
     "outreachSent": false,
@@ -543,7 +545,7 @@
     ]
   },
   "productOrdering": {
-    "status": "backend_live_frontend_pending",
+    "status": "live_owner_review_required",
     "ownerApprovalRequired": true,
     "personalized": false,
     "sharedAcrossCustomers": true,

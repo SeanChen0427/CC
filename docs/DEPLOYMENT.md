@@ -225,6 +225,8 @@ Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/brows
 
 ## 0.3.18 銷售建議與排序
 
-Edge v18 已發布，新增 service_role-only／security invoker 的 ccbaby_merchandising_read，SQL 再核對 owner session、期間與不重複人數。只讀原私有 browsing_events，無新雲端表。排序寫入原私有 store.data.merchandising，沿用 revision 與版本驗證；未有設定時原順序不動。靜態前端待發布與正式核對，未套用正式排序、未發 LINE 訊息。
+Edge v18 已發布，新增 service_role-only／security invoker 的 ccbaby_merchandising_read，SQL 再核對 owner session、期間與不重複人數。只讀原私有 browsing_events，無新雲端表。排序寫入原私有 store.data.merchandising，沿用 revision 與版本驗證；未有設定時原順序不動。Pages 5cea239 已發布（run 42397189994 success），正式前後台 10 檔與成品逐位元一致；未套用正式排序、未發 LINE 訊息。
 
 SQL 交易回滾驗證角色、去重、非法期間與權限通過，正式業務 revision 73、16 商品／1 預購／open 保留。安全 advisor 仍只有既有私有表 RLS 無策略（刻意預設拒絕）及[未啟用外洩密碼檢查](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)；效能提示仍為單列 store 的 owner 外鍵無索引，未為本功能新增廣泛權限。
+
+0.3.18 正式分析 API 店主讀取、匿名／錯誤角色／非法期間／無效排序版本拒絕通過。發布前後 revision 73 與業務雜湊一致，16 商品／1 預購／open，merchandising 尚未設定，無殘留 qa 測試事件。正式查驗僅送出必定拒絕的舊版本，未提交有效排序。
