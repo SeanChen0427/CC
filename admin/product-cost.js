@@ -1,6 +1,6 @@
-import { productCostState, sameCost, sizeCostState } from './product-costing.js?v=0.3.18';
-import { unitCostTwd } from './costing.js?v=0.3.18';
-import { parseSizes } from './product-pricing.js?v=0.3.18';
+import { productCostState, sameCost, sizeCostState } from './product-costing.js?v=0.3.19';
+import { unitCostTwd } from './costing.js?v=0.3.19';
+import { parseSizes } from './product-pricing.js?v=0.3.19';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});

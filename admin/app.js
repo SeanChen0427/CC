@@ -1,16 +1,17 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.18';
-import { art } from './product-art.js?v=0.3.18';
-import { mountImageEditor } from './image-editor.js?v=0.3.18';
-import { editorPricing } from './product-pricing.js?v=0.3.18';
-import { mountSizePricing } from './size-pricing.js?v=0.3.18';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.18';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.18';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.18';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.18';
-import { mountProductCost } from './product-cost.js?v=0.3.18';
-import { exportProductExcel } from './product-export.js?v=0.3.18';
-import { mountBrowsing } from './browsing.js?v=0.3.18';
-import { mountMerchandising } from './merchandising.js?v=0.3.18';
+import { request, config, cloud, download } from './runtime.js?v=0.3.19';
+import { art } from './product-art.js?v=0.3.19';
+import { mountImageEditor } from './image-editor.js?v=0.3.19';
+import { editorPricing } from './product-pricing.js?v=0.3.19';
+import { mountSizePricing } from './size-pricing.js?v=0.3.19';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.19';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.19';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.19';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.19';
+import { mountProductCost } from './product-cost.js?v=0.3.19';
+import { exportProductExcel } from './product-export.js?v=0.3.19';
+import { mountBrowsing } from './browsing.js?v=0.3.19';
+import { mountMerchandising } from './merchandising.js?v=0.3.19';
+import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.19';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -37,8 +38,8 @@ const paths = {
   check:'<path d="m5 12 4 4L19 6"/>',
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.list}</svg>`;
-const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',browsing:'瀏覽紀錄',merchandising:'商品排序',procurement:'採買清單',settings:'活動與設定'};
-const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null,productEditor:null,merchandisingEditor:null};
+const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',browsing:'瀏覽紀錄',care:'客戶聯繫',merchandising:'商品排序',procurement:'採買清單',settings:'活動與設定'};
+const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null,productEditor:null,merchandisingEditor:null,careEditor:null,careCustomer:null};
 const modal=$('#modal');
 let toastTimer;
 const labels={draft:'準備中',open:'開放預購中',closed:'已結單',purchasing:'韓國採購中',arrived:'商品已到台',archived:'已封存'};
@@ -77,7 +78,7 @@ const exportButton=()=>`<button class="button light" data-action="export">${icon
 const brand=()=>`<div class="brand"><span class="brand-symbol">${icon('bag')}</span><span><span class="brand-title">CCBABY</span><small>店主採購工作台</small></span></div>`;
 
 function renderLogin(){
-  state.merchandisingEditor=null;
+  state.merchandisingEditor=null;state.careEditor?.dispose();state.careEditor=null;
   state.productEditor?.flush();disposeEditor();modal.close();
   $('#app').innerHTML=`<div class="login-screen"><section class="login-story">${brand()}<div><div class="eyebrow">CURATE WITH CARE</div><h1>商品與採買管理</h1><p>從每一份小小的喜歡，到一張清楚的採買清單， 這一趟，讓預購的每個細節都有自己的位置</p></div><footer>CCBABY / OWNER WORKSPACE</footer><div class="story-number">01</div></section><section class="login-panel"><form class="login-card" id="login-form"><div class="eyebrow">WELCOME TO YOUR WORKSPACE</div><h2>歡迎回來</h2><p>請使用店主專屬帳號登入採購工作台</p><label class="field">管理帳號<input name="username" autocomplete="username" required value="hannah"></label><label class="field">登入密碼<input name="password" type="password" autocomplete="current-password" required placeholder="輸入你的管理密碼"></label><div id="login-error" class="error" role="alert"></div><button class="button" type="submit">登入工作台 ${icon('arrow')}</button><div class="login-note"><span class="pill"><i></i>${cloud ? '店主專屬入口' : '本機工作台'}</span><p>客戶與管理入口各自獨立， 此處只供店主管理商品、預購與採買進度</p></div></form></section></div>`;
   $('#login-form').addEventListener('submit',async event=>{
@@ -88,13 +89,15 @@ function renderLogin(){
 }
 async function load(){state.data=await api('admin/state');}
 const productCategories=()=>categoryNames(state.data.categories,state.data.products);
-function leaveMerchandising(){if(state.merchandisingEditor&&!state.merchandisingEditor.canLeave())return false;state.merchandisingEditor=null;return true;}
-function navigate(view){if(!leaveMerchandising()||!closeModal())return;state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
+function leavePageEdits(){if(state.merchandisingEditor&&!state.merchandisingEditor.canLeave())return false;if(state.careEditor&&!state.careEditor.canLeave())return false;state.merchandisingEditor=null;state.careEditor?.dispose();state.careEditor=null;return true;}
+function navigate(view){if(!leavePageEdits()||!closeModal())return;state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
 function renderShell(){
+  state.careEditor?.dispose();state.careEditor=null;
   const d=state.data;if(!d)return;
-  $('#app').innerHTML=`<div class="workspace"><aside class="sidebar">${brand()}<div class="nav-label">YOUR WORKSPACE</div><nav class="side-nav" aria-label="管理導覽">${[['dashboard','grid'],['products','bag'],['customers','users'],['browsing','users'],['merchandising','grid'],['procurement','list'],['settings','settings']].map(([id,img])=>`<button data-action="navigate" data-view="${id}" class="${state.view===id?'active':''}">${icon(img)}<span>${views[id]}</span>${id==='products'?`<span class="nav-count">${d.products.length}</span>`:''}</button>`).join('')}</nav><div class="sidebar-bottom"><a class="side-preview" href="${esc(config.customerURL)}" target="_blank" rel="noopener">${icon('external')}預覽客戶選物頁</a><div class="owner"><div class="avatar">S</div><div><div class="owner-name">店主工作室</div><div class="owner-role">OWNER / 唯一管理員</div></div><button class="text-button" data-action="logout">登出</button></div></div></aside><div class="admin-main"><header class="topbar"><div class="breadcrumb"><span>韓國年度採購</span><span>/</span><strong>${views[state.view]}</strong></div><div class="topbar-right"><span>${esc(d.campaign.name)}</span><span class="pill"><i></i>${cloud ? '雲端工作台' : '本機工作台'}</span><button class="text-button" data-action="refresh" aria-label="重新整理資料">更新資料</button><button class="text-button mobile-logout" data-action="logout">登出</button></div></header><main class="admin-content" id="content"></main></div></div>`;
+  $('#app').innerHTML=`<div class="workspace"><aside class="sidebar">${brand()}<div class="nav-label">YOUR WORKSPACE</div><nav class="side-nav" aria-label="管理導覽">${[['dashboard','grid'],['products','bag'],['customers','users'],['browsing','users'],['care','users'],['merchandising','grid'],['procurement','list'],['settings','settings']].map(([id,img])=>`<button data-action="navigate" data-view="${id}" class="${state.view===id?'active':''}">${icon(img)}<span>${views[id]}</span>${id==='products'?`<span class="nav-count">${d.products.length}</span>`:''}</button>`).join('')}</nav><div class="sidebar-bottom"><a class="side-preview" href="${esc(config.customerURL)}" target="_blank" rel="noopener">${icon('external')}預覽客戶選物頁</a><div class="owner"><div class="avatar">S</div><div><div class="owner-name">店主工作室</div><div class="owner-role">OWNER / 唯一管理員</div></div><button class="text-button" data-action="logout">登出</button></div></div></aside><div class="admin-main"><header class="topbar"><div class="breadcrumb"><span>韓國年度採購</span><span>/</span><strong>${views[state.view]}</strong></div><div class="topbar-right"><span>${esc(d.campaign.name)}</span><span class="pill"><i></i>${cloud ? '雲端工作台' : '本機工作台'}</span><button class="text-button" data-action="refresh" aria-label="重新整理資料">更新資料</button><button class="text-button mobile-logout" data-action="logout">登出</button></div></header><main class="admin-content" id="content"></main></div></div>`;
   if(state.view==='dashboard')renderDashboard();
-  else if(state.view==='browsing')mountBrowsing($('#content'),{request:api,context:state.data,onOrder:async id=>{try{await load();showOrder(id);}catch(error){toast(error.message);}},toast});
+  else if(state.view==='browsing')mountBrowsing($('#content'),{request:api,context:state.data,onCare:customerId=>{state.careCustomer=customerId;navigate('care');},onOrder:async id=>{try{await load();showOrder(id);}catch(error){toast(error.message);}},toast});
+  else if(state.view==='care')state.careEditor=mountCustomerCare($('#content'),{request:api,toast,initialCustomerId:state.careCustomer,onOrder:async id=>{try{await load();showOrder(id);}catch(error){toast(error.message);}}});
   else if(state.view==='merchandising')state.merchandisingEditor=mountMerchandising($('#content'),{request:api,toast});
   else if(state.view==='settings')renderSettings();
   else renderTablePage();
@@ -114,10 +117,11 @@ function renderDashboard(){
       ['預估商品總額',money(stats.total),'','參考金額，並非已收款','bag'],
       ['本期選物',stats.products,'款','目前開放預購的商品','box'],
     ].map(([label,value,unit,note,img])=>`<div class="stat"><div class="stat-label"><span>${label}</span>${icon(img)}</div><div class="stat-value" ${String(value).length>9?'style="font-size:27px"':''}>${value}<small>${unit}</small></div><div class="stat-note">${note}</div></div>`).join('')}</div>
-    <div class="dashboard-columns"><section class="panel"><div class="panel-head"><h2>最近的預購 <small>RECENT PREORDERS</small></h2><button class="text-button" data-action="navigate" data-view="customers">查看全部 →</button></div>${activeOrders.length ? `<div class="table-scroll"><table><thead><tr><th>客戶／預購編號</th><th>件數</th><th>預估金額</th><th>預購時間</th><th></th></tr></thead><tbody>${activeOrders.slice(0,6).map(o=>`<tr><td><div class="customer-cell"><span class="avatar">${esc(o.name.slice(-1))}</span><span><strong>${esc(o.name)}</strong><small>${esc(o.code)}</small></span></div></td><td class="number">${o.quantity}</td><td class="money">${money(o.total)}</td><td><small>${date(o.updated_at)} ${time(o.updated_at)}</small></td><td><button class="text-button" data-action="order" data-id="${o.id}">查看</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">還沒有收到預購，客戶送出後就會顯示在這裡</td></tr>'}</tbody></table></div>` : '<div class="empty">尚未收到預購</div>'}</section>
+    <section class="panel care-dashboard" id="care-reminders"><div class="panel-body">正在整理客戶聯繫提醒…</div></section><div class="dashboard-columns"><section class="panel"><div class="panel-head"><h2>最近的預購 <small>RECENT PREORDERS</small></h2><button class="text-button" data-action="navigate" data-view="customers">查看全部 →</button></div>${activeOrders.length ? `<div class="table-scroll"><table><thead><tr><th>客戶／預購編號</th><th>件數</th><th>預估金額</th><th>預購時間</th><th></th></tr></thead><tbody>${activeOrders.slice(0,6).map(o=>`<tr><td><div class="customer-cell"><span class="avatar">${esc(o.name.slice(-1))}</span><span><strong>${esc(o.name)}</strong><small>${esc(o.code)}</small></span></div></td><td class="number">${o.quantity}</td><td class="money">${money(o.total)}</td><td><small>${date(o.updated_at)} ${time(o.updated_at)}</small></td><td><button class="text-button" data-action="order" data-id="${o.id}">查看</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">還沒有收到預購，客戶送出後就會顯示在這裡</td></tr>'}</tbody></table></div>` : '<div class="empty">尚未收到預購</div>'}</section>
     <aside class="dashboard-right"><section class="panel"><div class="panel-head"><h2>這一趟的行程</h2><span class="pill">${labels[campaign.status]}</span></div><div class="panel-body"><ol class="timeline"><li class="${campaign.status==='open'?'current':''}">選物開放預購<small>讓客人慢慢挑，先把喜歡記下</small></li><li class="${campaign.status==='closed'?'current':''}">整理採買清單<small>${campaign.status==='draft'?'請設定預購截止時間':'預計 '+date(campaign.closesAt)+' 結單'}</small></li><li class="${campaign.status==='purchasing'?'current':''}">出發韓國，親自採買<small>依規格記錄買到與缺貨</small></li><li class="${campaign.status==='arrived'?'current':''}">到台清點，聯絡客人<small>回台後再通知付款與交付</small></li></ol><div class="trip-note">${cloud?'請先上架商品並設定 LINE 登入，再開放預購':'本機資料保存在這台電腦'} 選物與日期可在活動與設定調整</div></div></section>
     <section class="progress-panel"><div class="progress-head"><h2>採買進度</h2><strong>${percent}%</strong></div><div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div><div class="progress-text"><span>已買到 ${stats.bought} 件</span><span>待採買 ${stats.remaining} 件</span></div><button class="text-button" data-action="navigate" data-view="procurement" style="padding:17px 0 0">打開採買清單 →</button></section></aside></div>
     <p class="admin-footnote">所有金額為預購參考金額，非已收款，付款與交付仍透過 LINE 人工聯絡</p>`;
+  void renderCareReminders($('#care-reminders'),{request:api});
 }
 
 function renderTablePage(){
@@ -162,7 +166,7 @@ function renderTable(){
 function showOrder(id){
   const o=state.data.orders.find(o=>o.id===id);if(!o)return;
   showModal(`<div class="eyebrow">PREORDER DETAILS / ${esc(o.code)}</div><h2>${esc(o.name)}的預購清單</h2><p>${date(o.created_at)} 建立，共 ${o.quantity} 件選物</p><div class="detail-contact"><div>LINE 暱稱<strong>${esc(o.customer.display_name)}</strong></div><div>聯絡手機<strong>${esc(o.phone||'尚未填寫')}</strong></div><div class="wide">收件資料<strong>${esc(o.customer.delivery||'待客戶補填')}</strong></div></div>
-    ${o.items.map(i=>{const cost=state.data.report.find(r=>r.variant_id===i.variant_id)?.cost;return `<div class="modal-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>售價單價 ${money(i.price)} · 單件進價 ${cost?krw(cost.unitKrw)+' ／ '+costMoney(unitCostTwd(cost)):'未填'}</small><small>需求進價 ${cost?costMoney(costTotal(cost,i.quantity)):'未填'}</small><small>分配買到 ${i.bought} · 確認缺貨 ${i.shortage} · 待處理 ${i.quantity-i.bought-i.shortage}</small></div><div class="right"><span class="money">${money(i.price*i.quantity)}</span> <button class="text-button" data-action="allocate" data-id="${i.id}">分配採購結果</button></div></div>`;}).join('')}<div class="detail-total"><span>預估商品小計，非已收款</span><strong>${money(o.total)}</strong></div><div class="form-actions"><button class="button light" data-action="copy-order" data-id="${o.id}">複製分貨明細</button><button class="button" data-action="close">完成</button></div>`);
+    ${o.items.map(i=>{const cost=state.data.report.find(r=>r.variant_id===i.variant_id)?.cost;return `<div class="modal-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>售價單價 ${money(i.price)} · 單件進價 ${cost?krw(cost.unitKrw)+' ／ '+costMoney(unitCostTwd(cost)):'未填'}</small><small>需求進價 ${cost?costMoney(costTotal(cost,i.quantity)):'未填'}</small><small>分配買到 ${i.bought} · 確認缺貨 ${i.shortage} · 待處理 ${i.quantity-i.bought-i.shortage}</small></div><div class="right"><span class="money">${money(i.price*i.quantity)}</span> <button class="text-button" data-action="allocate" data-id="${i.id}">分配採購結果</button></div></div>`;}).join('')}<div class="detail-total"><span>預估商品小計，非已收款</span><strong>${money(o.total)}</strong></div><div class="form-actions"><button class="button light" data-action="care-customer" data-customer-id="${esc(o.customer_id)}">LINE 聯繫與訂單圖卡</button><button class="button light" data-action="copy-order" data-id="${o.id}">複製分貨明細</button><button class="button" data-action="close">完成</button></div>`);
   const deletion=document.createElement('div');deletion.className='order-delete-action';
   deletion.innerHTML=`<button class="text-button danger-text" data-action="delete-order" data-id="${o.id}" ${orderDeleteBlocked(o)?'disabled':''}>刪除預購</button>${orderDeleteBlocked(o)?'<p>已有採購、缺貨或分配紀錄，請先處理採購與分配再刪除</p>':''}`;
   modal.querySelector('.modal-content').append(deletion);
@@ -332,9 +336,10 @@ document.addEventListener('click',async event=>{
       const id=state.productEditor?.id;
       disposeEditor();productDrafts().remove(id);modal.close();return;
     }
+    if(action==='care-customer'){state.careCustomer=target.dataset.customerId;navigate('care');return;}
     if(action==='navigate'){navigate(target.dataset.view);return;}
-    if(action==='logout'){if(!leaveMerchandising())return;await api('logout',{method:'POST',body:{}});state.data=null;renderLogin();return;}
-    if(action==='refresh'){if(!leaveMerchandising())return;await load();renderShell();toast('已取得最新資料');return;}
+    if(action==='logout'){if(!leavePageEdits())return;await api('logout',{method:'POST',body:{}});state.data=null;renderLogin();return;}
+    if(action==='refresh'){if(!leavePageEdits())return;await load();renderShell();toast('已取得最新資料');return;}
     if(action==='more'){state.limit+=25;renderTable();return;}
     if(action==='order'){showOrder(id);return;}
     if(action==='delete-order'){showDeleteOrder(id);return;}
@@ -392,10 +397,10 @@ document.addEventListener('click',async event=>{
 modal.addEventListener('close',()=>{if(!modal.open){state.productEditor?.flush();disposeEditor();}});
 modal.addEventListener('cancel',event=>{event.preventDefault();closeModal();});
 modal.addEventListener('click',event=>{if(event.target===modal&&!state.productEditor){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)closeModal();}});
-window.addEventListener('beforeunload',event=>{if(state.merchandisingEditor?.dirty()){event.preventDefault();event.returnValue='';}});
+window.addEventListener('beforeunload',event=>{if(state.merchandisingEditor?.dirty()||state.careEditor?.dirty()){event.preventDefault();event.returnValue='';}});
 window.addEventListener('hashchange',()=>{
   const view=location.hash.slice(1);
-  if(state.data&&views[view]&&view!==state.view){if(!leaveMerchandising()||!closeModal()){history.replaceState(null,'','#'+state.view);return;}state.view=view;state.search='';state.limit=25;renderShell();}
+  if(state.data&&views[view]&&view!==state.view){if(!leavePageEdits()||!closeModal()){history.replaceState(null,'','#'+state.view);return;}state.view=view;state.search='';state.limit=25;renderShell();}
 });
 try{
   const me=await api('me');

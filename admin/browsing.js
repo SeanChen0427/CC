@@ -1,4 +1,4 @@
-import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.18';
+import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.19';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const stamp=v=>v?new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(v)):'尚無紀錄';
 const duration=ms=>{const n=Math.floor(ms/1000);return n>=3600?`${Math.floor(n/3600)} 小時 ${Math.floor(n%3600/60)} 分`:n>=60?`${Math.floor(n/60)} 分 ${n%60} 秒`:n?`${n} 秒`:'少於 1 秒';};
@@ -16,7 +16,7 @@ function eventText(e){
   if(e.action==='search'&&e.results!=null)text+=' · '+e.results+' 個結果';
   return text;
 }
-export function mountBrowsing(root,{request,context={},onOrder=()=>{},toast=()=>{}}){
+export function mountBrowsing(root,{request,context={},onOrder=()=>{},onCare=()=>{},toast=()=>{}}){
   const state={days:30,people:[],person:null,detail:null,search:'',filter:'all',busy:false,seq:0};
   const note=`<p class="browse-note">從功能上線後開始記錄，保留最近 180 天，僅含登入後的本站活動 · 停留為前景估算，背景與閒置一分鐘後暫停，斷線或關頁可能缺漏 · 預購結果以「客戶預購」為準</p>`;
   function shell(){
@@ -32,7 +32,7 @@ export function mountBrowsing(root,{request,context={},onOrder=()=>{},toast=()=>
   }
   function advice(d){
     const i=analyzeJourney({...context,person:d.person,events:d.events,interests:d.interests,partial:Boolean(d.nextCursor)});
-    return `<section class="panel browse-advice"><div class="panel-head"><h2>下一步建議</h2><span class="pill">${esc(i.label)}</span></div><div class="panel-body"><h3>${esc(i.title)}</h3><p>${esc(i.next)}</p><div class="browse-facts">${i.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div><ol>${i.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>${i.focus.length?`<p>可先準備：${i.focus.map(p=>esc(p.productCode+' '+p.productName)).join('、')}</p>`:''}${i.lastCart?`<p class="browse-note">最近加購紀錄：${esc(i.lastCart.productCode+' '+i.lastCart.productName)}${i.lastCart.color?' · '+esc(i.lastCart.color+' / '+i.lastCart.size):''} · ${stamp(i.lastCart.at)}，不代表目前購物車</p>`:''}${i.orderId?`<button class="button light" data-browse="order" data-id="${i.orderId}">核對客戶預購</button>`:''}${i.draft?`<label class="field browse-draft">對話草稿，可先修改<textarea id="browse-draft" rows="5" maxlength="2000">${esc(i.draft)}</textarea></label><div class="form-actions"><button class="button" data-browse="copy">複製對話草稿</button><a class="button light" href="https://manager.line.biz/" target="_blank" rel="noopener noreferrer">開啟 LINE 官方帳號</a></div><p class="browse-note">先在官方帳號核對客戶與過往對話，再人工傳送；LINE 暱稱不保證唯一，網站登入不代表好友或可聯繫狀態 · 草稿修改僅保留於本畫面</p>`:''}<p class="browse-note">${esc(i.limit)} · 建議為規則判讀，仍需確認需求，不代表購買意願或流失原因</p></div></section>`;
+    return `<section class="panel browse-advice"><div class="panel-head"><h2>下一步建議</h2><button class="text-button" data-browse="care">LINE 聯繫與提醒 →</button><span class="pill">${esc(i.label)}</span></div><div class="panel-body"><h3>${esc(i.title)}</h3><p>${esc(i.next)}</p><div class="browse-facts">${i.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div><ol>${i.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>${i.focus.length?`<p>可先準備：${i.focus.map(p=>esc(p.productCode+' '+p.productName)).join('、')}</p>`:''}${i.lastCart?`<p class="browse-note">最近加購紀錄：${esc(i.lastCart.productCode+' '+i.lastCart.productName)}${i.lastCart.color?' · '+esc(i.lastCart.color+' / '+i.lastCart.size):''} · ${stamp(i.lastCart.at)}，不代表目前購物車</p>`:''}${i.orderId?`<button class="button light" data-browse="order" data-id="${i.orderId}">核對客戶預購</button>`:''}${i.draft?`<label class="field browse-draft">對話草稿，可先修改<textarea id="browse-draft" rows="5" maxlength="2000">${esc(i.draft)}</textarea></label><div class="form-actions"><button class="button" data-browse="copy">複製對話草稿</button><a class="button light" href="https://manager.line.biz/" target="_blank" rel="noopener noreferrer">開啟 LINE 官方帳號</a></div><p class="browse-note">先在官方帳號核對客戶與過往對話，再人工傳送；LINE 暱稱不保證唯一，網站登入不代表好友或可聯繫狀態 · 草稿修改僅保留於本畫面</p>`:''}<p class="browse-note">${esc(i.limit)} · 建議為規則判讀，仍需確認需求，不代表購買意願或流失原因</p></div></section>`;
   }
   function detail(){
     const d=state.detail,p=d.person,visits=new Map();
@@ -61,6 +61,7 @@ export function mountBrowsing(root,{request,context={},onOrder=()=>{},toast=()=>
   root.addEventListener('click',event=>{
     const button=event.target.closest('[data-browse]');if(!button)return;
     const action=button.dataset.browse;
+    if(action==='care'&&state.detail)onCare(state.detail.person.customerId);
     if(action==='order')onOrder(Number(button.dataset.id));
     if(action==='copy'){
       const field=root.querySelector('#browse-draft');

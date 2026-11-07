@@ -1547,3 +1547,36 @@ dialog::backdrop {
   .browse-events,.browse-interest-list {padding-left:18px;padding-right:18px}
   .browse-visit .panel-head {align-items:start;gap:10px;flex-wrap:wrap}
 }
+.care-dashboard {margin-bottom:24px}
+.care-reminder {display:flex;justify-content:space-between;gap:14px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:14px 0;line-height:1.8}
+.care-reminder strong,.care-reminder span {overflow-wrap:anywhere}
+.care-reminder span {color:#68735d}
+.care-person {padding:24px;margin:18px 0 24px}
+.care-person h2 {margin:0;font-size:22px}
+.care-person p {font-size:13px;line-height:1.9}
+.care-code {display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+.care-code strong {display:inline-block;letter-spacing:1px;margin:0 8px;overflow-wrap:anywhere}
+.care-check {display:flex;flex-direction:row;align-items:center;gap:10px}
+.care-check input {width:auto;min-width:18px;height:18px;margin:0}
+.care-person .form-actions,.care-order .form-actions {flex-wrap:wrap}
+.care-order {margin-bottom:24px}
+.care-stages {display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+.care-stages .button {padding:10px 14px;white-space:normal}
+.care-status {background:#f3f5ed;padding:18px;border-radius:8px;margin-bottom:20px;overflow-wrap:anywhere}
+.care-status strong,.care-status span {display:block;line-height:1.9}
+.care-status span,.care-status p {font-size:12px;color:#68735d}
+#care-message {line-height:1.9;min-height:190px;resize:vertical}
+.care-card-actions {display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--line)}
+.care-card-actions>div {display:flex;gap:10px;flex-wrap:wrap}
+.care-card-actions .button {padding:9px 14px}
+.care-card-preview {display:block;max-width:540px;width:100%;height:auto;margin:20px auto;border:1px solid var(--line);box-shadow:0 12px 28px #2b3b320b}
+.browse-advice .panel-head {flex-wrap:wrap;gap:12px}
+@media(max-width:760px){
+  .browse-advice .panel-head h2 {flex-basis:100%}
+  .care-person {padding:18px}
+  .care-code {align-items:start;flex-direction:column}
+  .care-reminder {flex-direction:column;gap:4px}
+  .care-order .panel-head {align-items:start;gap:12px;flex-wrap:wrap}
+  .care-card-actions {align-items:start}
+  .care-card-actions>div {width:100%}
+}
