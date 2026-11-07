@@ -238,4 +238,4 @@ SQL 交易回滾驗證角色、去重、非法期間與權限通過，正式業�
 
 私有 JSONB 只在首次建立聯繫碼或店主保存作業紀錄時增加 customers[].contact_code／customerCare／orderNotices，沒有新 DDL 或 RPC，不需重設正式資料。圖卡在店主瀏覽器產生，不上傳商品公開 bucket；不新增 Messaging API Token、Push、好友同步或 LINE 付費方案。
 
-Edge v19 ACTIVE。正式管理 API 3 會員／1 預購讀取、匿名／錯誤角色／無效版本／提前匯款拒絕通過；沒有提交有效作業紀錄。Pages 發布與公開檔案核對待補記。不得為測試對正式會員建立代碼、標記已通知、改採購結果或傳訊。
+Edge v19 ACTIVE。正式管理 API 3 會員／1 預購讀取、匿名／錯誤角色／無效版本／提前匯款拒絕通過；沒有提交有效作業紀錄。Pages 46af66261deeefc87400d67b297b058332b713ac／run 42403096138 success，正式 12 個公開檔案逐位元與 dist 一致；前後業務 revision 73、MD5 c1f206d97f33333f81aefa73d477b444 相同，16 商品／1 預購／open 保留，未建立正式 customerCare／orderNotices。不得為測試對正式會員建立代碼、標記已通知、改採購結果或傳訊。

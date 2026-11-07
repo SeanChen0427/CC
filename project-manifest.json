@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42397189994
+    "pagesRun": 42403096138
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "deploy_customer_care_and_verify_live",
+  "nextStep": "owner_match_customer_initiated_LINE_chat_and_use_manual_order_cards",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -125,7 +125,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "5cea239d39cc181db6c789b6a4eaaf2b9b968bc0",
+    "pagesCommit": "46af66261deeefc87400d67b297b058332b713ac",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -162,11 +162,9 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 13,
+    "affectedTestsPassed": 8,
     "affectedTests": [
-      "line-auth",
-      "customer-entry",
-      "existing_suite"
+      "customer-care"
     ],
     "nativeGalleryScrollBrowserChecked": true,
     "galleryZoomAndReturnChecked": true,
@@ -266,7 +264,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.18",
+    "lastLiveFrontendVersion": "0.3.19",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -278,11 +276,16 @@
     "pagesLiveFilesCompared": [
       "index.html",
       "app.js",
-      "runtime.js",
-      "line-auth.js",
+      "line-contact.js",
+      "style.css",
       "admin/index.html",
+      "admin/app.js",
+      "admin/customer-care.js",
+      "admin/order-card.js",
+      "admin/browsing.js",
+      "admin/style.css",
       "admin/runtime.js",
-      "admin/line-auth.js"
+      "admin/line-contact.js"
     ],
     "productSizeCostsBrowserChecked": true,
     "productSizeCostsDraftChecked": true,
@@ -350,8 +353,10 @@
     "customerCareLongNamePaginationChecked": true,
     "customerCareReloadChecked": true,
     "customerCarePhysicalLineSendChecked": false,
-    "liveCustomerCareChecked": false,
-    "liveCustomerCareApiChecked": true
+    "liveCustomerCareChecked": true,
+    "liveCustomerCareApiChecked": true,
+    "liveCustomerCareBusinessDataUnchanged": true,
+    "liveCustomerCareInvalidWriteRejected": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -582,7 +587,7 @@
     "productionOrderApplied": false
   },
   "customerCare": {
-    "status": "implemented_pending_deploy",
+    "status": "live",
     "manualLineOnly": true,
     "firstMessageCustomerSends": true,
     "massMessaging": false,
