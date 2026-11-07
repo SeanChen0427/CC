@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42256918889
+    "pagesRun": 42393225835
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -123,7 +123,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "ad3979475f4f288f2d46ba8387017470bc57674d",
+    "pagesCommit": "f8117a644fff6fd674964693ff48b59a4d8d7976",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -151,7 +151,7 @@
       390,
       768
     ],
-    "edgeVersion": 16,
+    "edgeVersion": 17,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -162,11 +162,10 @@
     "liveSizePricingChecked": true,
     "affectedTestsPassed": 88,
     "affectedTests": [
-      "product-costing",
-      "product-draft",
-      "product-transfer",
-      "product-workbook",
-      "app"
+      "browsing",
+      "app",
+      "cloud",
+      "existing_suite"
     ],
     "nativeGalleryScrollBrowserChecked": true,
     "galleryZoomAndReturnChecked": true,
@@ -266,7 +265,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.15",
+    "lastLiveFrontendVersion": "0.3.16",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -278,14 +277,14 @@
     "pagesLiveFilesCompared": [
       "index.html",
       "app.js",
+      "browsing.js",
+      "style.css",
       "admin/index.html",
       "admin/app.js",
-      "admin/product-cost.js",
-      "admin/product-costing.js",
-      "admin/product-draft.js",
-      "admin/product-export.js",
+      "admin/browsing.js",
       "admin/style.css",
-      "admin/config.json"
+      "admin/config.json",
+      "runtime.js"
     ],
     "productSizeCostsBrowserChecked": true,
     "productSizeCostsDraftChecked": true,
@@ -300,13 +299,30 @@
     "liveSplitProductWorkbookChecked": true,
     "liveSplitProductWorkbookRows": 22,
     "liveSplitProductWorkbookPhotoAnchors": 22,
-    "liveProductSizeCostsBusinessDataUnchanged": true
+    "liveProductSizeCostsBusinessDataUnchanged": true,
+    "browsingForegroundAndIdleChecked": true,
+    "browsingRolePrivacyChecked": true,
+    "browsingDeduplicationChecked": true,
+    "browsingPersistenceChecked": true,
+    "browsingSqlPaginationChecked": true,
+    "browsingBrowserChecked": true,
+    "browsingViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "liveBrowsingApiChecked": true,
+    "liveBrowsingBusinessDataUnchanged": true,
+    "liveBrowsingEventsAtVerification": 0,
+    "liveBrowsingCustomerJourneyChecked": false,
+    "liveBrowsingLoginPageChecked": true
   },
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
     "productionProducts": 16,
-    "productionCustomers": 1,
+    "productionCustomers": 3,
     "productionPreorders": 1,
     "automaticSeed": false
   },
@@ -452,7 +468,7 @@
     ]
   },
   "browsingAnalytics": {
-    "status": "implemented_pending_deployment",
+    "status": "live",
     "firstParty": true,
     "authenticatedOnly": true,
     "adminOnlyRead": true,
@@ -474,7 +490,7 @@
       "apps/admin-web/browsing.js",
       "domain/browsing.mjs",
       "tests/browsing.test.mjs",
-      "supabase/migrations/20261107163703_ccbaby_browsing.sql"
+      "supabase/migrations/20261107164621_ccbaby_browsing.sql"
     ]
   }
 }

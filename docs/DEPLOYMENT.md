@@ -209,10 +209,10 @@ Edge v16 ACTIVE，仍 verify_jwt=false 配合既有自訂 session／角色驗證
 
 ## 0.3.16 客戶瀏覽觀察 — 2026-11-08
 
-Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/browsing.mjs。私有 browsing_events 獨立於 store JSONB，不呼叫業務 revision 提交；migration 為 supabase/migrations/20261107163703_ccbaby_browsing.sql，僅新增表／索引／兩個 SECURITY INVOKER RPC。所有 anon／authenticated／PUBLIC 直接表與函式權限撤銷，service_role 獨享，SQL 每次核對角色／到期／owner，RLS 預設拒絕不建立客戶策略；權限實查符合
+Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/browsing.mjs。私有 browsing_events 獨立於 store JSONB，不呼叫業務 revision 提交；migration 為 supabase/migrations/20261107164621_ccbaby_browsing.sql，僅新增表／索引／兩個 SECURITY INVOKER RPC。所有 anon／authenticated／PUBLIC 直接表與函式權限撤銷，service_role 獨享，SQL 每次核對角色／到期／owner，RLS 預設拒絕不建立客戶策略；權限實查符合
 
-180 天查詢窗與回報時清理，沒有排程或 Messaging API，不改 LINE、Storage、商品／預購及活動。客戶 uses browsing.js、管理 #browsing 使用獨立同名模組，均隨公開版本 cache-bust；不把任何私有紀錄寫入 GitHub。觀察不納入原業務 JSON 備份與報表，需保留超過 180 天或獨立備份另行設計
+180 天查詢窗與回報時清理，沒有排程或 Messaging API，不改 LINE、Storage、商品／預購及活動。客戶使用 browsing.js、管理 #browsing 使用獨立同名模組，均隨公開版本 cache-bust；不把任何私有紀錄寫入 GitHub。觀察不納入原業務 JSON 備份與報表，需保留超過 180 天或獨立備份另行設計
 
-88 項測試、隔離瀏覽器操作及四種寬度通過；SQL 交易已回滾，正式觀察表保持空白，未加入示範客戶。正式 API 管理列表／明細及權限、非法查詢檢查通過，業務雜湊前後不變（16 商品、1 預購、open）。Pages 待發布後補最終結果
+88 項測試、隔離瀏覽器操作及四種寬度通過；SQL 交易已回滾，正式觀察表保持空白，未加入示範客戶。正式 API 管理列表／明細及權限、非法查詢檢查通過，業務雜湊前後不變（16 商品、1 預購、open）。Pages f8117a644fff6fd674964693ff48b59a4d8d7976／[run 42393225835](https://github.com/SeanChen0427/CC/actions/runs/42393225835) 發布成功，正式雙入口與兩端 app／browsing／style 等 10 個公開檔案 HTTP 200 且逐位元符合成品；正式管理登入頁正常，完整帶紀錄互動在隔離環境完成。3 位既有會員仍無新版瀏覽紀錄，沒有模擬正式客戶進站。Migration 檔名已對齊雲端 history version 20261107164621，不重複套用
 
 安全 advisor 僅新增刻意的私有表 [RLS 無 policy 提示](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)，維持預設拒絕；既有 [外洩密碼保護未啟用提示](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) 未變，未更動帳密或登入設定

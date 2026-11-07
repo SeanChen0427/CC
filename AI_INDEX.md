@@ -4,7 +4,7 @@
 
 品牌名稱已確認為 **CCBABY**。
 
-0.3.15 尺寸個別進價及商品表拆列已正式發布，Edge v16／Pages ad39794，正式雙入口與 10 個關鍵檔案及商品匯出驗證通過；交接見 HANDOFF／DEPLOYMENT
+0.3.16 客戶瀏覽觀察已正式發布，Edge v17／Pages f8117a6，88 項測試、隔離操作／手機與正式 API／10 個公開檔案驗證通過；只觀察不發 LINE 訊息，從新版進站後開始累積。交接見 HANDOFF／DEPLOYMENT
 
 任何 AI 工具接手本專案，先從這份索引定位目前狀態與工作文件。
 本索引只負責導覽；產品需求、決策及實作進度各有自己的主文件，不在此另寫第二套規格。
@@ -89,7 +89,7 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 ### 客戶瀏覽觀察（0.3.16）
 
 - [客戶回報與計時](apps/customer-web/browsing.js)、[管理瀏覽紀錄](apps/admin-web/browsing.js)、[共用驗證與彙總](domain/browsing.mjs)
-- [權限／計時／去重／保存驗證](tests/browsing.test.mjs)、[私有表與 service_role RPC](supabase/migrations/20261107163703_ccbaby_browsing.sql)
+- [權限／計時／去重／保存驗證](tests/browsing.test.mjs)、[私有表與 service_role RPC](supabase/migrations/20261107164621_ccbaby_browsing.sql)
 
 ## 4. 索引樹
 
