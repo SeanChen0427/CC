@@ -54,7 +54,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
             if (!body || typeof body !== 'object' || Array.isArray(body)) throw new AppError('資料格式不正確');
           }
           const result = await api({ store, req, role, path: url.pathname, method, body,
-            session: sessionFor(store, req, role), localDir: directory, credentialPath });
+            session: sessionFor(store, req, role), localDir: directory, credentialPath, query:url.searchParams });
           if (result.cookie) { res.setHeader('Set-Cookie', result.cookie); delete result.cookie; }
           if (result.buffer) {
             res.setHeader('Content-Type', result.type);

@@ -1,5 +1,11 @@
 # 架構地圖與樹狀圖
 
+## 0.3.16 客戶瀏覽觀察
+
+客戶 browsing.js（記憶體佇列、白名單事件、前景／閒置計時）→ POST customer/browsing → domain/browsing.mjs 核對角色、時間、商品／規格並剔除任意輸入 → 獨立 browsing_events。雲端使用私有表＋service_role-only ccbaby_browsing_write／read，SQL 再核對 session／owner；不呼叫 ccbaby_commit、不爭用業務 revision。資料表開 RLS、無客戶直連策略；本機 SQLite 新增獨立表與索引，舊資料不改。
+
+管理 #browsing → apps/admin-web/browsing.js → GET admin/browsing（days、customerId、before）。彙總全部符合期間資料後合併所有已登入會員及有效預購狀態，明細按客戶讀取 200＋1 筆、以時間與 UUID 游標繼續，關注商品彙總不受明細分頁影響。時間軸依 visitId 分組，重新整理或 30 分鐘閒置另建造訪。無第三方像素／LINE 訊息，前台用途提示不改登入門檻。
+
 0.3.15 尺寸進價與商品拆列：product-cost.js 共用值／個別尺寸完整進價 → costUpdate.sizeCosts＋全規格版本 → planProductCosts 驗證目前尺寸、成本與衝突 → 兩後端更新原 procurement.cost。新顏色沿用該尺寸一致成本，未指定修改保留舊規格；客戶不含成本。productDisplayRows 按實際售價＋完整成本及有效顏色／尺寸組合拆列，productWorkbook 每列同首圖，xlsx.mjs 重用同圖 bytes，連結跟隨新列；CSV／匯入底稿一款一列，無 DDL
 
 0.3.14 商品來源記錄：商品編輯 sourceUrl → 同分頁草稿白名單 → 共用 productSourceUrl 驗證 → 雲端 products.sourceUrl／本機 products.source_url。僅管理 catalog 與採買報表回傳；客戶 catalog 明確排除此欄。商品／CSV／採買 XLSX 帶來源，xlsx.mjs 建立安全 http(s) 超連結關聯，與首圖 drawing 共存；不請求來源網址、不改採購或預購。新增顏色欄空白，既有規格及草稿照原資料。

@@ -9,6 +9,7 @@ import { mountPurchaseCost } from './purchase-cost.js';
 import { createProductDrafts, watchProductDraft } from './product-draft.js';
 import { mountProductCost } from './product-cost.js';
 import { exportProductExcel } from './product-export.js';
+import { mountBrowsing } from './browsing.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -35,7 +36,7 @@ const paths = {
   check:'<path d="m5 12 4 4L19 6"/>',
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name]||paths.list}</svg>`;
-const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',procurement:'採買清單',settings:'活動與設定'};
+const views={dashboard:'工作總覽',products:'商品管理',customers:'客戶預購',browsing:'瀏覽紀錄',procurement:'採買清單',settings:'活動與設定'};
 const state={view:'dashboard',data:null,search:'',category:'全部分類',limit:25,onlyPending:false,imageEditor:null,productEditor:null};
 const modal=$('#modal');
 let toastTimer;
@@ -79,7 +80,7 @@ function renderLogin(){
   $('#app').innerHTML=`<div class="login-screen"><section class="login-story">${brand()}<div><div class="eyebrow">CURATE WITH CARE</div><h1>商品與採買管理</h1><p>從每一份小小的喜歡，到一張清楚的採買清單， 這一趟，讓預購的每個細節都有自己的位置</p></div><footer>CCBABY / OWNER WORKSPACE</footer><div class="story-number">01</div></section><section class="login-panel"><form class="login-card" id="login-form"><div class="eyebrow">WELCOME TO YOUR WORKSPACE</div><h2>歡迎回來</h2><p>請使用店主專屬帳號登入採購工作台</p><label class="field">管理帳號<input name="username" autocomplete="username" required value="hannah"></label><label class="field">登入密碼<input name="password" type="password" autocomplete="current-password" required placeholder="輸入你的管理密碼"></label><div id="login-error" class="error" role="alert"></div><button class="button" type="submit">登入工作台 ${icon('arrow')}</button><div class="login-note"><span class="pill"><i></i>${cloud ? '店主專屬入口' : '本機工作台'}</span><p>客戶與管理入口各自獨立， 此處只供店主管理商品、預購與採買進度</p></div></form></section></div>`;
   $('#login-form').addEventListener('submit',async event=>{
     event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;$('#login-error').textContent='';
-    try{await api('admin/login',{method:'POST',body:formData(form)});await load();renderShell();restoreProductDraft();}
+    try{await api('admin/login',{method:'POST',body:formData(form)});await load();if(views[location.hash.slice(1)])state.view=location.hash.slice(1);renderShell();restoreProductDraft();}
     catch(error){$('#login-error').textContent=error.message;button.disabled=false;}
   });
 }
@@ -88,8 +89,9 @@ const productCategories=()=>categoryNames(state.data.categories,state.data.produ
 function navigate(view){if(!closeModal())return;state.view=view;state.search='';state.category='全部分類';state.limit=25;state.onlyPending=false;location.hash=view;renderShell();}
 function renderShell(){
   const d=state.data;if(!d)return;
-  $('#app').innerHTML=`<div class="workspace"><aside class="sidebar">${brand()}<div class="nav-label">YOUR WORKSPACE</div><nav class="side-nav" aria-label="管理導覽">${[['dashboard','grid'],['products','bag'],['customers','users'],['procurement','list'],['settings','settings']].map(([id,img])=>`<button data-action="navigate" data-view="${id}" class="${state.view===id?'active':''}">${icon(img)}<span>${views[id]}</span>${id==='products'?`<span class="nav-count">${d.products.length}</span>`:''}</button>`).join('')}</nav><div class="sidebar-bottom"><a class="side-preview" href="${esc(config.customerURL)}" target="_blank" rel="noopener">${icon('external')}預覽客戶選物頁</a><div class="owner"><div class="avatar">S</div><div><div class="owner-name">店主工作室</div><div class="owner-role">OWNER / 唯一管理員</div></div><button class="text-button" data-action="logout">登出</button></div></div></aside><div class="admin-main"><header class="topbar"><div class="breadcrumb"><span>韓國年度採購</span><span>/</span><strong>${views[state.view]}</strong></div><div class="topbar-right"><span>${esc(d.campaign.name)}</span><span class="pill"><i></i>${cloud ? '雲端工作台' : '本機工作台'}</span><button class="text-button" data-action="refresh" aria-label="重新整理資料">更新資料</button><button class="text-button mobile-logout" data-action="logout">登出</button></div></header><main class="admin-content" id="content"></main></div></div>`;
+  $('#app').innerHTML=`<div class="workspace"><aside class="sidebar">${brand()}<div class="nav-label">YOUR WORKSPACE</div><nav class="side-nav" aria-label="管理導覽">${[['dashboard','grid'],['products','bag'],['customers','users'],['browsing','users'],['procurement','list'],['settings','settings']].map(([id,img])=>`<button data-action="navigate" data-view="${id}" class="${state.view===id?'active':''}">${icon(img)}<span>${views[id]}</span>${id==='products'?`<span class="nav-count">${d.products.length}</span>`:''}</button>`).join('')}</nav><div class="sidebar-bottom"><a class="side-preview" href="${esc(config.customerURL)}" target="_blank" rel="noopener">${icon('external')}預覽客戶選物頁</a><div class="owner"><div class="avatar">S</div><div><div class="owner-name">店主工作室</div><div class="owner-role">OWNER / 唯一管理員</div></div><button class="text-button" data-action="logout">登出</button></div></div></aside><div class="admin-main"><header class="topbar"><div class="breadcrumb"><span>韓國年度採購</span><span>/</span><strong>${views[state.view]}</strong></div><div class="topbar-right"><span>${esc(d.campaign.name)}</span><span class="pill"><i></i>${cloud ? '雲端工作台' : '本機工作台'}</span><button class="text-button" data-action="refresh" aria-label="重新整理資料">更新資料</button><button class="text-button mobile-logout" data-action="logout">登出</button></div></header><main class="admin-content" id="content"></main></div></div>`;
   if(state.view==='dashboard')renderDashboard();
+  else if(state.view==='browsing')mountBrowsing($('#content'),{request:api});
   else if(state.view==='settings')renderSettings();
   else renderTablePage();
 }

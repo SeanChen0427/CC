@@ -206,3 +206,13 @@ Edge v16 ACTIVE，仍 verify_jwt=false 配合既有自訂 session／角色驗證
 正式只查目錄、拒絕不存在尺寸／非法來源、驗證匯出及資料雜湊，未提交有效商品修改；當下 16 商品、1 預購、open 保留，下載 XLSX 與本機預期逐位元相同，22 價格列／22 首圖錨點／16 media 檔、全部 XML 可解析。同商品重用照片 bytes，未填／零元及 CSV 格式不變，私有檔仍在忽略的 .local/exports/ccbaby-products-with-photos.xlsx
 
 靜態提交 ad3979475f4f288f2d46ba8387017470bc57674d 已發布，[run 42256918889](https://github.com/SeanChen0427/CC/actions/runs/42256918889) 成功，台北 00:58:00 Pages 回 built／部署 succeed。獨立查詢參數與 no-cache 取得正式雙入口、兩端 app.js、管理 product-cost.js／product-costing.js／product-draft.js／product-export.js／style.css／config.json 共 10 檔皆 HTTP 200，與成品逐位元一致，確認正式 0.3.15 已生效；未重新觸發或取消其他部署
+
+## 0.3.16 客戶瀏覽觀察 — 2026-11-08
+
+Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/browsing.mjs。私有 browsing_events 獨立於 store JSONB，不呼叫業務 revision 提交；migration 為 supabase/migrations/20261107163703_ccbaby_browsing.sql，僅新增表／索引／兩個 SECURITY INVOKER RPC。所有 anon／authenticated／PUBLIC 直接表與函式權限撤銷，service_role 獨享，SQL 每次核對角色／到期／owner，RLS 預設拒絕不建立客戶策略；權限實查符合
+
+180 天查詢窗與回報時清理，沒有排程或 Messaging API，不改 LINE、Storage、商品／預購及活動。客戶 uses browsing.js、管理 #browsing 使用獨立同名模組，均隨公開版本 cache-bust；不把任何私有紀錄寫入 GitHub。觀察不納入原業務 JSON 備份與報表，需保留超過 180 天或獨立備份另行設計
+
+88 項測試、隔離瀏覽器操作及四種寬度通過；SQL 交易已回滾，正式觀察表保持空白，未加入示範客戶。正式 API 管理列表／明細及權限、非法查詢檢查通過，業務雜湊前後不變（16 商品、1 預購、open）。Pages 待發布後補最終結果
+
+安全 advisor 僅新增刻意的私有表 [RLS 無 policy 提示](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)，維持預設拒絕；既有 [外洩密碼保護未啟用提示](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) 未變，未更動帳密或登入設定

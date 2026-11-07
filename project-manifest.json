@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.15",
-  "updatedAt": "2026-11-07",
+  "documentVersion": "0.3.16",
+  "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
@@ -94,7 +94,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "owner_record_size_purchase_costs_and_export_split_product_rows",
+  "nextStep": "observe_authenticated_customer_journeys_without_line_outreach",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -116,11 +116,11 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 83,
+    "integrationTestsPassed": 88,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
-    "date": "2026-11-07",
+    "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
     "pagesCommit": "ad3979475f4f288f2d46ba8387017470bc57674d",
@@ -160,7 +160,7 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 83,
+    "affectedTestsPassed": 88,
     "affectedTests": [
       "product-costing",
       "product-draft",
@@ -449,6 +449,32 @@
       "server/reports.mjs",
       "server/xlsx.mjs",
       "tests/product-source.test.mjs"
+    ]
+  },
+  "browsingAnalytics": {
+    "status": "implemented_pending_deployment",
+    "firstParty": true,
+    "authenticatedOnly": true,
+    "adminOnlyRead": true,
+    "retentionDays": 180,
+    "queryDays": [
+      7,
+      30,
+      180
+    ],
+    "foregroundOnly": true,
+    "idlePauseSeconds": 60,
+    "newVisitIdleMinutes": 30,
+    "flushSeconds": 15,
+    "timelinePageSize": 200,
+    "recordsBeforeRelease": false,
+    "lineOutreach": false,
+    "sourcePaths": [
+      "apps/customer-web/browsing.js",
+      "apps/admin-web/browsing.js",
+      "domain/browsing.mjs",
+      "tests/browsing.test.mjs",
+      "supabase/migrations/20261107163703_ccbaby_browsing.sql"
     ]
   }
 }

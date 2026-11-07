@@ -82,6 +82,13 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY, kind TEXT NOT NULL, subject TEXT NOT NULL,
       detail TEXT NOT NULL, created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS browsing_events (
+      customer_id TEXT NOT NULL REFERENCES customers(id), id TEXT NOT NULL,
+      at TEXT NOT NULL, received_at TEXT NOT NULL, data TEXT NOT NULL,
+      PRIMARY KEY(customer_id,id)
+    );
+    CREATE INDEX IF NOT EXISTS browsing_events_time ON browsing_events(at);
+    CREATE INDEX IF NOT EXISTS browsing_events_customer_time ON browsing_events(customer_id,at,id);
     CREATE TABLE IF NOT EXISTS closing_snapshots (
       id INTEGER PRIMARY KEY, data TEXT NOT NULL, created_at TEXT NOT NULL
     );

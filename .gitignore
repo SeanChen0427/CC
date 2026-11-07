@@ -21,3 +21,6 @@ coverage/
 # Reference UI and local screenshots are not public site assets.
 docs/reference-ui/
 docs/preview-ui/
+
+# Supabase CLI local cache.
+supabase/.temp/

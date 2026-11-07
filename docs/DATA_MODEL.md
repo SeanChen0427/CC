@@ -1,5 +1,15 @@
 # 資料模型與報表規則
 
+## 0.3.16 瀏覽紀錄實際結構
+
+- 雲端 ccbaby_private.browsing_events：customer_id、id UUID（兩者主鍵）、visit_id UUID、occurred_at、received_at、event JSONB；本機 browsing_events 同等欄位，以 data JSON 與 at 保存
+- event 白名單：id、visitId、at、type(page_view/action)、page、activeMs，action、productId／productCode／productName、variantId／color／size、quantity、category、results、option 為核對後選填；不接受客戶識別與任意 detail／URL／表單
+- page_view activeMs 為累計前景停留，重送按相同客戶＋事件 ID upsert，取較大累計值，保持首次事件／商品快照；操作同樣按 ID 去重。日期過舊／未來超限、非法停留、未知事件與商品／規格拒絕，批次最多 20 筆
+- 客戶每分鐘超過 200 個近期事件暫停回報；記憶體佇列最多 200 筆，暫時失敗重試、離站以 keepalive 嘗試補送，不將憑證／觀察佇列放持久本機儲存
+- 觀察保留最近 180 天，查詢以事件開始時間篩選、回報時刪除超期列；不是永久歷史。查詢彙總 visits／pageViews／productViews／activeMs／cartAdds／submits／lastSeen，沒有紀錄的既有會員仍列出
+- 管理明細 keyset：occurred_at DESC、id DESC，每頁最多 200 筆，另取 1 筆判定 nextCursor；商品彙總查全期間。觀察紀錄不改商品／預購／採買、業務異動 events 或報表合計
+- 造訪不等於登入次數；跨重新整理／分頁可能多次，同一 tab 前景與互動計時，背景不算，連續閒置一分鐘截止，30 分鐘後再操作另建造訪。原客戶唯一身分及 12 小時登入不改
+
 ## 0.3.5 實際尺寸定價欄位
 
 - products.basePrice 為基本售價，products.sizeSurcharges 為 [{size, extra}]，未列尺寸不加價，單價 = 基本售價 + 該尺寸加價

@@ -3,6 +3,7 @@ import { art } from './product-art.js';
 import { enterCustomerSite } from './entry.js';
 import { imageForColor, photoIndexForColor } from './product-gallery.js';
 import { mountGallery } from './gallery.js';
+import { mountBrowsingTracker } from './browsing.js';
 import { categoryCounts as countCategories } from './product-categories.js';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
@@ -24,7 +25,19 @@ const paths = {
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.bag}</svg>`;
 const state = { products: [], campaign: null, user: null, profiles: [], category: '全部選物', search: '', limit: 24, cart: [], orders: [], selection: null, submitting: false, pending: null, contactDraft: null, lineConfigured: false, lineChannelId: null };
 const modal = $('#modal');
-let toastTimer;
+let toastTimer, browsing=null, searchTimer;
+function startBrowsing(){
+  browsing?.dispose();
+  browsing=mountBrowsingTracker(async(body,options)=>{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+    try{return await request('customer/browsing',{method:'POST',body,...options,signal:controller.signal});}
+    finally{clearTimeout(timer);}
+  });
+}
+function observe(action,detail={}){browsing?.action(action,detail);}
+function observeVariant(action,variantId,quantity){const pair=getItem(variantId);if(pair)observe(action,{productId:pair.product.id,variantId,quantity});}
+function browsingPrivacy(){setModal(`<div class="modal-copy"><h2>瀏覽紀錄說明</h2><p>登入後，本站會將瀏覽頁面、商品、前景停留與選購操作連結至你的會員身分，供店主了解選購需求與改善服務</p><p>紀錄僅供店主管理查看，保留最近 180 天，不記錄聯絡表單輸入、私人 LINE 對話或站外瀏覽，也不傳送至廣告平台</p><p>停留時間為估算，切到背景或閒置一分鐘後暫停；斷線、關閉瀏覽器等情況可能造成缺漏</p><p>如需詢問或刪除相關紀錄，請透過 LINE 聯絡店主</p><button class="primary-button" data-action="close">知道了</button></div>`,'modal-small');}
+
 state.ready=false;
 state.authRedirecting=false;
 
@@ -32,7 +45,7 @@ async function api(path, options = {}) {
   try { return await request(path, options); }
   catch(error) {
     if(error.status===401){
-      state.user=null;
+      browsing?.dispose();browsing=null;state.user=null;
       if(cloud)renderAuthGate('登入已到期，請重新使用 LINE 登入');else renderHeader();
     }
     throw error;
@@ -102,7 +115,7 @@ function renderHeader() {
     <a href="#shop" class="brand" aria-label="CCBABY 首頁"><span class="brand-mark">${icon('bag')}</span><span><span class="brand-name">CCBABY</span><span class="brand-sub">韓國・日常選物</span></span></a>
     <nav class="header-nav" aria-label="主要頁面"><a href="#shop" class="${tab === 'shop' ? 'active' : ''}">本期選物</a><a href="#orders" class="${tab === 'orders' ? 'active' : ''}">我的預購</a><a href="#shop" data-action="about">預購說明</a></nav>
     <div class="header-actions"><button class="login-button" data-action="${state.user ? 'account' : 'login'}">${icon('user')}<span>${state.user ? esc(state.user.display_name) : '會員登入'}</span></button><a href="#cart" class="cart-icon" aria-label="購物車 ${count} 件">${icon('bag')}${count ? `<span class="count">${count}</span>` : ''}</a></div>
-  </div>`;
+  </div>${state.user?'<div class="browsing-note">本站記錄瀏覽與選購操作，供店主了解需求 <button class="text-button" data-action="browsing-privacy">了解紀錄用途</button></div>':''}`;
   $('#bottom-nav').innerHTML = [['shop','grid','選購'],['cart','bag','購物車'],['orders','list','我的預購']].map(([id, image, name]) =>
     `<a href="#${id}" class="${tab === id ? 'active' : ''}">${icon(image)}<span>${name}</span>${id === 'cart' && count ? `<b class="count">${count}</b>` : ''}</a>`).join('');
 }
@@ -120,7 +133,7 @@ function renderShop() {
       <div class="mobile-filter" id="mobile-categories">${[['全部選物',0],...categoryCounts()].map(([name]) => `<button data-action="category" data-category="${esc(name)}" class="${name === state.category ? 'active' : ''}">${esc(name)}</button>`).join('')}</div>
       <div class="product-grid" id="product-grid"></div><div id="load-more"></div></section>
     </div>${footer()}</div>`;
-  $('#search').addEventListener('input', event => { state.search = event.target.value; state.limit = 24; renderGrid(); });
+  $('#search').addEventListener('input', event => { state.search = event.target.value; state.limit = 24; renderGrid();clearTimeout(searchTimer);searchTimer=setTimeout(()=>observe('search',{results:state.products.filter(p=>(state.category==='全部選物'||p.category===state.category)&&(p.name+' '+p.code).toLocaleLowerCase().includes(state.search.toLocaleLowerCase())).length}),700); });
   renderGrid();
 }
 
@@ -153,6 +166,7 @@ function showProduct(id, retain = false) {
   const product = state.products.find(p => p.id === id);
   if (!product) return toast('商品已更新，請重新選購');
   if (!retain || state.selection?.id !== id) state.selection = { id, color:'', size:'', quantity:1, photoIndex:0 };
+  browsing?.view('product',id);
   const selected = state.selection;
   const colors = [...new Set(product.variants.map(v => v.color))];
   const sizes = [...new Set(product.variants.map(v => v.size))];
@@ -167,7 +181,7 @@ function showProduct(id, retain = false) {
     <div class="option-label">顏色 <span>${esc(selected.color || '請選擇')}</span></div><div class="options">${colors.map(color => `<button class="option ${selected.color===color?'selected':''}" data-action="option" data-option="color" data-value="${esc(color)}">${esc(color)}</button>`).join('')}</div>
     <div class="option-label">尺寸／規格 ${['vest','coat'].includes(product.kind)?'<button class="text-button" data-action="size">尺寸參考</button>':''}</div><div class="options">${sizes.map(size => `<button class="option ${selected.size===size?'selected':''}" data-action="option" data-option="size" data-value="${esc(size)}">${esc(size)}</button>`).join('')}</div>
     <div class="product-cta"><div class="quantity"><button data-action="detail-qty" data-delta="-1" aria-label="減少數量">−</button><span>${selected.quantity}</span><button data-action="detail-qty" data-delta="1" aria-label="增加數量">＋</button></div><button class="primary-button" data-action="add" ${!variant || !openForOrders()?'disabled':''}>${openForOrders() ? variant?'加入購物車 '+money(variant.price*selected.quantity):'請先選擇完整規格':'本期已結單'}</button></div></div></div>`);
-  state.gallery=mountGallery($('.product-gallery'),{index:selected.photoIndex,onChange:index=>{selected.photoIndex=index;}});
+  state.gallery=mountGallery($('.product-gallery'),{index:selected.photoIndex,onChange:index=>{if(index!==selected.photoIndex)observe('photo');selected.photoIndex=index;}});
 }
 
 function showLogin() {
@@ -208,13 +222,16 @@ async function submitOrder(event) {
   const payload = { name:form.elements.namedItem('name').value,phone:form.elements.namedItem('phone').value,items:state.cart.map(i=>({...i})) };
   const signature = JSON.stringify(payload);
   if(state.pending?.signature!==signature) state.pending={signature,requestId:crypto.randomUUID()};
+  observe('submit_attempt');
+  let saved=false;
   state.submitting=true; const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent='正在送出預購…';
   try {
     const result=await api('customer/preorders',{method:'POST',body:{...payload,requestId:state.pending.requestId}});
+    saved=true;observe('submit_success',{quantity:result.added});
     state.cart=[];saveCart();state.pending=null;state.contactDraft=null;
     state.user=(await api('me')).user;renderCart();
     setModal(`<div class="modal-copy"><div class="success-mark">${icon('check')}</div><div class="eyebrow">SAVED FOR YOUR NEXT JOURNEY</div><h2>預購已送出</h2><p>已記下這次的 ${result.added} 件選物，目前不用付款，商品到台後再另行通知</p><div class="success-code">${esc(result.code)}</div><p>結單前還可以繼續追加，所有選物都會整理在同一份預購清單</p><button class="primary-button" data-action="view-orders">查看我的預購 ${icon('arrow')}</button></div>`,'modal-small');
-  } catch(error) { if ($('#submit-error')) $('#submit-error').textContent=error.message; else toast(error.message);button.disabled=false;button.innerHTML='重新送出預購 '+icon('arrow'); }
+  } catch(error) { if(!saved)observe('submit_failure');if ($('#submit-error')) $('#submit-error').textContent=error.message; else toast(error.message);button.disabled=false;button.innerHTML='重新送出預購 '+icon('arrow'); }
   finally {state.submitting=false;}
 }
 
@@ -239,6 +256,7 @@ async function renderOrders() {
 
 function render() {
   if(cloud&&(!state.ready||!state.user))return;
+  browsing?.view(route());
   renderHeader();
   if(route()==='cart')renderCart();
   else if(route()==='orders')renderOrders();
@@ -250,15 +268,17 @@ document.addEventListener('click', async event => {
   if(!target)return;
   const action=target.dataset.action;
   try {
+    if(action==='browsing-privacy'){browsingPrivacy();return;}
     if(action==='close'){modal.close();return;}
     if(action==='category'){
-      state.category=target.dataset.category;state.limit=24;modal.close();renderShop();return;
+      state.category=target.dataset.category;observe('category',{category:state.category});state.limit=24;modal.close();renderShop();return;
     }
     if(action==='product'){showProduct(Number(target.dataset.id));return;}
     if(action==='clear-search'){state.search='';state.category='全部選物';state.limit=24;renderShop();return;}
-    if(action==='more'){state.limit+=24;renderGrid();return;}
+    if(action==='more'){observe('more');state.limit+=24;renderGrid();return;}
     if(action==='photo'){state.gallery?.select(Number(target.dataset.index));return;}
     if(action==='option'){
+      observe(target.dataset.option==='color'?'select_color':'select_size',{option:target.dataset.value});
       state.selection[target.dataset.option]=target.dataset.value;
       if(target.dataset.option==='color'){
         const product=state.products.find(p=>p.id===state.selection.id);
@@ -266,20 +286,20 @@ document.addEventListener('click', async event => {
       }
       showProduct(state.selection.id,true);return;
     }
-    if(action==='detail-qty'){state.selection.quantity=Math.min(99,Math.max(1,state.selection.quantity+Number(target.dataset.delta)));showProduct(state.selection.id,true);return;}
+    if(action==='detail-qty'){observe('detail_quantity');state.selection.quantity=Math.min(99,Math.max(1,state.selection.quantity+Number(target.dataset.delta)));showProduct(state.selection.id,true);return;}
     if(action==='login'){showLogin();return;}
     if(action==='line-login'){await startLineLogin();return;}
     if(action==='reload'){location.reload();return;}
     if(action==='demo-login'){
       target.disabled=true;
       const data=await api('customer/login',{method:'POST',body:{profile:target.dataset.id}});
-      state.user=data.user;state.contactDraft=null;loadCart();modal.close();render();
+      state.user=data.user;state.contactDraft=null;loadCart();startBrowsing();modal.close();render();void browsing?.flush();
       toast('已使用「'+state.user.display_name+'」測試登入');return;
     }
-    if(action==='account'){
+    if(action==='account'){observe('account');
       setModal(`<div class="modal-copy"><div class="eyebrow">YOUR ACCOUNT</div><h2>你好，${esc(state.user.display_name)}</h2><p>${config.demoMode?'目前為本機測試會員':'已使用 LINE 身分登入'}你的預購與購物車會分開保存</p><div class="form-actions"><button class="secondary-button" data-action="logout">登出</button><button class="primary-button" data-action="view-orders">我的預購</button></div></div>`,'modal-small');return;
     }
-    if(action==='logout'){await api('logout',{method:'POST',body:{}});state.user=null;state.cart=[];state.contactDraft=null;modal.close();if(cloud)renderAuthGate('你已登出，請使用 LINE 登入後繼續');else render();return;}
+    if(action==='logout'){observe('logout');void browsing?.flush({keepalive:true});browsing?.dispose();browsing=null;await api('logout',{method:'POST',body:{}});state.user=null;state.cart=[];state.contactDraft=null;modal.close();if(cloud)renderAuthGate('你已登出，請使用 LINE 登入後繼續');else render();return;}
     if(action==='add'){
       if(state.submitting)return;
       if(!state.user){showLogin();return;}
@@ -292,34 +312,34 @@ document.addEventListener('click', async event => {
         if(existing.expectedPrice!==variant.price)throw new Error('商品價格已變更，請先移除舊購物車品項再選購');
         existing.quantity+=quantity;
       }else state.cart.push({variantId:variant.id,quantity,expectedPrice:variant.price});
-      saveCart();modal.close();toast('已放進購物車，記得送出才算預購完成');return;
+      observeVariant('cart_add',variant.id,quantity);saveCart();modal.close();toast('已放進購物車，記得送出才算預購完成');return;
     }
     if(action==='cart-qty'){
       if(state.submitting)return;
       const item=state.cart.find(i=>i.variantId===Number(target.dataset.id));
-      item.quantity=Math.min(99,Math.max(1,item.quantity+Number(target.dataset.delta)));saveCart();renderCart();return;
+      item.quantity=Math.min(99,Math.max(1,item.quantity+Number(target.dataset.delta)));observeVariant('cart_quantity',item.variantId,item.quantity);saveCart();renderCart();return;
     }
-    if(action==='remove'){if(state.submitting)return;state.cart=state.cart.filter(i=>i.variantId!==Number(target.dataset.id));saveCart();renderCart();return;}
+    if(action==='remove'){if(state.submitting)return;observeVariant('cart_remove',Number(target.dataset.id),0);state.cart=state.cart.filter(i=>i.variantId!==Number(target.dataset.id));saveCart();renderCart();return;}
     if(action==='view-orders'){modal.close();if(route()==='orders')renderOrders();else location.hash='orders';return;}
     if(action==='retry'){render();return;}
-    if(action==='about'){
+    if(action==='about'){observe('about');
       event.preventDefault();setModal(`<div class="modal-copy"><div class="eyebrow">A LITTLE NOTE</div><h2>預購說明</h2><p>先把喜歡的商品加入購物車，確認顏色、尺寸與數量後送出預購</p><p>我們會依照清單在韓國採買，實際款式與數量依現場供貨為準，商品到台後才會聯絡付款與交付方式</p><div class="notice">本期結單：${date(state.campaign.closesAt)}，結單前可追加與調整；結單後如需異動，請聯絡店主</div><button class="primary-button" data-action="close">知道了</button></div>`,'modal-small');return;
     }
-    if(action==='zoom'){
+    if(action==='zoom'){observe('zoom');
       const p=state.products.find(p=>p.id===state.selection.id);
       if(target.dataset.index!==undefined)state.selection.photoIndex=Number(target.dataset.index);
       setModal(`<img class="zoom-image" src="${esc(p.images?.[state.selection.photoIndex] || photo(p))}" alt="${esc(p.name)}放大圖"><button class="secondary-button" data-action="back-product" style="margin:15px">返回商品</button>`);return;
     }
     if(action==='back-product'){showProduct(state.selection.id,true);return;}
-    if(action==='size'&&!config.demoMode){setModal(`<div class="modal-copy"><div class="eyebrow">SIZE GUIDE</div><h2>尺寸選擇</h2><p>各款尺寸請以商品說明為準，若不確定尺寸，請透過 LINE 聯絡我們協助挑選</p><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;}
-    if(action==='size'){
+    if(action==='size'&&!config.demoMode){observe('size_guide');setModal(`<div class="modal-copy"><div class="eyebrow">SIZE GUIDE</div><h2>尺寸選擇</h2><p>各款尺寸請以商品說明為準，若不確定尺寸，請透過 LINE 聯絡我們協助挑選</p><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;}
+    if(action==='size'){observe('size_guide');
       setModal(`<div class="modal-copy"><div class="eyebrow">SIZE REFERENCE / CM</div><h2>尺寸選擇</h2><p>本機示範尺寸表，正式上架時請替換為各款實際尺寸</p><table class="size-table"><thead><tr><th>尺寸</th><th>胸圍</th><th>背長</th></tr></thead><tbody><tr><td>S</td><td>33</td><td>23</td></tr><tr><td>M</td><td>39</td><td>28</td></tr><tr><td>L</td><td>43</td><td>30</td></tr><tr><td>XL</td><td>48</td><td>35</td></tr></tbody></table><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;
     }
     if(action==='profile'){
       setModal(`<form id="profile-form" class="modal-copy"><div class="eyebrow">YOUR DETAILS</div><h2>聯絡與收件資料</h2><label class="form-field">聯絡姓名<input name="name" required value="${esc(state.user.name)}"></label><label class="form-field">手機號碼<input name="phone" required inputmode="tel" value="${esc(state.user.phone)}"></label><label class="form-field">收件地址／取貨備註（可稍後填）<textarea name="delivery">${esc(state.user.delivery)}</textarea></label><div class="error-message" id="profile-error" role="alert"></div><div class="form-actions"><button type="button" class="secondary-button" data-action="close">取消</button><button class="primary-button">儲存資料</button></div></form>`,'modal-small');
       $('#profile-form').addEventListener('submit',async e=>{
         e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));
-        try{await api('customer/profile',{method:'PATCH',body:data});state.user=(await api('me')).user;modal.close();render();toast('資料已儲存');}
+        try{await api('customer/profile',{method:'PATCH',body:data});observe('profile_saved');state.user=(await api('me')).user;modal.close();render();toast('資料已儲存');}
         catch(error){$('#profile-error').textContent=error.message;}
       });return;
     }
@@ -327,7 +347,7 @@ document.addEventListener('click', async event => {
       const item=state.orders.flatMap(o=>o.items).find(i=>i.id===Number(target.dataset.id));
       setModal(`<form id="item-form" class="modal-copy"><div class="eyebrow">EDIT PREORDER</div><h2>調整預購數量</h2><p>${esc(item.product_name)} ${esc(item.color)} / ${esc(item.size)}</p><label class="form-field">數量（填 0 取消此品項）<input name="quantity" type="number" min="0" max="999" required value="${item.quantity}"></label><div class="error-message" id="item-error" role="alert"></div><div class="form-actions"><button type="button" class="secondary-button" data-action="close">返回</button><button class="primary-button">儲存變更</button></div></form>`,'modal-small');
       $('#item-form').addEventListener('submit',async e=>{
-        e.preventDefault();try{await api('customer/items/'+item.id,{method:'PATCH',body:{quantity:Number(e.currentTarget.quantity.value)}});modal.close();renderOrders();toast('預購數量已更新');}
+        e.preventDefault();try{await api('customer/items/'+item.id,{method:'PATCH',body:{quantity:Number(e.currentTarget.quantity.value)}});observe('order_quantity',{quantity:Number(e.currentTarget.quantity.value)});modal.close();renderOrders();toast('預購數量已更新');}
         catch(error){$('#item-error').textContent=error.message;}
       });return;
     }
@@ -336,7 +356,7 @@ document.addEventListener('click', async event => {
 document.addEventListener('keydown',event=>{
   if(event.key==='Enter'&&event.target.matches('.product-photo'))showProduct(Number(event.target.dataset.id));
 });
-modal.addEventListener('close',()=>{state.gallery?.dispose();state.gallery=null;});
+modal.addEventListener('close',()=>{if(!modal.open)browsing?.view(route());state.gallery?.dispose();state.gallery=null;});
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
 window.addEventListener('hashchange',()=>{modal.close();render();window.scrollTo(0,0);});
 window.addEventListener('pageshow',event=>{
@@ -352,7 +372,7 @@ try {
     login:channelId=>startLineLogin(channelId,{replace:true}),
     ready:(catalog,me)=>{
       state.products=catalog.products;state.categories=catalog.categories||[];state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
-      state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();
+      if(state.user)startBrowsing();state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();void browsing?.flush();
     },
   });
 }catch(error){

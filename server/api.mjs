@@ -11,6 +11,7 @@ import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
 import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
+import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing, browsingPeople, browsingInterests, browsingPage } from '../domain/browsing.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -116,7 +117,7 @@ function importPreview(store, csv) {
   return previewProductImport(csv, validateProduct, code => store.get('SELECT id FROM products WHERE code=?',code));
 }
 
-export async function api({ store, req, role, path, method, body, session, localDir, credentialPath }) {
+export async function api({ store, req, role, path, method, body, session, localDir, credentialPath, query=new URLSearchParams() }) {
   if (path === '/api/health') return { ok: true, role, database: 'sqlite', localOnly: true };
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
@@ -157,6 +158,31 @@ export async function api({ store, req, role, path, method, body, session, local
     return { ok: true, ...login(store, role, 'owner') };
   }
   requireSession(session);
+
+  if(path==='/api/customer/browsing'&&method==='POST'){
+    const rows=validateBrowsing(body,session,store.catalog());
+    return store.transaction(()=>{
+      if(store.get('SELECT COUNT(*) AS n FROM browsing_events WHERE customer_id=? AND received_at>?',session.subject,new Date(Date.now()-60000).toISOString()).n>200)throw new AppError('瀏覽回報較多，請稍後再試',429);
+      store.run('DELETE FROM browsing_events WHERE at<?',new Date(Date.now()-180*86400000).toISOString());
+      for(const row of rows){
+        const old=store.get('SELECT data FROM browsing_events WHERE customer_id=? AND id=?',session.subject,row.id);
+        const data=old?{...JSON.parse(old.data),activeMs:Math.max(JSON.parse(old.data).activeMs,row.activeMs)}:row;
+        store.run('INSERT INTO browsing_events(customer_id,id,at,received_at,data) VALUES(?,?,?,?,?) ON CONFLICT(customer_id,id) DO UPDATE SET data=excluded.data,received_at=excluded.received_at',session.subject,row.id,data.at,now(),JSON.stringify(data));
+      }
+      return {ok:true};
+    });
+  }
+  if(path==='/api/admin/browsing'&&method==='GET'){
+    requireBrowsingRole(session,'admin');
+    const {days,customerId,before}=browsingQuery(query),since=new Date(Date.now()-days*86400000).toISOString();
+    const events=store.all('SELECT * FROM browsing_events WHERE at>=?',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id,receivedAt:r.received_at}));
+    const people=browsingPeople(summarizeBrowsing(events),store.all('SELECT id,display_name,name FROM customers'),store.orders());
+    if(!customerId)return {people,days,retentionDays:180};
+    const person=people.find(p=>p.customerId===customerId);
+    if(!person)throw new AppError('找不到客戶',404);
+    const own=events.filter(e=>e.customerId===customerId);
+    return {person,days,retentionDays:180,interests:browsingInterests(own),...browsingPage(own,before)};
+  }
 
   if (path === '/api/customer/orders' && method === 'GET') return { orders: store.orders(session.subject), campaign: store.campaign() };
   if (path === '/api/customer/profile' && method === 'PATCH') {

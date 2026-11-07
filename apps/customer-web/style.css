@@ -1646,3 +1646,6 @@ dialog::backdrop {
 .coming-soon { display:grid; place-content:center; text-align:center; color:#4e6350; height:100%; min-height:260px; letter-spacing:.2em; }
 .coming-soon strong {font-size:clamp(30px,4vw,56px);font-family:Georgia,serif;letter-spacing:.05em;}
 .coming-soon span {font-size:12px;margin-top:16px;letter-spacing:.3em;}
+
+.browsing-note {padding:8px 20px;background:#f5f4ee;color:#756b60;text-align:center;font-size:11px;line-height:1.8;overflow-wrap:anywhere}
+.browsing-note .text-button {font-size:11px;text-decoration:underline;padding:0 5px}
