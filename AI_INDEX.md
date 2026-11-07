@@ -1,6 +1,6 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-08（Asia/Taipei）｜版本：0.3.16
+更新：2026-11-08（Asia/Taipei）｜版本：0.3.17
 
 品牌名稱已確認為 **CCBABY**。
 
@@ -90,6 +90,10 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 
 - [客戶回報與計時](apps/customer-web/browsing.js)、[管理瀏覽紀錄](apps/admin-web/browsing.js)、[共用驗證與彙總](domain/browsing.mjs)
 - [權限／計時／去重／保存驗證](tests/browsing.test.mjs)、[私有表與 service_role RPC](supabase/migrations/20261107164621_ccbaby_browsing.sql)
+
+### LINE 跨瀏覽器恢復（0.3.17）
+
+- [短期登入暫存與消耗](shared/line-auth.js)、[跳轉與回呼](shared/runtime.js)、[跨分頁／state／逾時驗證](tests/line-auth.test.mjs)
 
 ## 4. 索引樹
 

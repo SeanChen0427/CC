@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.16",
+  "documentVersion": "0.3.17",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -94,7 +94,7 @@
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md"
   },
-  "nextStep": "observe_authenticated_customer_journeys_without_line_outreach",
+  "nextStep": "verify_real_iphone_external_browser_line_recovery",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -116,7 +116,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 88,
+    "integrationTestsPassed": 94,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -160,11 +160,10 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 88,
+    "affectedTestsPassed": 13,
     "affectedTests": [
-      "browsing",
-      "app",
-      "cloud",
+      "line-auth",
+      "customer-entry",
       "existing_suite"
     ],
     "nativeGalleryScrollBrowserChecked": true,
@@ -316,7 +315,12 @@
     "liveBrowsingBusinessDataUnchanged": true,
     "liveBrowsingEventsAtVerification": 0,
     "liveBrowsingCustomerJourneyChecked": false,
-    "liveBrowsingLoginPageChecked": true
+    "liveBrowsingLoginPageChecked": true,
+    "lineAuthCrossTabBrowserChecked": true,
+    "lineAuthCrossBrowserRecoveryChecked": true,
+    "lineAuthReplayRejected": true,
+    "lineAuthBrowserRecoveryWithoutAutoLogin": true,
+    "lineAuthRealIPhoneChecked": false
   },
   "brandName": "CCBABY",
   "testData": {
@@ -492,5 +496,20 @@
       "tests/browsing.test.mjs",
       "supabase/migrations/20261107164621_ccbaby_browsing.sql"
     ]
+  },
+  "lineLoginRecovery": {
+    "status": "implemented_pending_pages",
+    "attemptTtlMinutes": 10,
+    "sameBrowserNewTabFallback": true,
+    "crossBrowserRequiresNewLogin": true,
+    "retryDisablesAutoLogin": true,
+    "explicitEntry": "https://ccbaby.beecharge.live/?login=browser",
+    "sessionStorageUnchanged": true,
+    "sourcePaths": [
+      "shared/line-auth.js",
+      "shared/runtime.js",
+      "tests/line-auth.test.mjs"
+    ],
+    "realIPhoneVerified": false
   }
 }

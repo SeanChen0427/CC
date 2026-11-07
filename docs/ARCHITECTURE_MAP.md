@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.17 LINE 跨瀏覽器恢復
+
+shared/runtime.js → shared/line-auth.js，依隨機 state 分隔 10 分鐘登入暫存，原分頁 sessionStorage＋同源 localStorage 短期備援；回呼核對 state／時間／verifier／nonce，消耗後 local 僅留到期清理的已用標記，跨分頁舊副本不能重用。其他瀏覽器取不到暫存就停在恢復頁，下一次登入加 disable_auto_login=true；?login=browser 可直接選擇該流程。正式 session、伺服器 code／ID token 驗證與角色分離沿用。只有靜態前端及本機共用檔案路由更新，Supabase Edge 仍 v17，不改資料或登入設定
+
 ## 0.3.16 客戶瀏覽觀察
 
 客戶 browsing.js（記憶體佇列、白名單事件、前景／閒置計時）→ POST customer/browsing → domain/browsing.mjs 核對角色、時間、商品／規格並剔除任意輸入 → 獨立 browsing_events。雲端使用私有表＋service_role-only ccbaby_browsing_write／read，SQL 再核對 session／owner；不呼叫 ccbaby_commit、不爭用業務 revision。資料表開 RLS、無客戶直連策略；本機 SQLite 新增獨立表與索引，舊資料不改。

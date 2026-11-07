@@ -1,5 +1,12 @@
 # 資料模型與報表規則
 
+## 0.3.17 短期 LINE 驗證暫存
+
+- ccbaby.line.attempt.v2.<state>：state、verifier、nonce、at、白名單 returnHash，同瀏覽器 sessionStorage／localStorage；10 分鐘有效、維護最多 8 筆舊紀錄，於後續登入／回呼清理超期值
+- 完成消耗後清除該分頁副本，共用副本覆為 consumed／at，不保留 PKCE 或 nonce；舊版 ccbaby.line.pending 可在原分頁接續，成功消耗即移除
+- ccbaby.line.browser-login.v1 為同分頁重試模式，沒有身分或 Token，成功登入移除；跨瀏覽器不讀別的瀏覽器資料，重新產生 state／PKCE／nonce
+- 原 ccbaby.session.customer.v1／admin.v1 仍只有 sessionStorage，沒有把登入 Token 改放 localStorage；Supabase 業務資料與資料庫 schema 不變
+
 ## 0.3.16 瀏覽紀錄實際結構
 
 - 雲端 ccbaby_private.browsing_events：customer_id、id UUID（兩者主鍵）、visit_id UUID、occurred_at、received_at、event JSONB；本機 browsing_events 同等欄位，以 data JSON 與 at 保存

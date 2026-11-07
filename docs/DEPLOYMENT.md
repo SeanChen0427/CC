@@ -216,3 +216,9 @@ Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/brows
 88 項測試、隔離瀏覽器操作及四種寬度通過；SQL 交易已回滾，正式觀察表保持空白，未加入示範客戶。正式 API 管理列表／明細及權限、非法查詢檢查通過，業務雜湊前後不變（16 商品、1 預購、open）。Pages f8117a644fff6fd674964693ff48b59a4d8d7976／[run 42393225835](https://github.com/SeanChen0427/CC/actions/runs/42393225835) 發布成功，正式雙入口與兩端 app／browsing／style 等 10 個公開檔案 HTTP 200 且逐位元符合成品；正式管理登入頁正常，完整帶紀錄互動在隔離環境完成。3 位既有會員仍無新版瀏覽紀錄，沒有模擬正式客戶進站。Migration 檔名已對齊雲端 history version 20261107164621，不重複套用
 
 安全 advisor 僅新增刻意的私有表 [RLS 無 policy 提示](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)，維持預設拒絕；既有 [外洩密碼保護未啟用提示](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) 未變，未更動帳密或登入設定
+
+## 0.3.17 LINE 外部瀏覽器恢復 — 2026-11-08
+
+只有靜態前端更新，Edge 維持 v17，未改 LINE Channel、session 時限、資料庫、商品或預購。shared/line-auth.js 依 state 短期保存與消耗，來源／build 同步複製兩入口依賴。登入暫存存在 sessionStorage 與同源 localStorage 10 分鐘備援，成功／消耗清除秘密、保留短期已用標記，Token 仍僅各分頁 sessionStorage。跨瀏覽器拒絕無綁定回呼，手動重試與 ?login=browser 使用 disable_auto_login=true，依 [LINE 官方](https://developers.line.biz/en/docs/line-login/how-to-handle-auto-login-failure/) 流程避免反覆失敗，仍核對 state／PKCE／nonce
+
+94 項測試（13 項直接相關）及隔離兩瀏覽器／新分頁／回呼重用／恢復登入／390px 通過；未實際操作使用者 iPhone 或使用真實 LINE 憑證測寫。Pages 待發布後核對，正式驗證只檢查公開成品與恢復參數，不記錄真實 callback query、Token 或登入暫存
