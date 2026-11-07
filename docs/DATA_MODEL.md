@@ -258,3 +258,13 @@ LINE Token 不作報表欄位；驗證所需資料與紀錄最小化。
 - ccbaby_merchandising_read 為 service_role-only、security invoker，SQL 核對 owner session，沿用 browsing_time 索引及 7／30／180 天限制，沒有新增雲端表／直連策略
 - browsing API 增加最小 context（活動階段、截止、預購 id／customer_id／更新時間／數量／缺貨件數），不帶手機或地址；供管理端使用最新預購狀態
 - 排序設定加入既有私有 JSON 業務備份；瀏覽事件仍不加入既有業務匯出。價格與預購快照、採購與分配不變
+
+## 0.3.19 會員聯繫與通知
+
+- customers.contact_code：CC- 加 12 位大寫十六進位，首次本人點入口才建立、重複使用同碼，碰撞重試；不是登入憑證。SQLite nullable 舊資料不回填並設非 null 唯一索引，雲端於 revision 交易檢查唯一
+- 雲端 customerCare[customerId]／本機 customer_care.data：version、chatConfirmed、chatLabel、chatConfirmedAt、followUpAt、followUpNote、updatedAt。僅店主可寫；備註不進客戶 me／orders 或圖片
+- 雲端 orderNotices[orderId]／本機 order_notices.data：version、notices[kind]（status、signature、recordedAt）、updatedAt。kind 為 thanks／purchased／arrived／payment，status 為 pending／sent，sent 僅代表店主人工標記
+- 通知簽章使用明細快照、版本及該階段所需的買到／缺貨／活動階段；更新量或分配後需重新確認，版本與簽章不符回 409，不覆蓋別畫面
+- 本人採購進度依 items.bought／shortage 分配，不取他人或未分配總採買；到台與匯款條件皆為 campaign.arrived 且本人 bought>0，匯款商品小計 sum(bought*歷史售價)
+- 有效訂單才列分析及通知；刪除與零數量排除，歷史作業紀錄仍保留於私有備份。新增作業不變更實際預購／採購／分配數量或已收款狀態
+- 圖卡在瀏覽器暫時產生，不保存在雲端；圖片不含成本與私人聯絡欄位。新聯繫資料加入原私有 JSON 備份，瀏覽事件保存規則不變

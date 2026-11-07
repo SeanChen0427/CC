@@ -6,6 +6,7 @@ import { validateOrderDeletion } from '../domain/order-deletion.mjs';
 import { planProductCosts, costForProductVariant } from '../domain/product-costing.mjs';
 import { sameCost } from '../shared/product-costing.js';
 import { orderedProducts, planProductOrder } from '../domain/merchandising.mjs';
+import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -106,6 +107,26 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   if (path === 'me' && method === 'GET') return { authenticated: Boolean(session), role: session?.role, localOnly: false, profiles: [], user: session?.role === 'customer' ? s.customers.find(c => c.id === session.subject) || null : null };
   const role = path.startsWith('admin/') ? 'admin' : 'customer'; required(session, role);
+  if(path==='customer/line-contact'&&method==='POST'){
+    const customer=s.customers.find(c=>c.id===session.subject);
+    if(!customer)throw new AppError('請重新登入',401);
+    const result=assignContactCode(customer,s.customers);
+    if(result.changed)event(s,'customer.contact-code',customer.id);
+    return result;
+  }
+  if(path==='admin/customer-care'&&method==='GET')return careData(s.customers,orders(s),s.campaign,s.customerCare,s.orderNotices);
+  if(path==='admin/customer-care'&&method==='PUT'){
+    const customer=s.customers.find(c=>c.id===body.customerId);
+    if(!customer)throw new AppError('找不到客戶',404);
+    const care=planCustomerCare(body,s.customerCare?.[customer.id]);
+    s.customerCare={...s.customerCare,[customer.id]:care};event(s,'customer.care',customer.id,{version:care.version});return {ok:true,care};
+  }
+  if(path==='admin/order-notice'&&method==='PUT'){
+    const order=orders(s).find(o=>o.id===body.orderId&&o.quantity>0);
+    if(!order)throw new AppError('找不到有效預購',404);
+    const record=planNotice(body,order,s.campaign,s.customerCare?.[order.customer_id],s.orderNotices?.[order.id]);
+    s.orderNotices={...s.orderNotices,[order.id]:record};event(s,'order.notice',order.id,{kind:body.kind,status:body.status,version:record.version});return {ok:true,record};
+  }
   if (path === 'customer/orders' && method === 'GET') return { campaign: s.campaign, orders: orders(s, session.subject) };
   if (path === 'customer/profile' && method === 'PATCH') {
     const c = s.customers.find(c => c.id === session.subject); if (!c) throw new AppError('請重新登入',401);

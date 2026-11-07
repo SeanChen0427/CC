@@ -13,6 +13,7 @@ import { planProductCosts, costForProductVariant } from '../domain/product-costi
 import { sameCost } from '../shared/product-costing.js';
 import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing, browsingPeople, browsingInterests, browsingPage, browsingContext } from '../domain/browsing.mjs';
 import { orderedProducts, planProductOrder, productSignals, merchandising } from '../domain/merchandising.mjs';
+import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -159,6 +160,41 @@ export async function api({ store, req, role, path, method, body, session, local
     return { ok: true, ...login(store, role, 'owner') };
   }
   requireSession(session);
+
+  if(path==='/api/customer/line-contact'&&method==='POST'){
+    requireBrowsingRole(session,'customer');
+    return store.transaction(()=>{
+      const customer=store.get('SELECT * FROM customers WHERE id=?',session.subject);
+      if(!customer)throw new AppError('請重新登入',401);
+      const result=assignContactCode(customer,store.all('SELECT contact_code FROM customers'));
+      if(result.changed){store.run('UPDATE customers SET contact_code=? WHERE id=?',result.contactCode,session.subject);store.event('customer.contact-code',session.subject,{});}
+      return result;
+    });
+  }
+  if(path==='/api/admin/customer-care'&&method==='GET'){
+    requireBrowsingRole(session,'admin');
+    return careData(store.all('SELECT id,display_name,name,contact_code FROM customers'),store.orders(),store.campaign(),store.careRecords(),store.noticeRecords());
+  }
+  if(path==='/api/admin/customer-care'&&method==='PUT'){
+    requireBrowsingRole(session,'admin');
+    return store.transaction(()=>{
+      const customer=store.get('SELECT id FROM customers WHERE id=?',String(body.customerId||''));
+      if(!customer)throw new AppError('找不到客戶',404);
+      const care=planCustomerCare(body,store.careRecords()[customer.id]);
+      store.run('INSERT INTO customer_care VALUES(?,?) ON CONFLICT(customer_id) DO UPDATE SET data=excluded.data',customer.id,JSON.stringify(care));
+      store.event('customer.care',customer.id,{version:care.version});return {ok:true,care};
+    });
+  }
+  if(path==='/api/admin/order-notice'&&method==='PUT'){
+    requireBrowsingRole(session,'admin');
+    return store.transaction(()=>{
+      const order=store.orders().find(o=>o.id===body.orderId&&o.quantity>0);
+      if(!order)throw new AppError('找不到有效預購',404);
+      const record=planNotice(body,order,store.campaign(),store.careRecords()[order.customer_id],store.noticeRecords()[order.id]);
+      store.run('INSERT INTO order_notices VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET data=excluded.data',order.id,JSON.stringify(record));
+      store.event('order.notice',order.id,{kind:body.kind,status:body.status,version:record.version});return {ok:true,record};
+    });
+  }
 
   if(path==='/api/customer/browsing'&&method==='POST'){
     const rows=validateBrowsing(body,session,store.catalog());
@@ -419,7 +455,7 @@ export async function api({ store, req, role, path, method, body, session, local
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','cost_settings','merchandising_settings','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','cost_settings','merchandising_settings','customer_care','order_notices','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };

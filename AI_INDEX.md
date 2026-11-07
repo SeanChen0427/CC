@@ -1,10 +1,10 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-08（Asia/Taipei）｜版本：0.3.18
+更新：2026-11-08（Asia/Taipei）｜版本：0.3.19
 
 品牌名稱已確認為 **CCBABY**。
 
-0.3.18 銷售協助與店主審閱商品排序已上線，Pages 5cea239／Edge v18；101 項測試、四種螢幕寬度、正式分析 API 與 10 檔核對通過；正式商品、預購與活動狀態保留，排序待店主自行審閱套用
+0.3.19 LINE 人工一對一聯繫、訂單圖卡與服務提醒已完成本機驗證，待正式發布；109 項測試及四種螢幕寬度通過。客戶主動送出第一則訊息，店主核對聊天室後人工傳送；到台後才提供匯款聯繫，無付費推播
 
 任何 AI 工具接手本專案，先從這份索引定位目前狀態與工作文件。
 本索引只負責導覽；產品需求、決策及實作進度各有自己的主文件，不在此另寫第二套規格。
@@ -48,6 +48,7 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 | 本機啟動、登入、操作與驗證 | [LOCAL_PREVIEW.md](docs/LOCAL_PREVIEW.md) | 最新交接及實作對照 |
 | 目標規格與真實完成範圍 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | 規格、程式及驗證紀錄 |
 | 瀏覽資料如何協助銷售與店主審閱排序 | [SALES_PLAYBOOK.md](docs/SALES_PLAYBOOK.md) | SPEC、決策及實作狀態 |
+| LINE 開聊、訂單圖卡、採購／到台與匯款人工提醒 | [CUSTOMER_CARE.md](docs/CUSTOMER_CARE.md) | SPEC、資料、決策及實作狀態 |
 | 最新進度、交棒、未完成工作 | [HANDOFF.md](docs/HANDOFF.md) | CHANGELOG 與 manifest 階段 |
 | AI 工作規則與驗證方式 | [AI_START_HERE.md](docs/AI_START_HERE.md) | 三份工具入口保持一致 |
 
@@ -97,6 +98,11 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 - 研究與操作：[SALES_PLAYBOOK.md](docs/SALES_PLAYBOOK.md)
 - 管理建議 apps/admin-web/browsing-insights.js；排序頁 apps/admin-web/merchandising.js；規則 domain/merchandising.mjs；tests/sales-guidance.test.mjs
 
+### LINE 一對一與訂單服務（0.3.19）
+
+- 操作與範圍：[CUSTOMER_CARE.md](docs/CUSTOMER_CARE.md)
+- 聯繫碼 shared/line-contact.js；規則 domain/customer-care.mjs；管理聯繫 apps/admin-web/customer-care.js；PNG 圖卡 apps/admin-web/order-card.js；驗證 tests/customer-care.test.mjs
+
 ### LINE 跨瀏覽器恢復（0.3.17）
 
 - [短期登入暫存與消耗](shared/line-auth.js)、[跳轉與回呼](shared/runtime.js)、[跨分頁／state／逾時驗證](tests/line-auth.test.mjs)
@@ -123,6 +129,7 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
       ├─ docs/ARCHITECTURE_MAP.md：系統／頁面／目錄樹
       ├─ docs/DATA_MODEL.md：資料與報表規則
       ├─ docs/SALES_PLAYBOOK.md：研究、對話協助及審閱排序
+      ├─ docs/CUSTOMER_CARE.md：一對一開聊、圖卡與服務提醒
       ├─ docs/UI_REFERENCE_AUDIT.md：參考 UI 實測證據
       ├─ docs/AI_START_HERE.md：工作方式與維護規則
       └─ CHANGELOG.md：歷次變更與驗證

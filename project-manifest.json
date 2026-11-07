@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.18",
+  "documentVersion": "0.3.19",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -93,9 +93,10 @@
     "localPreview": "docs/LOCAL_PREVIEW.md",
     "implementationStatus": "docs/IMPLEMENTATION_STATUS.md",
     "deployment": "docs/DEPLOYMENT.md",
-    "salesPlaybook": "docs/SALES_PLAYBOOK.md"
+    "salesPlaybook": "docs/SALES_PLAYBOOK.md",
+    "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_review_sales_guidance_and_product_order",
+  "nextStep": "deploy_customer_care_and_verify_live",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -117,7 +118,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 101,
+    "integrationTestsPassed": 109,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -152,7 +153,7 @@
       390,
       768
     ],
-    "edgeVersion": 18,
+    "edgeVersion": 19,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -337,7 +338,20 @@
     "salesGuidanceUndoBrowserChecked": true,
     "salesGuidanceUnappliedOrderPreserved": true,
     "liveSalesGuidanceFilesChecked": 10,
-    "liveSalesGuidanceBusinessDataUnchanged": true
+    "liveSalesGuidanceBusinessDataUnchanged": true,
+    "customerCareBrowserChecked": true,
+    "customerCareViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "customerCarePngDownloaded": true,
+    "customerCareLongNamePaginationChecked": true,
+    "customerCareReloadChecked": true,
+    "customerCarePhysicalLineSendChecked": false,
+    "liveCustomerCareChecked": false,
+    "liveCustomerCareApiChecked": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -534,7 +548,7 @@
     "ruleBased": true,
     "manualLineOnly": true,
     "outreachSent": false,
-    "storesOutreachStatus": false,
+    "storesOutreachStatus": true,
     "sourcePaths": [
       "docs/SALES_PLAYBOOK.md",
       "apps/admin-web/browsing-insights.js",
@@ -542,7 +556,8 @@
       "domain/merchandising.mjs",
       "tests/sales-guidance.test.mjs",
       "supabase/migrations/20261107173208_ccbaby_merchandising.sql"
-    ]
+    ],
+    "outreachStatusSource": "customerCare"
   },
   "productOrdering": {
     "status": "live_owner_review_required",
@@ -565,5 +580,41 @@
     "previousOrder": true,
     "versioned": true,
     "productionOrderApplied": false
+  },
+  "customerCare": {
+    "status": "implemented_pending_deploy",
+    "manualLineOnly": true,
+    "firstMessageCustomerSends": true,
+    "massMessaging": false,
+    "messagingApiPush": false,
+    "paidLineServicesAdded": false,
+    "stableMemberContactCode": true,
+    "chatMatch": "manual_owner_confirmation",
+    "followUpTimezone": "Asia/Taipei",
+    "reminders": "in_app_on_load_or_refresh",
+    "noticeKinds": [
+      "thanks",
+      "purchased",
+      "arrived",
+      "payment"
+    ],
+    "purchaseRequiresPersonalAllocation": true,
+    "paymentRequiresArrivalAndBoughtAllocation": true,
+    "paymentTracking": false,
+    "noticeVersionAndSignatureGuard": true,
+    "pngSize": [
+      1080,
+      1600
+    ],
+    "pngPagination": true,
+    "privateCardsUploaded": false,
+    "sourcePaths": [
+      "docs/CUSTOMER_CARE.md",
+      "shared/line-contact.js",
+      "domain/customer-care.mjs",
+      "apps/admin-web/customer-care.js",
+      "apps/admin-web/order-card.js",
+      "tests/customer-care.test.mjs"
+    ]
   }
 }

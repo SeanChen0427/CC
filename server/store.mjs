@@ -30,6 +30,12 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     CREATE TABLE IF NOT EXISTS merchandising_settings (
       id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS customer_care (
+      customer_id TEXT PRIMARY KEY REFERENCES customers(id), data TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS order_notices (
+      order_id INTEGER PRIMARY KEY REFERENCES preorders(id), data TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS admin (
       id INTEGER PRIMARY KEY CHECK(id=1), username TEXT NOT NULL UNIQUE,
       salt TEXT NOT NULL, hash TEXT NOT NULL
@@ -97,6 +103,10 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     );
   `);
   upgradePreorders(db);
+  if (!db.prepare('PRAGMA table_info(customers)').all().some(column => column.name === 'contact_code')) {
+    db.exec('ALTER TABLE customers ADD COLUMN contact_code TEXT');
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS customer_contact_code ON customers(contact_code) WHERE contact_code IS NOT NULL');
   if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'image_bindings')) {
     db.exec("ALTER TABLE products ADD COLUMN image_bindings TEXT NOT NULL DEFAULT '[]'");
   }
@@ -137,6 +147,12 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     merchandisingSettings() {
       const row=this.get('SELECT data FROM merchandising_settings WHERE id=1');
       return row?JSON.parse(row.data):{version:0,productIds:[],previousIds:[]};
+    },
+    careRecords() {
+      return Object.fromEntries(this.all('SELECT * FROM customer_care').map(r=>[r.customer_id,JSON.parse(r.data)]));
+    },
+    noticeRecords() {
+      return Object.fromEntries(this.all('SELECT * FROM order_notices').map(r=>[r.order_id,JSON.parse(r.data)]));
     },
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);

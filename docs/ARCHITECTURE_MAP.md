@@ -264,3 +264,11 @@ shared/runtime.js → shared/line-auth.js，依隨機 state 分隔 10 分鐘登�
 管理 browsing.js → browsing-insights.js，以最新 browsing API 的活動／最小預購摘要搭配期間彙總及已載入時間軸，產生依據、下一步與可複製草稿。僅開 LINE 官方管理首頁，無訊息 API。
 
 管理 #merchandising → GET admin/merchandising → 私有 ccbaby_merchandising_read（SQL 核對 owner session）取得不重複人數 → domain/merchandising.mjs 加入本期有效預購並產生建議。畫面手調草稿 → PUT admin/product-order → 完整上架名單及版本驗證 → 原 JSONB revision 原子提交。雲端 merchandising／本機 merchandising_settings 保存目前與上次順序。customer catalog 只用 orderedProducts 排列公開商品，分析不送客戶。
+
+## 0.3.19 LINE 聯繫與訂單服務
+
+客戶詢問入口 → POST customer/line-contact → domain/customer-care.mjs 本人代碼建立／重用 → shared/line-contact.js 組官方聊天室連結及預填文字 → 客戶親自傳送。只在首次建立代碼寫業務文件；重用不增加雲端 revision，不把網站 Token 或 LINE user ID 放入連結。
+
+管理 #care → GET admin/customer-care（最新有效預購及分配）→ customer-care.js 顯示人工核對、追蹤及四階段通知 → order-card.js 瀏覽器 Canvas 分頁產生 PNG／Blob 下載，文字與圖卡由店主另在 LINE 原生個別聊天室傳送。
+
+PUT admin/customer-care 保存私有聊天室備註及下次提醒；PUT admin/order-notice 依版本、通知簽章、有效明細、分配與到台條件保存人工紀錄。雲端沿用 private JSONB + revision，本機 SQLite 新增欄位與獨立兩表；未加雲端 RPC／表／權限或 LINE Secret。工作總覽另讀相同管理分析，列到期及待處理客戶。

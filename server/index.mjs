@@ -35,6 +35,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
           res.setHeader('Content-Type','application/json');res.end(JSON.stringify({mode:'local',role,demoMode:seed,customerURL:'http://127.0.0.1:'+servers[0].address().port+'/'}));return;
         }
         const sharedFiles={'/runtime.js':'shared/runtime.js','/line-auth.js':'shared/line-auth.js','/product-art.js':'server/art.mjs','/product-gallery.js':'shared/product-gallery.js','/product-pricing.js':'shared/product-pricing.js','/product-categories.js':'shared/product-categories.js',...(role==='admin'?{'/costing.js':'shared/costing.js','/product-costing.js':'shared/product-costing.js'}:{})};
+        sharedFiles['/line-contact.js']='shared/line-contact.js';
         if (sharedFiles[url.pathname]) {
           res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(await readFile(join(ROOT,sharedFiles[url.pathname])));return;
         }

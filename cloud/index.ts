@@ -145,7 +145,7 @@ Deno.serve(async req=>{
     if(path==='admin/campaign'&&body.status==='open'&&!lineConfigured)throw new AppError('請先設定 LINE 登入，再開放預購');
     for(let attempt=0;attempt<5;attempt++){
       const result=operate(state.data,path,method,body,state.session,imagePrefix);
-      if(method==='GET'||(path==='admin/import'&&!body.commit))return json(result);
+      if(method==='GET'||(path==='admin/import'&&!body.commit)||(path==='customer/line-contact'&&result.changed===false))return json(result);
       if(await rpc('ccbaby_commit',{p_revision:state.revision,p_data:state.data,p_hash:hash,p_role:role}))return json(result);
       state=await rpc('ccbaby_load',{p_hash:hash,p_role:role});
       if(!state.session)throw new AppError('請重新登入',401);

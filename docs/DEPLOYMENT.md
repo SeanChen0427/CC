@@ -230,3 +230,12 @@ Edge v18 已發布，新增 service_role-only／security invoker 的 ccbaby_merc
 SQL 交易回滾驗證角色、去重、非法期間與權限通過，正式業務 revision 73、16 商品／1 預購／open 保留。安全 advisor 仍只有既有私有表 RLS 無策略（刻意預設拒絕）及[未啟用外洩密碼檢查](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)；效能提示仍為單列 store 的 owner 外鍵無索引，未為本功能新增廣泛權限。
 
 0.3.18 正式分析 API 店主讀取、匿名／錯誤角色／非法期間／無效排序版本拒絕通過。發布前後 revision 73 與業務雜湊一致，16 商品／1 預購／open，merchandising 尚未設定，無殘留 qa 測試事件。正式查驗僅送出必定拒絕的舊版本，未提交有效排序。
+
+
+## 0.3.19 LINE 一對一與圖卡服務
+
+新增 shared/line-contact.js 靜態模組，前後台建置皆複製；管理新增 customer-care.js 與 order-card.js。Edge 沿用自訂 session、verify_jwt=false 與原子 revision，customer/line-contact 只替本人建立一次代碼，重讀已有代碼不提交 revision；店主的 customer-care／order-notice 需角色、版本、內容簽章與階段核對。
+
+私有 JSONB 只在首次建立聯繫碼或店主保存作業紀錄時增加 customers[].contact_code／customerCare／orderNotices，沒有新 DDL 或 RPC，不需重設正式資料。圖卡在店主瀏覽器產生，不上傳商品公開 bucket；不新增 Messaging API Token、Push、好友同步或 LINE 付費方案。
+
+Edge v19 ACTIVE。正式管理 API 3 會員／1 預購讀取、匿名／錯誤角色／無效版本／提前匯款拒絕通過；沒有提交有效作業紀錄。Pages 發布與公開檔案核對待補記。不得為測試對正式會員建立代碼、標記已通知、改採購結果或傳訊。
