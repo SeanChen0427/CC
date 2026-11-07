@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42393225835
+    "pagesRun": 42394211661
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -123,7 +123,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "f8117a644fff6fd674964693ff48b59a4d8d7976",
+    "pagesCommit": "a16834ff95d7f4ca6dacd89b3af3e7e5bc12e250",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -264,7 +264,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.16",
+    "lastLiveFrontendVersion": "0.3.17",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -276,14 +276,11 @@
     "pagesLiveFilesCompared": [
       "index.html",
       "app.js",
-      "browsing.js",
-      "style.css",
+      "runtime.js",
+      "line-auth.js",
       "admin/index.html",
-      "admin/app.js",
-      "admin/browsing.js",
-      "admin/style.css",
-      "admin/config.json",
-      "runtime.js"
+      "admin/runtime.js",
+      "admin/line-auth.js"
     ],
     "productSizeCostsBrowserChecked": true,
     "productSizeCostsDraftChecked": true,
@@ -320,7 +317,10 @@
     "lineAuthCrossBrowserRecoveryChecked": true,
     "lineAuthReplayRejected": true,
     "lineAuthBrowserRecoveryWithoutAutoLogin": true,
-    "lineAuthRealIPhoneChecked": false
+    "lineAuthRealIPhoneChecked": false,
+    "liveLineRecoveryEntryChecked": true,
+    "liveLineRecoveryRetryChecked": true,
+    "liveLineRecoveryWithoutCodeExchange": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -498,7 +498,7 @@
     ]
   },
   "lineLoginRecovery": {
-    "status": "implemented_pending_pages",
+    "status": "live",
     "attemptTtlMinutes": 10,
     "sameBrowserNewTabFallback": true,
     "crossBrowserRequiresNewLogin": true,

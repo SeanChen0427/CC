@@ -221,4 +221,4 @@ Edge v17 ACTIVE（verify_jwt=false 沿用自訂 session），新增 domain/brows
 
 只有靜態前端更新，Edge 維持 v17，未改 LINE Channel、session 時限、資料庫、商品或預購。shared/line-auth.js 依 state 短期保存與消耗，來源／build 同步複製兩入口依賴。登入暫存存在 sessionStorage 與同源 localStorage 10 分鐘備援，成功／消耗清除秘密、保留短期已用標記，Token 仍僅各分頁 sessionStorage。跨瀏覽器拒絕無綁定回呼，手動重試與 ?login=browser 使用 disable_auto_login=true，依 [LINE 官方](https://developers.line.biz/en/docs/line-login/how-to-handle-auto-login-failure/) 流程避免反覆失敗，仍核對 state／PKCE／nonce
 
-94 項測試（13 項直接相關）及隔離兩瀏覽器／新分頁／回呼重用／恢復登入／390px 通過；未實際操作使用者 iPhone 或使用真實 LINE 憑證測寫。Pages 待發布後核對，正式驗證只檢查公開成品與恢復參數，不記錄真實 callback query、Token 或登入暫存
+94 項測試（13 項直接相關）及隔離兩瀏覽器／新分頁／回呼重用／恢復登入／390px 通過；未實際操作使用者 iPhone 或使用真實 LINE 憑證測寫。Pages a16834ff95d7f4ca6dacd89b3af3e7e5bc12e250／[run 42394211661](https://github.com/SeanChen0427/CC/actions/runs/42394211661) 已成功發布，正式七檔逐位元符合 dist；隔離 Chrome context 的正式恢復入口與 retry 參數驗證通過，未交換真實 code。正式驗證只檢查公開成品與恢復參數，不記錄真實 callback query、Token 或登入暫存

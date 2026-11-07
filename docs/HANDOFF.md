@@ -4,7 +4,7 @@
 
 前次正式資料（0.3.9 唯讀查驗）：13 款商品、1 份預購，活動 open；早期 draft／零預購紀錄僅為歷史，不可據此清空或改回草稿
 
-目前 0.3.16 瀏覽觀察已完成，Edge v17 ACTIVE、私有表與 RPC 及 Pages f8117a6 已發布，run 42393225835 成功，正式雙入口／10 個公開檔案逐位元符合成品。正式唯讀檢查為 16 商品、3 會員、1 預購、open，業務文件 revision 66／雜湊未變；不要清空或更改 LINE／網域
+目前 0.3.17 LINE 跨分頁接續與外部瀏覽器重新登入已發布，Pages a16834f／Edge 仍 v17；94 項測試、隔離雙環境與正式恢復入口／7 檔驗證通過，真實 iPhone 待使用者重試；既有商品、預購與瀏覽觀察保留；run 42394211661 成功，只有靜態前端更新，不改 LINE／網域
 
 ## 正式入口
 
@@ -19,7 +19,7 @@
 
 - 0.3.17 使用者確認 LINE 內可用、轉外部瀏覽器才失效；截圖文案對應原前端驗證暫存缺少／不符／到期分支，無當次回呼資料，未宣稱單一根因
 - 已補 shared/line-auth.js 短期 state 分隔暫存、同瀏覽器新分頁接續、消耗與到期清理，網站 Token 仍僅 sessionStorage；跨瀏覽器必須新登入，恢復按鈕及 ?login=browser 使用 disable_auto_login=true
-- 94 項測試（13 項直接相關）及隔離兩瀏覽器環境已通過：新分頁接續、舊副本拒絕、不同瀏覽器拒絕舊回呼、重試帶參數、新驗證後進站與 390px。僅模擬 LINE 回應，不冒稱實體 iPhone 已驗證。Pages 待本輪發布，Edge／正式資料不改
+- 94 項測試（13 項直接相關）及隔離兩瀏覽器環境已通過：新分頁接續、舊副本拒絕、不同瀏覽器拒絕舊回呼、重試帶參數、新驗證後進站與 390px。僅模擬 LINE 回應，不冒稱實體 iPhone 已驗證。Pages a16834f 已發布，正式七個成品與恢復入口參數驗證通過，Edge／正式資料不改
 
 
 - 0.3.16 客戶登入後觀察選物／商品／購物車／預購頁、分類／搜尋結果數／規格／照片／加購／送單等白名單事件，前景累計停留，初次與每 15 秒回報；背景／閒置一分鐘暫停、重整／閒置 30 分鐘另建造訪
@@ -163,3 +163,6 @@
 0.3.13 正式驗證：Edge v14 ACTIVE，Pages c09c214c7f043974247c6b67a1b015171671ee0e 發布成功；正式 index 使用 0.3.13，app.js／product-export.js 與建置成品逐位元一致。13 款商品／13 首圖 XLSX 四表、全部 XML／關聯與 144px JPEG 可讀；以 LibreOffice 重開渲染確認圖片、繁體中文、空白金額與表格排版。正式照片跨來源 canvas CORS 可用；POST 匿名、錯誤入口及缺縮圖拒絕，完整下載與本機預期檔一致，發布／下載前後業務文件雜湊一致（13 商品、1 預購、open）。未改商品、成本或預購。新版私有檔為 .local/exports/ccbaby-products-with-photos.xlsx，原 ccbaby-products.xlsx 亦同步更新；CSV 不變。隔離 UI 驗證 PNG／JPG／WebP、0 元／空白／無圖、320px 無水平溢出，75 項測試通過，隔離服務已停止。
 
 0.3.16 正式驗證（2026-11-08）：Edge v17 ACTIVE；Pages f8117a644fff6fd674964693ff48b59a4d8d7976、Actions run 42393225835 成功。正式客戶及管理 index／app／browsing／style、管理 config 與 runtime 共 10 檔 HTTP 200、逐位元符合 dist；正式瀏覽 API 管理清單與明細可讀，3 位既有會員、0 筆觀察，匿名／錯誤角色／非法查詢拒絕，正式管理登入頁正常。完整帶紀錄操作與四種寬度於隔離環境驗證，沒有在正式站模擬客戶瀏覽或送單；業務文件 MD5、revision 66 全程一致，16 商品、1 預購、open 保留。SQL 去重／角色／200 筆游標與全期間彙總驗證均在交易內回滾，無測試殘留。Migration 檔名已與雲端 schema_migrations 20261107164621 對齊，不可再次套用。隔離預覽服務本輪結束時停止
+
+
+0.3.17 正式驗證：Pages a16834ff95d7f4ca6dacd89b3af3e7e5bc12e250／run 42394211661 success。客戶 index／app／runtime／line-auth 與管理 index／runtime／line-auth 共七檔 HTTP 200、逐位元符合 dist。隔離 Chrome context 於正式網址確認 ?login=browser、無效測試回呼恢復按鈕與 disable_auto_login=true，正確 channel／PKCE 參數與回呼 query 清除；授權頁攔截、不交換真實 code、不用客戶身分、不新增正式紀錄。實體 iPhone／LINE 往返待使用者重試，未宣稱已恢復。隔離服務已停止

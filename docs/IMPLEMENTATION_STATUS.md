@@ -2,7 +2,7 @@
 
 ## 0.3.17 LINE 回站恢復
 
-同瀏覽器新分頁短期接續、跨瀏覽器獨立重新登入及停用 auto login 的恢復入口已實作，保留 state／PKCE／nonce、10 分鐘限制與網站 sessionStorage。94 項測試（13 項直接相關）及隔離兩環境瀏覽器流程、390px 通過；正式 Pages 發布後補結果，實體 iPhone 往返仍待重試。Supabase Edge 保持 v17，未修改正式商品／預購或 LINE 設定
+同瀏覽器新分頁短期接續、跨瀏覽器獨立重新登入及停用 auto login 的恢復入口已實作，保留 state／PKCE／nonce、10 分鐘限制與網站 sessionStorage。94 項測試（13 項直接相關）及隔離兩環境瀏覽器流程、390px 通過；Pages a16834f 已發布，正式七個成品及恢復入口／retry 參數核對通過，實體 iPhone 往返仍待重試。Supabase Edge 保持 v17，未修改正式商品／預購或 LINE 設定
 
 ## 0.3.16 瀏覽觀察
 
