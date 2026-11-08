@@ -1,5 +1,11 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.22 揭露位置調整 — 2026-11-08
+
+main 57da845、Pages 1b346945544506d3acaf4dd5fba52405e2a3d64e／[run 42449286082](https://github.com/SeanChen0427/CC/actions/runs/42449286082) success。用途短句移到客戶共用頁尾，會員選單另有完整說明入口；頁首不再常駐顯示。只更新靜態前端，Edge 保持 v20，沒有 SQL、LINE、認證、商品、預購或活動操作
+
+120 項測試、47 模組語法與建置、隔離 Chrome 四種寬度三頁面及登入／購物車重載／送單／本人與管理查單通過。正式 13 檔逐位元符合成品；真實匿名入口只讀 customer/line/config 後正常導向 LINE（工具攔截，未交換 code），正式成品搭配攔截的隔離 API 於 390px 驗證三頁面與兩處揭露入口，無頁面錯誤。沒有建立正式示範瀏覽或預購，不冒稱本次實體 iPhone 已驗證
+
 ## 0.3.21 登入等待動畫 — 2026-11-08
 
 main 1357ca1、Pages a56f58ca3042610579593597a8bf072c031d48e4／[run 42448647605](https://github.com/SeanChen0427/CC/actions/runs/42448647605) success。只有客戶靜態介面、可選 async 模組與本地 MP4／海報；Edge 維持 v20，無 SQL、RPC、LINE、session 或正式業務資料操作。本機僅增加 video/mp4 MIME

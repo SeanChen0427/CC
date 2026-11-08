@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42448647605
+    "pagesRun": 42449286082
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -125,7 +125,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "a56f58ca3042610579593597a8bf072c031d48e4",
+    "pagesCommit": "1b346945544506d3acaf4dd5fba52405e2a3d64e",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -267,7 +267,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.21",
+    "lastLiveFrontendVersion": "0.3.22",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -761,7 +761,7 @@
     "pagesRun": 42448647605
   },
   "browsingDisclosure": {
-    "status": "verified_pending_publish",
+    "status": "live_verified",
     "placement": [
       "shared_customer_footer",
       "account_menu"
@@ -783,6 +783,13 @@
     ],
     "pageErrors": 0,
     "cartReloadPreorderAndAdminChecked": true,
-    "physicalIPhoneChecked": false
+    "physicalIPhoneChecked": false,
+    "sourceCommit": "57da845",
+    "pagesCommit": "1b346945544506d3acaf4dd5fba52405e2a3d64e",
+    "pagesRun": 42449286082,
+    "livePublicFilesVerified": 13,
+    "liveAssetsWithIsolatedApiChecked": true,
+    "anonymousLineRedirectChecked": true,
+    "productionBusinessWrites": false
   }
 }
