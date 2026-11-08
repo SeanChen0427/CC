@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42438895329
+    "pagesRun": 42448647605
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "publish_and_verify_login_wait_animation_static_assets",
+  "nextStep": "observe_real_mobile_login_wait_experience_without_forced_animation_delay",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -125,7 +125,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "44860e83aff6f64bef4465cf89e3ee92937637b3",
+    "pagesCommit": "a56f58ca3042610579593597a8bf072c031d48e4",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -267,7 +267,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.20",
+    "lastLiveFrontendVersion": "0.3.21",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -279,21 +279,17 @@
     "pagesLiveFilesCompared": [
       "index.html",
       "app.js",
+      "style.css",
+      "login-animation.js",
+      "assets/login-run.mp4",
+      "assets/login-run-poster.webp",
       "entry.js",
       "runtime.js",
       "line-auth.js",
-      "style.css",
-      "config.json",
-      "gallery.js",
-      "browsing.js",
-      "line-contact.js",
-      "product-art.js",
-      "product-gallery.js",
-      "product-categories.js",
       "admin/index.html",
       "admin/app.js",
       "admin/runtime.js",
-      "admin/config.json"
+      "admin/style.css"
     ],
     "productSizeCostsBrowserChecked": true,
     "productSizeCostsDraftChecked": true,
@@ -369,7 +365,9 @@
     "liveLoginEntryOnlyConfigChecked": true,
     "liveLoginBootstrapAuthorizationChecked": true,
     "liveLoginPerformanceFilesChecked": true,
-    "liveConcurrentOwnerChangePreserved": true
+    "liveConcurrentOwnerChangePreserved": true,
+    "syntaxModules": 47,
+    "liveLoginAnimationChecked": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -678,7 +676,7 @@
   },
   "designPreviews": {
     "goldenRetrieverLogin": {
-      "status": "approved_native_video_integrated_pending_deployment",
+      "status": "approved_native_video_published",
       "interpolatedMotionAccepted": false,
       "motionReplacementModel": "byte-plus-seedance-2",
       "motionReplacementDurationSeconds": 4,
@@ -711,7 +709,7 @@
     }
   },
   "loginAnimation": {
-    "status": "isolated_verification_passed_pending_pages_deployment",
+    "status": "live_verified",
     "approvedVideoHistoryId": "O6PzyuFwKIcPvFZx94HQ",
     "approvedResourceId": "hjNaPSMsXSVtffuGIKlv",
     "originalCopyAndControlsPreserved": true,
@@ -750,7 +748,16 @@
       "fastEntrySkipsVideoRequest": true,
       "originalCancelAndRecoveryCopyPreserved": true,
       "cartReloadAndPreorderAndAdminChecked": true,
-      "physicalIPhoneChecked": false
-    }
+      "physicalIPhoneChecked": false,
+      "livePublicFilesVerified": 13,
+      "liveViewport": 390,
+      "liveVideoPlayed": true,
+      "liveOriginalTextPreserved": true,
+      "liveLineRedirectChecked": true,
+      "productionBusinessWrites": false
+    },
+    "sourceCommit": "1357ca1",
+    "pagesCommit": "a56f58ca3042610579593597a8bf072c031d48e4",
+    "pagesRun": 42448647605
   }
 }

@@ -1,5 +1,11 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.21 登入等待動畫 — 2026-11-08
+
+main 1357ca1、Pages a56f58ca3042610579593597a8bf072c031d48e4／[run 42448647605](https://github.com/SeanChen0427/CC/actions/runs/42448647605) success。只有客戶靜態介面、可選 async 模組與本地 MP4／海報；Edge 維持 v20，無 SQL、RPC、LINE、session 或正式業務資料操作。本機僅增加 video/mp4 MIME
+
+正式 13 檔逐位元符合建置，含 MP4／海報、可選模組及客戶／管理入口；390px 原「正在確認 LINE 登入…」保留、影片可自動播放、無溢出或頁面錯誤，客戶只查公開 LINE 設定後正常導向 LINE。導向在驗證工具攔截，未交換真實 code 或建立正式示範資料。隔離九種登入／媒體情境及購物車、送單、本人與管理查單已通過；實體 iPhone 的本次網站播放與 LINE 往返仍待實際觀察
+
 ## 0.3.20 登入效能 — 2026-11-08
 
 Edge v20 ACTIVE、main ec7c4d4、Pages 44860e83aff6f64bef4465cf89e3ee92937637b3／[run 42438895329](https://github.com/SeanChen0427/CC/actions/runs/42438895329) success。無 DDL／RPC／LINE 設定或主機區域調整；verify_jwt=false 與原自訂 session 沿用。customer/bootstrap 需客戶 session，只回本人資料及受保護商品；exchange 選填 includeStartup，原呼叫者與 me／catalog 保持相容。前端只內嵌原公開設定並預載必要模組，17 個公開成品、18 個 Edge 來源一致，正式權限拒絕與管理唯讀通過
