@@ -1,4 +1,4 @@
-import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.20';
+import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.21';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const stamp=v=>v?new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(v)):'尚無紀錄';
 const duration=ms=>{const n=Math.floor(ms/1000);return n>=3600?`${Math.floor(n/3600)} 小時 ${Math.floor(n%3600/60)} 分`:n>=60?`${Math.floor(n/60)} 分 ${n%60} 秒`:n?`${n} 秒`:'少於 1 秒';};

@@ -1,11 +1,11 @@
-import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.20';
-import { art } from './product-art.js?v=0.3.20';
-import { enterCustomerSite } from './entry.js?v=0.3.20';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.20';
-import { mountGallery } from './gallery.js?v=0.3.20';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.20';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.20';
-import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.20';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.21';
+import { art } from './product-art.js?v=0.3.21';
+import { enterCustomerSite } from './entry.js?v=0.3.21';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.21';
+import { mountGallery } from './gallery.js?v=0.3.21';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.21';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.21';
+import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.21';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -59,7 +59,7 @@ function renderAuthGate(message, { loading=false, reload=false } = {}) {
   if(modal.open)modal.close();
   $('#header').innerHTML='';$('#bottom-nav').innerHTML='';
   const description=message||'登入後即可進入本期選物';
-  $('#main').innerHTML=`<section class="auth-gate"><div class="eyebrow">CCBABY</div><h1>${loading?'正在開啟 LINE 登入':'請先使用 LINE 登入'}</h1><p>${esc(description||'登入後即可進入本期選物')}</p>${!loading&&state.lineConfigured?`<button class="primary-button" data-action="line-login">${browserLineLoginRequired()?'在此瀏覽器重新登入 LINE':'使用 LINE 登入'}</button>`:''}${reload?'<button class="secondary-button" data-action="reload">重新載入</button>':''}</section>`;
+  $('#main').innerHTML=`<section class="auth-gate"><div class="eyebrow">CCBABY</div>${loading?'<video class="login-animation" data-login-animation data-src="./assets/login-run.mp4" poster="./assets/login-run-poster.webp" width="320" height="238" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>':''}<h1>${loading?'正在開啟 LINE 登入':'請先使用 LINE 登入'}</h1><p>${esc(description||'登入後即可進入本期選物')}</p>${!loading&&state.lineConfigured?`<button class="primary-button" data-action="line-login">${browserLineLoginRequired()?'在此瀏覽器重新登入 LINE':'使用 LINE 登入'}</button>`:''}${reload?'<button class="secondary-button" data-action="reload">重新載入</button>':''}</section>`;
 }
 
 async function startLineLogin(channelId=state.lineChannelId, { replace=false } = {}) {
