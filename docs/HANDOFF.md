@@ -1,6 +1,17 @@
 # 最新交接狀態
 
-## 0.3.24 LINE 訂單通知：網站／Edge 已發布，發訊待憑證啟用 — 2026-11-09
+## 0.3.24 LINE 發訊已授權並啟用 — 2026-11-09
+
+- 使用者明確回答「同意簽發、保存並啟用」，已完成 @445yxcey／Messaging API channel 2012401045 的新 Access Token 簽發及 CCBABY Supabase Secrets 保存，LINE_NOTIFICATIONS_ENABLED=true。不得再次詢問此項授權
+- 憑證只在官方 UI 的記憶體中移交指定 Supabase 專案，未寫入 Git、前端、檔案、日誌或聊天；沒有更換 LINE Login Secret、升級方案、啟用 webhook 或改選單／歡迎／回覆
+- 正式 health 200、lineConfigured=true、lineNotificationsConfigured=true；店主 admin/customer-care 200，LINE 真實核對 @445yxcey 後回傳 configured=true、available=true、limit=200、used=0、remaining=200。驗證登入隨即登出，未呼叫真實 Push
+- 下單／追加自動通知與到台逐位確認已啟用，額度不足仍提供複製人工傳送；沒有補發舊訂單或建立測試預購。手機實際收訊尚未驗收，不把額度連線查驗寫成送達證明
+- 啟用後唯讀 revision 91／business MD5 4e7fcb6ba7137f6002adb030a0259877，16 商品／3 會員／1 預購／open、0 通知工作，與發布前一致。Edge v22 與 Pages 58a9486 沿用，未重新發布程式
+- 正式 IAB 管理登入後開啟「客戶聯繫」，畫面顯示「本月已使用 0／200 則，剩餘 200 則」與人工備援說明；完成截圖 /private/tmp/ccbaby-line-notifications-enabled.png 只取標題／額度區，不含客戶明細或憑證，不提交 Git。驗證頁已按登出並關閉
+- LINE 新簽發頁已關閉，未提交重新簽發；Supabase UI 保存後長時間停 Saving／重載空白，但正式 Edge 已讀取並成功驗證該憑證及實際額度，因此不再重新簽發或重存。Chrome 擴充控制逾時，原生操作以 setValue 欄位有效；不要反覆重按 Issue
+
+
+## 0.3.24 發布／啟用前記錄（已由上節啟用結果取代） — 2026-11-09
 
 - D-45：使用者要求先接下單自動通知、到台逐筆確認、額度不足可人工傳送；不自動升級或加購方案。成功提交含追加才建立自動通知，修改單一數量不自動推播；採購／匯款聯繫仍人工
 - 已實作 durable lineNotifications 與訂單同次 revision 保存；提交成功後 EdgeRuntime.waitUntil 嘗試發送，失敗不影響成立。到台 API 驗證 owner、逐筆 confirm、版本／內容簽章及本人實際買到／arrived 階段

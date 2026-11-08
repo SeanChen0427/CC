@@ -1,8 +1,8 @@
 # 跨 AI 工具共用索引
 
-## 0.3.24 LINE 訂單通知（網站／Edge 已發布，待發訊憑證啟用）
+## 0.3.24 LINE 訂單通知（已發布並啟用）
 
-D-45 已授權下單自動通知、到台由店主逐筆確認發送、額度不足轉人工，方案升級由店主自行決定。139 項測試、51 模組語法與隔離 UI 320／390／768／1440px 通過；Edge v22／Pages 58a9486（run 42500024196 success）已發布，正式檔案及業務雜湊核對通過；發訊憑證尚未簽發，啟用狀態見 HANDOFF。LINE 登入身分可直接指定通知對象，不要求新客傳聯繫碼；未新增後台對話收件匣或歷史聊天同步。
+D-45 已授權下單自動通知、到台由店主逐筆確認發送、額度不足轉人工，方案升級由店主自行決定。139 項測試、51 模組語法與隔離 UI 320／390／768／1440px 通過；Edge v22／Pages 58a9486（run 42500024196 success）已發布，正式檔案及業務雜湊核對通過；使用者明確同意後已簽發並僅保存後端，正式 health／店主 API 核對可用、0/200／剩餘 200；手機收訊未測，詳見 HANDOFF。LINE 登入身分可直接指定通知對象，不要求新客傳聯繫碼；未新增後台對話收件匣或歷史聊天同步。
 
 程式：[通知規則](domain/line-notifications.mjs)、[LINE API](server/line-messaging.mjs)、[原子發送](server/line-delivery.mjs)、[通知驗證](tests/line-notifications.test.mjs)；操作與設定見 CUSTOMER_CARE、DEPLOYMENT。
 

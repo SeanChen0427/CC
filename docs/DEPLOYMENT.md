@@ -2,13 +2,13 @@
 
 ## 0.3.24 LINE 發訊設定（正式發布／啟用見 HANDOFF）
 
-Edge v22 ACTIVE；Pages 58a9486cf1640b15ef2c474a564d3403051177eb／[run 42500024196](https://github.com/SeanChen0427/CC/actions/runs/42500024196) success。正式 9 個重點檔及 22 個 Edge 來源一致，health 200，發訊 configured=false；發布後 revision 91／MD5 4e7fcb6ba7137f6002adb030a0259877 保留。LINE 發訊 Token 尚未簽發，需另完成憑證啟用
+Edge v22 ACTIVE；Pages 58a9486cf1640b15ef2c474a564d3403051177eb／[run 42500024196](https://github.com/SeanChen0427/CC/actions/runs/42500024196) success。正式 9 個重點檔及 22 個 Edge 來源一致，health 200，發訊 configured=true；發布及啟用後 revision 91／MD5 4e7fcb6ba7137f6002adb030a0259877 保留。使用者明確同意後已簽發並保存 Token、啟用開關；正式店主 API 取得 available=true、limit=200、used=0、remaining=200，未發真實測試訊息或補發歷史通知
 
 保留既有 ccbaby-api、verify_jwt=false、自訂 session 與 revision RPC，不新增雲端 DDL。部署相對依賴須包含 domain/line-notifications.mjs、server/line-messaging.mjs、server/line-delivery.mjs。新增工作保存在原私有文件，既有商品、會員、預購與活動不得清空或補發歷史訂單。
 
 後端 Supabase Secrets：LINE_MESSAGING_ACCESS_TOKEN（CCbaby Messaging API channel 2012401045 的發訊憑證）、LINE_NOTIFICATIONS_ENABLED=true。LINE Login 原 2012401105 的 ID／Secret 不修改。發訊前核對 bot basicId=@445yxcey、Provider 共用、目前方案與剩餘額度；不將憑證放公開設定、前端、Git、截圖或日誌。發訊憑證建立／移交依工具要求取得具體授權；既有網站發布授權保留。
 
-只用 Push 發送指定通知，本次不啟用 webhook、不變更歡迎／選單／關鍵字、不升級方案。憑證未就緒先保持 disabled，後台顯示人工備援；待啟用後以本人測試帳號驗收，不能對正式客戶補建測試單或發歷史通知。
+只用 Push 發送指定通知，本次不啟用 webhook、不變更歡迎／選單／關鍵字、不升級方案。憑證已就緒且啟用，未來設定失效仍提供人工備援；手機實際收訊由本人帳號驗收，不能對正式客戶補建測試單或發歷史通知。
 
 ## LINE 原生入口設定 — 2026-11-08（選單與回覆已上線）
 
