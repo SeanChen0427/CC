@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.22 揭露入口
+
+customer app.js 的 renderHeader 移除常駐用途列；共用 footer 在登入後顯示用途短句與原 browsing-privacy 操作，會員 account 對話框另提供同操作。沿用 browsingPrivacy 完整說明與既有 browsing.js／後端；只有客戶靜態介面變更，不增加 API 或資料欄位
+
 ## 0.3.21 登入等待動畫
 
 客戶 index 初始等待／app.js 開啟 LINE 等待 → 裝飾性 video／同源海報；login-animation.js 為 async 可選模組，監看等待節點、登入狀態與減少動態效果，150ms 後才開始影片請求。登入 entry.js／runtime.js 不引用或等待此模組；成功渲染、失敗／重試、背景／離開即停止，沒有新增 API、後端、資料或認證依賴。建置沿用 customer-web 靜態複製，管理端不加入動畫；本機 server 僅增加 video/mp4 MIME

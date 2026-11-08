@@ -116,11 +116,11 @@ function renderHeader() {
     <a href="#shop" class="brand" aria-label="CCBABY 首頁"><span class="brand-mark">${icon('bag')}</span><span><span class="brand-name">CCBABY</span><span class="brand-sub">韓國・日常選物</span></span></a>
     <nav class="header-nav" aria-label="主要頁面"><a href="#shop" class="${tab === 'shop' ? 'active' : ''}">本期選物</a><a href="#orders" class="${tab === 'orders' ? 'active' : ''}">我的預購</a><a href="#shop" data-action="about">預購說明</a></nav>
     <div class="header-actions"><button class="login-button" data-action="${state.user ? 'account' : 'login'}">${icon('user')}<span>${state.user ? esc(state.user.display_name) : '會員登入'}</span></button><a href="#cart" class="cart-icon" aria-label="購物車 ${count} 件">${icon('bag')}${count ? `<span class="count">${count}</span>` : ''}</a></div>
-  </div>${state.user?'<div class="browsing-note">本站記錄瀏覽與選購操作，供店主了解需求 <button class="text-button" data-action="browsing-privacy">了解紀錄用途</button></div>':''}`;
+  </div>`;
   $('#bottom-nav').innerHTML = [['shop','grid','選購'],['cart','bag','購物車'],['orders','list','我的預購']].map(([id, image, name]) =>
     `<a href="#${id}" class="${tab === id ? 'active' : ''}">${icon(image)}<span>${name}</span>${id === 'cart' && count ? `<b class="count">${count}</b>` : ''}</a>`).join('');
 }
-const footer = () => `<footer class="footer"><strong>CCBABY</strong><span>韓國親自選物・為日常留一點喜歡</span><span>${config.demoMode ? '本機示範版 / 原創商品示意圖' : '先預購・到台後再通知付款'}</span></footer>`;
+const footer = () => `<footer class="footer"><strong>CCBABY</strong><span>韓國親自選物・為日常留一點喜歡</span><span>${config.demoMode ? '本機示範版 / 原創商品示意圖' : '先預購・到台後再通知付款'}</span>${state.user?'<div class="browsing-note"><span>本站記錄瀏覽與選購操作，供店主了解需求</span><button class="text-button" type="button" data-action="browsing-privacy">了解紀錄用途</button></div>':''}</footer>`;
 
 function renderShop() {
   const close = date(state.campaign.closesAt);
@@ -315,7 +315,7 @@ document.addEventListener('click', async event => {
       toast('已使用「'+state.user.display_name+'」測試登入');return;
     }
     if(action==='account'){observe('account');
-      setModal(`<div class="modal-copy"><div class="eyebrow">YOUR ACCOUNT</div><h2>你好，${esc(state.user.display_name)}</h2><p>${config.demoMode?'目前為本機測試會員':'已使用 LINE 身分登入'}你的預購與購物車會分開保存</p><div class="form-actions"><button class="secondary-button" data-action="logout">登出</button><button class="primary-button" data-action="view-orders">我的預購</button></div></div>`,'modal-small');return;
+      setModal(`<div class="modal-copy"><div class="eyebrow">YOUR ACCOUNT</div><h2>你好，${esc(state.user.display_name)}</h2><p>${config.demoMode?'目前為本機測試會員':'已使用 LINE 身分登入'}你的預購與購物車會分開保存</p><button class="text-button" type="button" data-action="browsing-privacy">瀏覽紀錄與用途</button><div class="form-actions"><button class="secondary-button" data-action="logout">登出</button><button class="primary-button" data-action="view-orders">我的預購</button></div></div>`,'modal-small');return;
     }
     if(action==='logout'){observe('logout');void browsing?.flush({keepalive:true});browsing?.dispose();browsing=null;await api('logout',{method:'POST',body:{}});state.user=null;state.cart=[];state.contactDraft=null;modal.close();if(cloud)renderAuthGate('你已登出，請使用 LINE 登入後繼續');else render();return;}
     if(action==='add'){

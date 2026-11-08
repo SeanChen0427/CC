@@ -567,6 +567,8 @@ svg {
   padding:27px 0 0;
   border-top:1px solid var(--line);
   display:flex;
+  flex-wrap:wrap;
+  gap:12px 20px;
   align-items:center;
   justify-content:space-between;
   color:#a3a596;
@@ -1649,8 +1651,8 @@ dialog::backdrop {
 .coming-soon strong {font-size:clamp(30px,4vw,56px);font-family:Georgia,serif;letter-spacing:.05em;}
 .coming-soon span {font-size:12px;margin-top:16px;letter-spacing:.3em;}
 
-.browsing-note {padding:8px 20px;background:#f5f4ee;color:#756b60;text-align:center;font-size:11px;line-height:1.8;overflow-wrap:anywhere}
-.browsing-note .text-button {font-size:11px;text-decoration:underline;padding:0 5px}
+.browsing-note {flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;color:#756b60;font-size:12px;line-height:1.8}
+.browsing-note .text-button {font-size:12px;min-height:32px;padding:2px 0}
 .line-contact-button {margin:0 0 22px;font-size:13px}
 .line-contact-copy .primary-button,.line-contact-copy .secondary-button {width:100%;margin-top:12px;text-align:center}
 .line-contact-code {padding:16px 18px;margin:20px 0;background:#f0f3e9;border-radius:8px}

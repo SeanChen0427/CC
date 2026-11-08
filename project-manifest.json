@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.21",
+  "documentVersion": "0.3.22",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "observe_real_mobile_login_wait_experience_without_forced_animation_delay",
+  "nextStep": "observe_mobile_experience_and_add_only_owner_confirmed_promotional_copy",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -759,5 +759,30 @@
     "sourceCommit": "1357ca1",
     "pagesCommit": "a56f58ca3042610579593597a8bf072c031d48e4",
     "pagesRun": 42448647605
+  },
+  "browsingDisclosure": {
+    "status": "verified_pending_publish",
+    "placement": [
+      "shared_customer_footer",
+      "account_menu"
+    ],
+    "stickyBanner": false,
+    "fullExplanationPreserved": true,
+    "headerReservedForPromotions": true,
+    "promotionalCopyProvided": false,
+    "viewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "routes": [
+      "shop",
+      "cart",
+      "orders"
+    ],
+    "pageErrors": 0,
+    "cartReloadPreorderAndAdminChecked": true,
+    "physicalIPhoneChecked": false
   }
 }
