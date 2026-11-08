@@ -1,5 +1,15 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.23 店主優惠公告 — 2026-11-08
+
+main ab9c7c1、Pages 404f9715b04451c7104ea22c26f22805a9157c6b／[run 42451234705](https://github.com/SeanChen0427/CC/actions/runs/42451234705) success，Edge v21 ACTIVE、verify_jwt=false 沿用。新增 domain/promotion.mjs 與 admin/promotion PUT，完整 19 個 Edge 相對依賴已發布並逐位元核對；只有原 private JSONB 設定，沒有 Postgres DDL／RPC／權限、LINE、Storage 或登入設定變更
+
+管理「活動與設定」提供優惠文字、顯示開關與預覽；需店主 session 與設定版本，原子 revision 衝突會重讀並重新驗證，不覆蓋其他編輯。舊文件無 promotion 時讀取預設關閉空白且不提交，只有店主實際儲存才新增設定。客戶沿用原受保護 catalog／bootstrap 取得啟用的 {text} 或 null，無新增登入 API 或輪詢
+
+125 項測試、48 模組語法與建置、隔離 Chrome 四種寬度三頁面與完整購物流程通過。正式 13 個公開檔案符合成品；店主 API 讀取與匿名／錯誤角色／舊版本／啟用空白拒絕、實際管理表單四種寬度、120 字／預設關閉空白通過。匿名入口只讀 LINE 設定後正常導向（工具攔截、不交換 code）；正式客戶成品搭配攔截的隔離 API 驗證三頁面公告、純文字與關閉隱藏，頁面錯誤 0。成功管理查驗後登出，沒有提交有效正式優惠或示範預購
+
+發布前後 revision 88／MD5 4e7fcb6ba7137f6002adb030a0259877 相同，16 商品／3 會員／1 預購／open，仍沒有 promotion。店主可自行填實際優惠再開啟；既有商品、價格、預購、活動均保留，實體 iPhone 尚未操作
+
 ## 0.3.22 揭露位置調整 — 2026-11-08
 
 main 57da845、Pages 1b346945544506d3acaf4dd5fba52405e2a3d64e／[run 42449286082](https://github.com/SeanChen0427/CC/actions/runs/42449286082) success。用途短句移到客戶共用頁尾，會員選單另有完整說明入口；頁首不再常駐顯示。只更新靜態前端，Edge 保持 v20，沒有 SQL、LINE、認證、商品、預購或活動操作

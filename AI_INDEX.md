@@ -2,7 +2,7 @@
 
 ## 0.3.23 後台置頂優惠資訊
 
-已接入後台「活動與設定」的優惠文字、顯示開關及預覽，前台登入後顯示置頂公告。驗證／發布見 HANDOFF。共用規則 [domain/promotion.mjs](domain/promotion.mjs)，保存／權限驗證 [tests/promotion.test.mjs](tests/promotion.test.mjs) 及實際 Edge handler [tests/cloud-entry.test.mjs](tests/cloud-entry.test.mjs)
+已接入後台「活動與設定」的優惠文字、顯示開關及預覽，前台登入後顯示置頂公告。125 項測試與購物流程通過，Edge v21／Pages 404f971（run 42451234705 success）已發布，正式 13 檔及 19 個 Edge 來源一致，業務資料保留；詳見 HANDOFF。共用規則 [domain/promotion.mjs](domain/promotion.mjs)，保存／權限驗證 [tests/promotion.test.mjs](tests/promotion.test.mjs) 及實際 Edge handler [tests/cloud-entry.test.mjs](tests/cloud-entry.test.mjs)
 
 ## 0.3.22 瀏覽用途揭露位置調整
 

@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42449286082
+    "pagesRun": 42451234705
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -125,7 +125,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "1b346945544506d3acaf4dd5fba52405e2a3d64e",
+    "pagesCommit": "404f9715b04451c7104ea22c26f22805a9157c6b",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -153,7 +153,7 @@
       390,
       768
     ],
-    "edgeVersion": 20,
+    "edgeVersion": 21,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -265,7 +265,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.22",
+    "lastLiveFrontendVersion": "0.3.23",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -791,7 +791,7 @@
     "productionBusinessWrites": false
   },
   "promotionManagement": {
-    "status": "verified_pending_publish",
+    "status": "live_verified",
     "adminEntry": "settings",
     "api": "PUT admin/promotion",
     "textMaxLength": 120,
@@ -815,6 +815,25 @@
     "integrationTestsPassed": 125,
     "pageErrors": 0,
     "cartReloadPreorderAndAdminChecked": true,
-    "physicalIPhoneChecked": false
+    "physicalIPhoneChecked": false,
+    "sourceCommit": "ab9c7c1",
+    "pagesCommit": "404f9715b04451c7104ea22c26f22805a9157c6b",
+    "pagesRun": 42451234705,
+    "edgeVersion": 21,
+    "livePublicFilesVerified": 13,
+    "edgeSourceFilesVerified": 19,
+    "liveOwnerSettingsChecked": true,
+    "liveOwnerSettingsViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "liveInvalidWritesRejected": true,
+    "liveAssetsWithIsolatedApiChecked": true,
+    "productionBusinessWrites": false,
+    "businessRevisionAtFinalVerification": 88,
+    "businessHashAtFinalVerification": "4e7fcb6ba7137f6002adb030a0259877",
+    "ownerCopyConfigured": false
   }
 }
