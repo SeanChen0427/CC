@@ -123,8 +123,13 @@ test('local contact workflow persists and blocks stale, wrong-role, unallocated 
     data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='purchased').eligible,true);assert.equal(o.notices.find(n=>n.kind==='payment').eligible,false);
     await call('admin','admin/campaign',{name:app.store.campaign().name,status:'arrived',closesAt:app.store.campaign().closesAt},'PUT');
     data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='payment').progress.boughtTotal,item.price);
+    const arrived=o.notices.find(n=>n.kind==='arrived');
+    const sent=await call('admin','admin/line-notification',{orderId:o.id,kind:'arrived',version:o.noticeVersion,signature:arrived.signature,message:arrived.message,confirm:true});
+    assert.equal(sent.status,200);assert.equal(sent.data.notification.reason,'not_configured');
+    assert.equal(app.store.lineNotifications().length,1);
     await app.close();app=await startApp({directory,customerPort:0,adminPort:0,quiet:true});
     const restored=(await call('admin','admin/customer-care')).data;const p=restored.people.find(p=>p.customerId==='demo-anna');
     assert.equal(p.contactCode,contact.contactCode);assert.equal(p.care.chatConfirmed,true);assert.equal(p.next.key,'followup');assert.ok(restored.orders.find(o=>o.customer_id==='demo-anna').notices.find(n=>n.kind==='thanks').done);
+    assert.equal(app.store.lineNotifications()[0].reason,'not_configured');
   }finally{await app.close();await rm(directory,{recursive:true,force:true});}
 });

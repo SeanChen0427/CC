@@ -8,6 +8,7 @@ import { sameCost } from '../shared/product-costing.js';
 import { orderedProducts, planProductOrder } from '../domain/merchandising.mjs';
 import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
 import { promotionSettings,publicPromotion,planPromotion } from '../domain/promotion.mjs';
+import { queueNotification,notificationCareData,orderNoticeForSend,lineRecipient } from '../domain/line-notifications.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -117,11 +118,21 @@ export function operate(s, path, method, body, session, imagePrefix) {
   if(path==='customer/line-contact'&&method==='POST'){
     const customer=s.customers.find(c=>c.id===session.subject);
     if(!customer)throw new AppError('請重新登入',401);
+    if(lineRecipient(customer.id))return {contactCode:null,officialAccountId:'@445yxcey',identified:true,changed:false};
     const result=assignContactCode(customer,s.customers);
     if(result.changed)event(s,'customer.contact-code',customer.id);
     return result;
   }
-  if(path==='admin/customer-care'&&method==='GET')return careData(s.customers,orders(s),s.campaign,s.customerCare,s.orderNotices);
+  if(path==='admin/customer-care'&&method==='GET')return notificationCareData(careData(s.customers,orders(s),s.campaign,s.customerCare,s.orderNotices),s.lineNotifications||[]);
+  if(path==='admin/line-notification'&&method==='POST'){
+    const order=orders(s).find(o=>o.id===body.orderId&&o.quantity>0);
+    if(!order)throw new AppError('找不到有效預購',404);
+    const n=orderNoticeForSend(body,order,s.campaign,s.orderNotices?.[order.id]);
+    const job=queueNotification(s.lineNotifications||=([]),body.kind,order,s.campaign,{message:body.message});
+    if(job.firstPushAt&&body.message!==job.message)throw new AppError('此通知已嘗試發送，請重載原內容後再重試',409);
+    if(!job.firstPushAt&&!['accepted','manual_done','sending'].includes(job.status))job.message=body.message.trim();
+    return {ok:true,notificationId:job.id,signature:n.signature};
+  }
   if(path==='admin/customer-care'&&method==='PUT'){
     const customer=s.customers.find(c=>c.id===body.customerId);
     if(!customer)throw new AppError('找不到客戶',404);
@@ -132,6 +143,10 @@ export function operate(s, path, method, body, session, imagePrefix) {
     const order=orders(s).find(o=>o.id===body.orderId&&o.quantity>0);
     if(!order)throw new AppError('找不到有效預購',404);
     const record=planNotice(body,order,s.campaign,s.customerCare?.[order.customer_id],s.orderNotices?.[order.id]);
+    for(const job of s.lineNotifications||[])if(job.orderId===order.id&&job.kind===body.kind&&job.signature===body.signature){
+      if(job.status==='sending'&&Date.parse(job.leaseUntil)>Date.now())throw new AppError('通知正在發送，請稍後重新載入',409);
+      if(body.status==='sent')job.status='manual_done';
+    }
     s.orderNotices={...s.orderNotices,[order.id]:record};event(s,'order.notice',order.id,{kind:body.kind,status:body.status,version:record.version});return {ok:true,record};
   }
   if (path === 'customer/orders' && method === 'GET') return { campaign: s.campaign, orders: orders(s, session.subject) };
@@ -169,6 +184,7 @@ export function operate(s, path, method, body, session, imagePrefix) {
     Object.assign(o,details,{updated_at:stamp(),version:o.version+1});
     const c=s.customers.find(c => c.id===session.subject); if (!c) throw new AppError('請重新登入',401); Object.assign(c,details);
     const result={ok:true,orderId:o.id,code:o.code,added:[...combined.values()].reduce((a,i)=>a+i.quantity,0)};
+    result.notificationId=queueNotification(s.lineNotifications||=([]),'thanks',orders(s,session.subject).find(x=>x.id===o.id),s.campaign,{automatic:true}).id;
     s.submissions.push({customer_id:session.subject,request_id:requestId,signature,result}); event(s,'preorder.submit',o.id,{added:result.added});return result;
   }
   const itemMatch=path.match(/^customer\/items\/(\d+)$/);

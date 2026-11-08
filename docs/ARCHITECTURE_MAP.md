@@ -1,5 +1,17 @@
 # 架構地圖與樹狀圖
 
+## 0.3.24 LINE 通知資料流（D-45）
+
+customer/preorders → 同次私有 JSONB revision 保存訂單＋lineNotifications → Edge background task → 原子 claim → 核對官方帳號／額度／收件人 → 保存推送意圖 → LINE Push（固定 Retry-Key）→ 原子記錄 API 接受或轉人工。到台走 admin/line-notification，逐筆 confirm＋owner／版本／內容簽章／arrived／本人分配驗證後使用同一流程。
+
+LINE 登入會員 id 的 line:U… 直接指定相同 Provider 的 Messaging API 收件人；不以暱稱配對，不新增 webhook 或聊天收件匣。憑證只讀後端環境，前台只有發送結果與通用查單連結。本機 SQLite line_notifications 保存相同工作，預設不對外發訊；seed:true 的隔離測試可注入假的 Messaging adapter。
+
+## LINE 官方帳號優先漏斗（D-43，原生設定完成）
+
+廣告／社團 → 加入官方帳號 → 原生三格圖文選單的文字動作 → 關鍵字自動回覆說明與通用連結 → 網站原有 LINE 驗證 → #shop／#orders。我的訂單只由本人 session 查詢，不在回覆連結傳會員身分。我的訂單／看商品／預購說明三格選單 20584051 已發布並核對目前顯示圖面，三組回覆與歡迎保存完成；一般留言全域回覆 82936520 經明確同意套用收件確認。
+
+這條路徑建立對話；0.3.24 利用共用 CCbaby Provider 的已驗證 LINE User ID 指定通知對象，不以暱稱、關鍵字或通用連結配對。仍未接收 LINE webhook 或同步歷史聊天室；新客不要求處理代碼，舊人工資料保留。現有登入與授權不因改獲客入口而移除。
+
 ## 0.3.23 置頂優惠設定
 
 管理 app.js 的獨立 promotion-form → PUT admin/promotion → domain/promotion.mjs 核對布林／120 字／版本 → 雲端 private JSONB promotion（原 revision 交易）或本機 promotion_settings.data（SQLite 交易）。admin/state 取得完整設定；受保護 catalog／bootstrap 僅取得啟用的 {text} 或 null，沿用既有請求，不新增登入 API 或輪詢。客戶 renderHeader 顯示純文字公告，ResizeObserver 同步分類與預購確認的固定間距；不影響活動設定與預購價格

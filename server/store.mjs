@@ -40,6 +40,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     CREATE TABLE IF NOT EXISTS order_notices (
       order_id INTEGER PRIMARY KEY REFERENCES preorders(id), data TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS line_notifications (
+      id TEXT PRIMARY KEY, data TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS admin (
       id INTEGER PRIMARY KEY CHECK(id=1), username TEXT NOT NULL UNIQUE,
       salt TEXT NOT NULL, hash TEXT NOT NULL
@@ -161,6 +164,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     },
     noticeRecords() {
       return Object.fromEntries(this.all('SELECT * FROM order_notices').map(r=>[r.order_id,JSON.parse(r.data)]));
+    },
+    lineNotifications() {
+      return this.all('SELECT data FROM line_notifications').map(r=>JSON.parse(r.data));
     },
     catalog(includeInactive = false) {
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);

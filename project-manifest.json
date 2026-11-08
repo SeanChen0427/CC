@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.23",
-  "updatedAt": "2026-11-08",
+  "documentVersion": "0.3.24",
+  "updatedAt": "2026-11-09",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42451234705
+    "pagesRun": 42500024196
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -77,7 +77,7 @@
     "onlinePayments": false,
     "paymentTiming": "after_arrival_in_taiwan",
     "paymentCommunication": "manual_LINE",
-    "automatedPush": "deferred"
+    "automatedPush": "order_and_confirmed_arrival_implemented_pending_credentials"
   },
   "documents": {
     "crossAiIndex": "AI_INDEX.md",
@@ -96,7 +96,69 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_configures_promotional_copy_in_admin_settings",
+  "nextStep": "authorize_issue_and_save_messaging_token_then_verify_live_quota",
+  "lineEntryFunnel": {
+    "status": "live_menu_and_replies_configured",
+    "publicationHandledBy": "agent_after_owner_image_upload",
+    "publicationAuthorized": true,
+    "decision": "D-43",
+    "acquisition": "ads_and_groups_to_official_account_first",
+    "menuButtonCount": 3,
+    "menuActions": "send_keyword_then_reply_with_text_and_link",
+    "ordersLabel": "我的訂單",
+    "shoppingLabel": "看商品",
+    "thirdButton": "預購說明",
+    "labelsSource": "owner_authorized_publish_after_preview",
+    "menuImage": "assets/line-official/rich-menu-2500x843.png",
+    "menuUploadPackage": "assets/line-official/ccbaby-line-menu-upload.zip",
+    "menuPreviewSize": [
+      1200,
+      405
+    ],
+    "menuPreview": "assets/line-official/rich-menu-preview.png",
+    "mobilePreview": "assets/line-official/rich-menu-mobile-preview.png",
+    "designDecision": "D-44",
+    "designReference": "existing_customer_website_UI",
+    "designRevision": 2,
+    "paletteReadFromWebsiteCss": true,
+    "brandFont": "Georgia",
+    "titleFont": "Songti TC",
+    "copyFile": "assets/line-official/copy.json",
+    "buildScript": "scripts/build-line-menu.py",
+    "assetsPrepared": true,
+    "blockingCondition": null,
+    "fileUrlAccessStateVerified": false,
+    "nativeFilePickerOpen": false,
+    "browserConnected": true,
+    "menuDraftSaved": true,
+    "menuPublished": true,
+    "menuCurrentDisplayVerified": true,
+    "managerMenuId": "20584051",
+    "greetingConfigured": true,
+    "greetingRevision": 2,
+    "greetingOnlyFirstAdd": false,
+    "greetingReloadVerified": true,
+    "replyIds": [
+      "83071618",
+      "83071663",
+      "83071686"
+    ],
+    "responseModeVerified": true,
+    "defaultReplyChanged": true,
+    "defaultReplyChangeApproval": "explicitly_approved_and_applied",
+    "defaultReplyId": "82936520",
+    "ordersUrl": "https://ccbaby.beecharge.live/#orders",
+    "shopUrl": "https://ccbaby.beecharge.live/#shop",
+    "customerHandlesContactCodeTarget": false,
+    "menuConfigured": true,
+    "keywordRepliesConfigured": true,
+    "automaticChatMemberMatchImplemented": false,
+    "existingContactCodeFlowStillLive": false,
+    "websiteLoginRequired": true,
+    "directUrlBlockingRequested": false,
+    "guide": "docs/CUSTOMER_CARE.md",
+    "legacyContactCodeSupported": true
+  },
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -118,7 +180,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 125,
+    "integrationTestsPassed": 139,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -265,7 +327,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.23",
+    "lastLiveFrontendVersion": "0.3.24",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -835,5 +897,45 @@
     "businessRevisionAtFinalVerification": 88,
     "businessHashAtFinalVerification": "4e7fcb6ba7137f6002adb030a0259877",
     "ownerCopyConfigured": false
+  },
+  "lineNotifications": {
+    "decision": "D-45",
+    "status": "deployed_pending_credential_authorization",
+    "orderAutomatic": true,
+    "arrivalPerCustomerConfirmation": true,
+    "quotaExhaustedManualFallback": true,
+    "planUpgradeAutomatic": false,
+    "providerVerified": true,
+    "messagingChannelId": "2012401045",
+    "loginChannelId": "2012401105",
+    "credentialsConfigured": false,
+    "productionMessagingEnabled": false,
+    "realtimeChatInbox": false,
+    "webhookAdded": false,
+    "codeFreeNotificationRecipient": true,
+    "source": [
+      "domain/line-notifications.mjs",
+      "server/line-messaging.mjs",
+      "server/line-delivery.mjs"
+    ],
+    "test": "tests/line-notifications.test.mjs",
+    "isolatedTestsPassed": 139,
+    "uiViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "livePhoneReceiptVerified": false,
+    "edgeVersion": 22,
+    "edgeFilesCompared": 22,
+    "pagesCommit": "58a9486cf1640b15ef2c474a564d3403051177eb",
+    "pagesRun": 42500024196,
+    "liveFrontendFilesCompared": 9,
+    "businessRevisionAtVerification": 91,
+    "businessHashAtVerification": "4e7fcb6ba7137f6002adb030a0259877",
+    "productionBusinessWrites": false,
+    "tokenIssued": false,
+    "credentialConfirmationRequiredBy": "computer_use_new_security_sensitive_access"
   }
 }

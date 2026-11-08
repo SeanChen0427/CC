@@ -1,5 +1,25 @@
 # 跨 AI 工具共用索引
 
+## 0.3.24 LINE 訂單通知（網站／Edge 已發布，待發訊憑證啟用）
+
+D-45 已授權下單自動通知、到台由店主逐筆確認發送、額度不足轉人工，方案升級由店主自行決定。139 項測試、51 模組語法與隔離 UI 320／390／768／1440px 通過；Edge v22／Pages 58a9486（run 42500024196 success）已發布，正式檔案及業務雜湊核對通過；發訊憑證尚未簽發，啟用狀態見 HANDOFF。LINE 登入身分可直接指定通知對象，不要求新客傳聯繫碼；未新增後台對話收件匣或歷史聊天同步。
+
+程式：[通知規則](domain/line-notifications.mjs)、[LINE API](server/line-messaging.mjs)、[原子發送](server/line-delivery.mjs)、[通知驗證](tests/line-notifications.test.mjs)；操作與設定見 CUSTOMER_CARE、DEPLOYMENT。
+
+LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200×405；[上傳原檔 ZIP](assets/line-official/ccbaby-line-menu-upload.zip) 只含正式 PNG。使用者完成圖片上傳後，已接手儲存並確認選單正式顯示
+
+## LINE 最新實際進度：選單、回覆與歡迎已上線
+
+加入歡迎詞已依最新要求優化並套用，先引導「看商品 → 購物車送出預購」，保留到台後付款與直接留言；重新載入全文一致，實際文案見 copy.json.greeting revision 2。
+
+三格選單 20584051 已發布，後台「目前顯示的選單」已核對圖片及我的訂單／看商品／預購說明文字動作；預設展開、選單列「選購與預購」。三組關鍵字回覆與歡迎已啟用；Default 82936520 經使用者單獨明確同意改為「CCBABY｜一般留言」，套用後內容核對通過。詳見 [交接](docs/HANDOFF.md) 與 [實際設定](assets/line-official/copy.json)，勿重建已存在的選單與回覆。實體 LINE 點擊／收訊仍待驗收；0.3.24 已實作免碼指定通知對象，完整聊天室同步未製作
+
+## 已確認入口：先加入 LINE，再由選單進站
+
+已上架的選單依 D-44 對齊網站 UI：Georgia 品牌字樣、宋體標題、網站色票／標誌與圖示；[390px 預覽](assets/line-official/rich-menu-mobile-preview.png) 僅供檢視，不作上傳檔
+
+廣告／社團先導向官方帳號，三格選單點擊送出關鍵字，再回覆說明與網站連結；新客不處理聯繫碼。已製作「我的訂單／看商品／預購說明」[選單 PNG](assets/line-official/rich-menu-2500x843.png)、[設定文案](assets/line-official/copy.json) 與 [重建腳本](scripts/build-line-menu.py)，詳見 [服務流程](docs/CUSTOMER_CARE.md)。正式網站已為 0.3.24；免碼通知與憑證啟用以上節為準，LINE 原生設定保留
+
 ## 0.3.23 後台置頂優惠資訊
 
 已接入後台「活動與設定」的優惠文字、顯示開關及預覽，前台登入後顯示置頂公告。125 項測試與購物流程通過，Edge v21／Pages 404f971（run 42451234705 success）已發布，正式 13 檔及 19 個 Edge 來源一致，業務資料保留；詳見 HANDOFF。共用規則 [domain/promotion.mjs](domain/promotion.mjs)，保存／權限驗證 [tests/promotion.test.mjs](tests/promotion.test.mjs) 及實際 Edge handler [tests/cloud-entry.test.mjs](tests/cloud-entry.test.mjs)
@@ -8,7 +28,7 @@
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-08（Asia/Taipei）｜版本：0.3.23
+更新：2026-11-09（Asia/Taipei）｜版本：0.3.24
 
 品牌名稱已確認為 **CCBABY**。
 

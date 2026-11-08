@@ -1,0 +1,82 @@
+{
+  "officialAccountId": "@445yxcey",
+  "status": "live_menu_and_replies_configured",
+  "publicationAuthorized": true,
+  "design": {
+    "revision": 2,
+    "reference": "existing_customer_website_UI",
+    "paletteSource": "apps/customer-web/style.css",
+    "iconSource": "apps/customer-web/app.js",
+    "brandFont": "Georgia",
+    "titleFont": "Songti TC",
+    "mobilePreview": "assets/line-official/rich-menu-mobile-preview.png"
+  },
+  "menu": {
+    "name": "CCBABY｜選購與預購",
+    "chatBarText": "選購與預購",
+    "defaultExpanded": true,
+    "image": "assets/line-official/rich-menu-2500x843.png",
+    "uploadPackage": "assets/line-official/ccbaby-line-menu-upload.zip",
+    "width": 2500,
+    "height": 843,
+    "managerMenuId": "20584051",
+    "displayStart": "2026-11-08T00:00:00+08:00",
+    "displayEnd": "2036-11-08T23:59:00+08:00",
+    "published": true,
+    "currentDisplayVerified": true,
+    "buttons": [
+      {"label": "我的訂單", "type": "message", "text": "我的訂單", "bounds": {"x": 0, "y": 0, "width": 833, "height": 843}},
+      {"label": "看商品", "type": "message", "text": "看商品", "bounds": {"x": 833, "y": 0, "width": 834, "height": 843}},
+      {"label": "預購說明", "type": "message", "text": "預購說明", "bounds": {"x": 1667, "y": 0, "width": 833, "height": 843}}
+    ]
+  },
+  "greetingRevision": 2,
+  "greetingOnlyFirstAdd": false,
+  "greeting": "歡迎加入 CCBABY 🤍\n一起挑選喜歡的韓國日常好物\n\n🛍 第一次來，點下方「看商品」開始逛\n挑好後，記得到購物車「送出預購」\n\n現在不用付款，商品到台後會在這裡通知你\n\n📋 我的訂單｜查看預購明細與進度\n📖 預購說明｜了解採買與付款方式\n\n尺寸或商品有問題，直接留言給我們就好",
+  "replies": [
+    {
+      "title": "CCBABY｜我的訂單",
+      "managerReplyId": "83071618",
+      "enabled": true,
+      "keywords": ["我的訂單", "查訂單", "訂單查詢"],
+      "text": "你的預購明細與進度在這裡 👇\nhttps://ccbaby.beecharge.live/#orders\n\n使用 LINE 登入後，就能查看自己的預購\n如果還沒有送出預購，可以先點下方「看商品」挑選喜歡的款式\n有訂單問題，直接在這裡留言，我們會協助確認"
+    },
+    {
+      "title": "CCBABY｜看商品",
+      "managerReplyId": "83071663",
+      "enabled": true,
+      "keywords": ["看商品", "購物", "商品", "選購"],
+      "text": "本期韓國選物在這裡 🛍\nhttps://ccbaby.beecharge.live/#shop\n\n挑好顏色、尺寸與數量，加入購物車後記得「送出預購」，我們才會收到你的清單\n現在不用付款，商品到台後再通知你\n尺寸或商品想問問，直接在這裡留言就好"
+    },
+    {
+      "title": "CCBABY｜預購說明",
+      "managerReplyId": "83071686",
+      "enabled": true,
+      "keywords": ["預購說明", "預購規則", "規則"],
+      "text": "預購前先看看 🤍\n\n① 選好商品規格，加入購物車後「送出預購」才算完成登記\n② 我們會依清單到韓國採買，實際款式與數量依現場供貨為準\n③ 商品到台後，會在這裡通知付款並確認交付方式，現在不用付款\n\n結單前可在網站追加與調整，結單後如需異動，請在這裡留言\n\n本期商品與結單時間 👇\nhttps://ccbaby.beecharge.live/#shop"
+    }
+  ],
+  "verification": {
+    "menuSaved": true,
+    "menuPublished": true,
+    "menuImageSaved": true,
+    "menuCurrentDisplayVerified": true,
+    "greetingSaved": true,
+    "greetingReloadVerified": true,
+    "repliesSaved": true,
+    "responseModeVerified": true,
+    "realLineTapAndReplyVerified": false,
+    "websiteMemberChatAutoMatchImplemented": false
+  },
+  "defaultReplyChange": {
+    "status": "explicitly_approved_and_applied",
+    "managerReplyId": "82936520",
+    "existingTitle": "Default",
+    "proposedTitle": "CCBABY｜一般留言",
+    "proposedText": "收到你的訊息，謝謝你聯絡 CCBABY\n我們會在這裡協助確認商品與預購問題\n\n想先挑選商品或查看預購，可以直接點下方「看商品」或「我的訂單」",
+    "scope": "all_messages_not_matching_keywords",
+    "published": true,
+    "enabled": true,
+    "savedContentVerified": true
+  }
+}

@@ -14,7 +14,7 @@ const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=u
   '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.ico': 'image/x-icon' };
 
 export async function startApp({ directory = join(ROOT, '.local'), customerPort = 4173, adminPort = 4174,
-  password, seed = false, quiet = false } = {}) {
+  password, seed = false, quiet = false, lineMessaging } = {}) {
   mkdirSync(directory, { recursive: true, mode: 0o700 });
   const credentialPath = join(directory, 'admin-credentials.txt');
   const store = openStore(join(directory, 'preorder.sqlite'), { seed, password, credentialPath });
@@ -55,7 +55,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
             if (!body || typeof body !== 'object' || Array.isArray(body)) throw new AppError('資料格式不正確');
           }
           const result = await api({ store, req, role, path: url.pathname, method, body,
-            session: sessionFor(store, req, role), localDir: directory, credentialPath, query:url.searchParams });
+            session: sessionFor(store, req, role), localDir: directory, credentialPath, query:url.searchParams, lineMessaging:seed?lineMessaging:undefined });
           if (result.cookie) { res.setHeader('Set-Cookie', result.cookie); delete result.cookie; }
           if (result.buffer) {
             res.setHeader('Content-Type', result.type);

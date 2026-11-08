@@ -1,5 +1,19 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.24 LINE 發訊設定（正式發布／啟用見 HANDOFF）
+
+Edge v22 ACTIVE；Pages 58a9486cf1640b15ef2c474a564d3403051177eb／[run 42500024196](https://github.com/SeanChen0427/CC/actions/runs/42500024196) success。正式 9 個重點檔及 22 個 Edge 來源一致，health 200，發訊 configured=false；發布後 revision 91／MD5 4e7fcb6ba7137f6002adb030a0259877 保留。LINE 發訊 Token 尚未簽發，需另完成憑證啟用
+
+保留既有 ccbaby-api、verify_jwt=false、自訂 session 與 revision RPC，不新增雲端 DDL。部署相對依賴須包含 domain/line-notifications.mjs、server/line-messaging.mjs、server/line-delivery.mjs。新增工作保存在原私有文件，既有商品、會員、預購與活動不得清空或補發歷史訂單。
+
+後端 Supabase Secrets：LINE_MESSAGING_ACCESS_TOKEN（CCbaby Messaging API channel 2012401045 的發訊憑證）、LINE_NOTIFICATIONS_ENABLED=true。LINE Login 原 2012401105 的 ID／Secret 不修改。發訊前核對 bot basicId=@445yxcey、Provider 共用、目前方案與剩餘額度；不將憑證放公開設定、前端、Git、截圖或日誌。發訊憑證建立／移交依工具要求取得具體授權；既有網站發布授權保留。
+
+只用 Push 發送指定通知，本次不啟用 webhook、不變更歡迎／選單／關鍵字、不升級方案。憑證未就緒先保持 disabled，後台顯示人工備援；待啟用後以本人測試帳號驗收，不能對正式客戶補建測試單或發歷史通知。
+
+## LINE 原生入口設定 — 2026-11-08（選單與回覆已上線）
+
+本次只操作已登入的 @445yxcey 官方帳號，沒有發布網站／Edge 或改業務資料。三組回覆 83071618／83071663／83071686 已啟用；歡迎訊息保存後重載內容一致，人工聊天及既有回應模式保留。使用者完成圖片上傳後已接手儲存選單 20584051，後台「目前顯示的選單」核對正確圖面與三格文字動作，預設展開、期間 2026/11/08 00:00～2036/11/08 23:59。Default 82936520 經單獨明確同意改為「CCBABY｜一般留言」並套用成功，清單內容一致。實體 LINE 點選／收訊未測，會員免碼配對未實作；完整狀態見 HANDOFF。
+
 ## 0.3.23 店主優惠公告 — 2026-11-08
 
 main ab9c7c1、Pages 404f9715b04451c7104ea22c26f22805a9157c6b／[run 42451234705](https://github.com/SeanChen0427/CC/actions/runs/42451234705) success，Edge v21 ACTIVE、verify_jwt=false 沿用。新增 domain/promotion.mjs 與 admin/promotion PUT，完整 19 個 Edge 相對依賴已發布並逐位元核對；只有原 private JSONB 設定，沒有 Postgres DDL／RPC／權限、LINE、Storage 或登入設定變更

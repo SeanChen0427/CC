@@ -1,5 +1,16 @@
 # 資料模型與報表規則
 
+## 0.3.24 通知工作與結果（D-45）
+
+- 私有 JSONB 新增 lineNotifications[]；本機 line_notifications(id,data)，不遷移或清空既有商品／預購。工作含 id(UUID，同 Retry-Key)、orderId、customerId、kind(thanks/arrived)、signature、不可於首次嘗試後更換的 message、automatic、status、reason、claim／leaseUntil、attempts、firstPushAt、mayHaveSent、acceptedAt 及時間
+- status 為 pending／sending／accepted／manual／manual_done／superseded；收到 API 200 或帶 accepted-request-id 的 409 才記 accepted。最多 23 小時安全重試，結果不明且超時需先人工核對。expired lease 可重試，沒有全新 Retry-Key 補送不明工作
+- orderNotices 沿用原版本與內容簽章，API 接受附 method=line-api、notificationId；人工已傳為既有標記，並停止同簽章工作重試。舊通知記錄保留
+- 客戶只收到自己的提交結果與訂單；通知工作／推送識別／錯誤與發送紀錄只供後端及 owner。訊息不包含電話、成本、內部備註或網站 session。雲端原有私有表與 RPC 權限不變，無 DDL
+
+## LINE 官方帳號優先漏斗（D-43，需求確認）
+
+新客不處理聯繫碼為新目標；本次不變更 schema、客戶識別、contact_code、chatConfirmed 或既有通知紀錄。點選單送關鍵字不能直接寫為會員配對成功；後續免碼識別需使用經驗證的 LINE 身分另行設計，不以暱稱合併會員。下方 0.3.19 欄位仍為正式現況，不因需求更新刪除歷史資料。
+
 ## 0.3.23 置頂優惠欄位
 
 - promotion = {enabled:boolean, text:string, version:integer}，文字正規化空白後最多 120 字，啟用不可空白；未設定視為 false／空字串／版本 0，不在讀取時寫入舊資料

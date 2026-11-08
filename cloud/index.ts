@@ -8,6 +8,8 @@ import { workbook } from '../server/xlsx.mjs';
 import { reportSheets } from '../server/reports.mjs';
 import { validateBrowsing, browsingQuery, requireBrowsingRole, browsingPeople, browsingContext } from '../domain/browsing.mjs';
 import { merchandising } from '../domain/merchandising.mjs';
+import { createLineMessaging } from '../server/line-messaging.mjs';
+import { dispatchLineNotification } from '../server/line-delivery.mjs';
 
 const base = Deno.env.get('SUPABASE_URL');
 const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -18,6 +20,7 @@ const imagePrefix = base + '/storage/v1/object/public/ccbaby-products/';
 const lineId = Deno.env.get('LINE_CHANNEL_ID') || '';
 const lineSecret = Deno.env.get('LINE_CHANNEL_SECRET') || '';
 const lineConfigured = Boolean(lineId && lineSecret);
+const messaging=createLineMessaging({token:Deno.env.get('LINE_MESSAGING_ACCESS_TOKEN')||'',enabled:Deno.env.get('LINE_NOTIFICATIONS_ENABLED')==='true'});
 const hex = bytes => [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
 const digest = async value => hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))));
 async function backend(path, body, method='POST', extra={}) {
@@ -27,6 +30,16 @@ async function backend(path, body, method='POST', extra={}) {
   return data;
 }
 const rpc=(name,body)=>backend('/rest/v1/rpc/'+name,body);
+async function notificationTransaction(hash,role,mutate){
+  for(let attempt=0;attempt<5;attempt++){
+    const state=await rpc('ccbaby_load',{p_hash:hash,p_role:role});
+    if(!state.session||state.session.role!==role)throw new AppError('請重新登入',401);
+    const result=mutate({jobs:state.data.lineNotifications||=([]),orders:orders(state.data),campaign:state.data.campaign,notices:state.data.orderNotices||={},session:state.session});
+    if(await rpc('ccbaby_commit',{p_revision:state.revision,p_data:state.data,p_hash:hash,p_role:role}))return result;
+  }
+  throw new AppError('資料正由另一個畫面更新，請重新載入通知狀態',409);
+}
+const sendNotification=(id,hash,role)=>dispatchLineNotification(id,{messaging,transact:mutate=>notificationTransaction(hash,role,mutate)});
 function startup(state) {
   const result=operate(state.data,'customer/bootstrap','GET',{},state.session,imagePrefix);
   result.catalog={...result.catalog,lineConfigured,lineChannelId:lineConfigured?lineId:null};
@@ -65,7 +78,7 @@ Deno.serve(async req=>{
       try{body=JSON.parse(raw);}catch{throw new AppError('資料格式不正確');}
       if(!body||typeof body!=='object'||Array.isArray(body))throw new AppError('資料格式不正確');
     }
-    if(path==='health'&&method==='GET')return json({ok:true,database:'supabase',localOnly:false,lineConfigured});
+    if(path==='health'&&method==='GET')return json({ok:true,database:'supabase',localOnly:false,lineConfigured,lineNotificationsConfigured:messaging.configured});
     if((path.startsWith('admin/')&&role!=='admin')||(path.startsWith('customer/')&&role!=='customer'))throw new AppError('請使用對應入口',403);
     if(path==='customer/line/config'&&method==='GET')return json({lineConfigured,lineChannelId:lineConfigured?lineId:null,requiresLogin:true});
     if(path==='customer/login')throw new AppError('請使用 LINE 登入',403);
@@ -104,6 +117,7 @@ Deno.serve(async req=>{
     if(path==='catalog'&&method==='GET')return json({...operate(state.data,path,method,body,state.session,imagePrefix),lineConfigured,lineChannelId:lineConfigured?lineId:null});
     if(path==='me'&&method==='GET')return json(operate(state.data,path,method,body,state.session,imagePrefix));
     if(!state.session)throw new AppError('請先登入',401);
+    if(path==='admin/customer-care'&&method==='GET')return json({...operate(state.data,path,method,body,state.session,imagePrefix),messaging:await messaging.quota()});
     if(path==='customer/browsing'&&method==='POST'){
       const events=validateBrowsing(body,state.session,catalog(state.data));
       const result=await rpc('ccbaby_browsing_write',{p_hash:hash,p_events:events});
@@ -161,7 +175,16 @@ Deno.serve(async req=>{
     for(let attempt=0;attempt<5;attempt++){
       const result=operate(state.data,path,method,body,state.session,imagePrefix);
       if(method==='GET'||(path==='admin/import'&&!body.commit)||(path==='customer/line-contact'&&result.changed===false))return json(result);
-      if(await rpc('ccbaby_commit',{p_revision:state.revision,p_data:state.data,p_hash:hash,p_role:role}))return json(result);
+      if(await rpc('ccbaby_commit',{p_revision:state.revision,p_data:state.data,p_hash:hash,p_role:role})){
+        if(path==='admin/line-notification'&&method==='POST')return json({ok:true,notification:await sendNotification(result.notificationId,hash,role)});
+        if(path==='customer/preorders'&&method==='POST'&&result.notificationId){
+          const task=sendNotification(result.notificationId,hash,role).catch(()=>console.warn('Order notification requires follow-up'));
+          // The order and outbox entry are already durable; notification failure
+          // never changes a successful preorder into a failed submission.
+          if(typeof EdgeRuntime!=='undefined')EdgeRuntime.waitUntil(task);else await task;
+        }
+        return json(result);
+      }
       state=await rpc('ccbaby_load',{p_hash:hash,p_role:role});
       if(!state.session)throw new AppError('請重新登入',401);
     }

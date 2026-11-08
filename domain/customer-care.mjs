@@ -98,8 +98,9 @@ export function customerCarePerson(customer,orders,campaign,care={},orderRecords
   const ownOrders=orders.filter(o=>o.customer_id===customer.id&&!o.deleted_at&&o.quantity>0);
   let next={key:'observe',title:'等待客戶的選購或詢問',priority:0};
   const tasks=ownOrders.flatMap(o=>noticeKinds.map(kind=>({...orderNotice(kind,o,campaign,orderRecords[o.id]),orderId:o.id}))).filter(n=>n.eligible&&!n.done);
-  if(!care.chatConfirmed&&(ownOrders.length||customer.contact_code))next={key:'chat',title:'先核對官方聊天室與會員',priority:70};
-  else if(care.chatConfirmed&&tasks.length){const task=tasks[0];next={key:task.kind,title:task.title+(task.changed?'（內容有更新）':''),orderId:task.orderId,priority:60};}
+  const lineIdentified=/^line:U[0-9a-f]{32}$/.test(customer.id);
+  if(!lineIdentified&&!care.chatConfirmed&&(ownOrders.length||customer.contact_code))next={key:'chat',title:'先核對官方聊天室與會員',priority:70};
+  else if((lineIdentified||care.chatConfirmed)&&tasks.length){const task=tasks[0];next={key:task.kind,title:task.title+(task.changed?'（內容有更新）':''),orderId:task.orderId,priority:60};}
   if(care.followUpAt&&Date.parse(care.followUpAt)<=now)next={key:'followup',title:'已到下次聯繫時間',priority:100};
   return {customerId:customer.id,name:customer.name||customer.display_name,displayName:customer.display_name,contactCode:customer.contact_code||null,care,next,
     pendingNotices:tasks.length,orderCount:ownOrders.length,orderIds:ownOrders.map(o=>o.id)};

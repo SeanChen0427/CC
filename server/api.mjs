@@ -15,11 +15,25 @@ import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing
 import { orderedProducts, planProductOrder, productSignals, merchandising } from '../domain/merchandising.mjs';
 import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
 import { publicPromotion,planPromotion } from '../domain/promotion.mjs';
+import { notificationCareData,queueNotification,orderNoticeForSend } from '../domain/line-notifications.mjs';
+import { createLineMessaging } from './line-messaging.mjs';
+import { dispatchLineNotification } from './line-delivery.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
 const digest = value => createHash('sha256').update(value).digest('hex');
 const loginAttempts = new Map();
+// Local previews never send real LINE messages. Cloud handles production sends.
+const localMessaging=createLineMessaging();
+function notificationTransaction(store,session,mutate){
+  return store.transaction(()=>{
+    const jobs=store.lineNotifications(),notices=store.noticeRecords();
+    const result=mutate({jobs,notices,orders:store.orders(),campaign:store.campaign(),session});
+    for(const job of jobs)store.run('INSERT INTO line_notifications VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data',job.id,JSON.stringify(job));
+    for(const [id,record] of Object.entries(notices))store.run('INSERT INTO order_notices VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET data=excluded.data',Number(id),JSON.stringify(record));
+    return result;
+  });
+}
 
 export function sessionFor(store, req, role) {
   const value = (req.headers.cookie || '').split(';').map(x => x.trim())
@@ -120,7 +134,7 @@ function importPreview(store, csv) {
   return previewProductImport(csv, validateProduct, code => store.get('SELECT id FROM products WHERE code=?',code));
 }
 
-export async function api({ store, req, role, path, method, body, session, localDir, credentialPath, query=new URLSearchParams() }) {
+export async function api({ store, req, role, path, method, body, session, localDir, credentialPath, query=new URLSearchParams(), lineMessaging=localMessaging }) {
   if (path === '/api/health') return { ok: true, role, database: 'sqlite', localOnly: true };
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
@@ -174,7 +188,19 @@ export async function api({ store, req, role, path, method, body, session, local
   }
   if(path==='/api/admin/customer-care'&&method==='GET'){
     requireBrowsingRole(session,'admin');
-    return careData(store.all('SELECT id,display_name,name,contact_code FROM customers'),store.orders(),store.campaign(),store.careRecords(),store.noticeRecords());
+    return {...notificationCareData(careData(store.all('SELECT id,display_name,name,contact_code FROM customers'),store.orders(),store.campaign(),store.careRecords(),store.noticeRecords()),store.lineNotifications()),messaging:await lineMessaging.quota()};
+  }
+  if(path==='/api/admin/line-notification'&&method==='POST'){
+    requireBrowsingRole(session,'admin');
+    const id=notificationTransaction(store,session,ctx=>{
+      const order=ctx.orders.find(o=>o.id===body.orderId&&o.quantity>0);if(!order)throw new AppError('找不到有效預購',404);
+      orderNoticeForSend(body,order,ctx.campaign,ctx.notices[order.id]);
+      const job=queueNotification(ctx.jobs,body.kind,order,ctx.campaign,{message:body.message});
+      if(job.firstPushAt&&body.message!==job.message)throw new AppError('此通知已嘗試發送，請重載原內容後再重試',409);
+      if(!job.firstPushAt&&!['accepted','manual_done','sending'].includes(job.status))job.message=body.message.trim();
+      return job.id;
+    });
+    return {ok:true,notification:await dispatchLineNotification(id,{messaging:lineMessaging,transact:fn=>notificationTransaction(store,session,fn)})};
   }
   if(path==='/api/admin/customer-care'&&method==='PUT'){
     requireBrowsingRole(session,'admin');
@@ -192,6 +218,10 @@ export async function api({ store, req, role, path, method, body, session, local
       const order=store.orders().find(o=>o.id===body.orderId&&o.quantity>0);
       if(!order)throw new AppError('找不到有效預購',404);
       const record=planNotice(body,order,store.campaign(),store.careRecords()[order.customer_id],store.noticeRecords()[order.id]);
+      for(const job of store.lineNotifications())if(job.orderId===order.id&&job.kind===body.kind&&job.signature===body.signature){
+        if(job.status==='sending'&&Date.parse(job.leaseUntil)>Date.now())throw new AppError('通知正在發送，請稍後重新載入',409);
+        if(body.status==='sent'){job.status='manual_done';store.run('UPDATE line_notifications SET data=? WHERE id=?',JSON.stringify(job),job.id);}
+      }
       store.run('INSERT INTO order_notices VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET data=excluded.data',order.id,JSON.stringify(record));
       store.event('order.notice',order.id,{kind:body.kind,status:body.status,version:record.version});return {ok:true,record};
     });
@@ -271,7 +301,7 @@ export async function api({ store, req, role, path, method, body, session, local
       integer(qty, '同規格數量', 99, 1);
       combined.set(variant.id, { ...variant, quantity: qty });
     }
-    return store.transaction(() => {
+    const result=store.transaction(() => {
       let order = store.get('SELECT * FROM preorders WHERE customer_id=? AND deleted_at IS NULL', session.subject);
       if (!order) {
         const id = Number(store.run(`INSERT INTO preorders(customer_id,name,phone,created_at,updated_at)
@@ -291,10 +321,14 @@ export async function api({ store, req, role, path, method, body, session, local
         details.name, details.phone, now(), order.id);
       store.run('UPDATE customers SET name=?,phone=? WHERE id=?', details.name, details.phone, session.subject);
       const result = { ok: true, orderId: order.id, code: order.code, added: [...combined.values()].reduce((sum, i) => sum + i.quantity, 0) };
+      const job=queueNotification(store.lineNotifications(),'thanks',store.orders().find(o=>o.id===order.id),store.campaign(),{automatic:true});
+      store.run('INSERT INTO line_notifications VALUES(?,?)',job.id,JSON.stringify(job));result.notificationId=job.id;
       store.run('INSERT INTO submissions VALUES(?,?,?,?)', session.subject, requestId, hash, JSON.stringify(result));
       store.event('preorder.submit', order.id, { customer: session.subject, items: [...combined.values()] });
       return result;
     });
+    try{await dispatchLineNotification(result.notificationId,{messaging:lineMessaging,transact:fn=>notificationTransaction(store,session,fn)});}catch{/* Saved order remains successful; durable notification can be reviewed by owner. */}
+    return result;
   }
   const itemMatch = path.match(/^\/api\/customer\/items\/(\d+)$/);
   if (itemMatch && method === 'PATCH') {
@@ -464,7 +498,7 @@ export async function api({ store, req, role, path, method, body, session, local
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','cost_settings','merchandising_settings','promotion_settings','customer_care','order_notices','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','cost_settings','merchandising_settings','promotion_settings','customer_care','order_notices','line_notifications','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };
