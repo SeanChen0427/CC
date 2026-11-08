@@ -1,5 +1,13 @@
 # 架構地圖與樹狀圖
 
+## 0.3.20 登入效能
+
+- 無 token → GET customer/line/config → LINE → POST customer/line/exchange（includeStartup:true）→ 同回應帶 token、本人 me 與受保護 catalog，直接渲染
+- 有 token → GET customer/bootstrap → PostgreSQL 核對 session／角色／期限 → 同回應 me＋catalog；401 重新登入，其他服務失敗保留憑證供重載
+- exchange 保留原 LINE 官方驗證，成功後才更新會員、建立原 session 並按需讀取最新文件。若追加商品讀取失敗，仍回傳已成立 token，由客戶端重試受保護 bootstrap，避免丟失成功登入
+- 舊 exchange 不帶 includeStartup 時仍只回 ok／token，me／catalog 不移除。新前端遇舊後端 bootstrap 404 時回到原 me／catalog 流程，取消及回呼失效仍停在恢復頁
+- customer index 預載九個必要模組，build 統一版本並安全嵌入既有公開設定；runtime 優先讀內嵌設定，本機與管理端仍讀 config.json。未內嵌個資或秘密，不快取私人 API
+
 ## 0.3.17 LINE 跨瀏覽器恢復
 
 shared/runtime.js → shared/line-auth.js，依隨機 state 分隔 10 分鐘登入暫存，原分頁 sessionStorage＋同源 localStorage 短期備援；回呼核對 state／時間／verifier／nonce，消耗後 local 僅留到期清理的已用標記，跨分頁舊副本不能重用。其他瀏覽器取不到暫存就停在恢復頁，下一次登入加 disable_auto_login=true；?login=browser 可直接選擇該流程。正式 session、伺服器 code／ID token 驗證與角色分離沿用。只有靜態前端及本機共用檔案路由更新，Supabase Edge 仍 v17，不改資料或登入設定

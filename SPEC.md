@@ -1,6 +1,6 @@
 # 需求規格
 
-版本：0.3.19｜日期：2026-11-08｜階段：GitHub Pages + Supabase + LINE Login 已啟用
+版本：0.3.20｜日期：2026-11-08｜階段：GitHub Pages + Supabase + LINE Login 已啟用
 
 目前實際完成範圍見 [實作對照](docs/IMPLEMENTATION_STATUS.md)，部署見 [DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 
@@ -118,6 +118,9 @@ LINE Login 已完成設定與 Published 發布，真實帳號登入已驗證；�
 - 暫存被禁用時清楚提示，並於離站提醒；草稿不含帳密、登入憑證或客戶資料，既有 12 小時管理驗證不延長
 
 ## 6. LINE 登入與客戶資訊
+
+- 0.3.20 效能實作：無憑證不先查 me；登入成功合併取得本人資料及受保護商品，有效憑證進站合併查詢。仍完成 LINE／session／角色驗證後才載入商品，不改 12 小時、sessionStorage、恢復／取消、購物車及預購規則
+- 後續改版以保留目前功能為前提，須通過對應回歸驗證；減少請求不代表放寬身分驗證
 
 - 客戶操作以 LINE 登入身分識別，不以暱稱當唯一 Key。
 - 伺服器驗證 LINE 憑證與正確 Channel，再建立本系統工作階段。

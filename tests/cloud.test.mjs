@@ -13,6 +13,18 @@ test('product catalog requires a customer session and rejects anonymous or admin
   for(const session of [null,owner])assert.throws(()=>operate(s,'catalog','GET',{},session),e=>e.status===401);
   assert.equal(operate(s,'catalog','GET',{},anna).products.length,1);
 });
+test('customer startup preserves the existing public catalog and own profile without mutating business data',()=>{
+  const s=fixture();s.products[0].sourceUrl='https://private.example/purchase';
+  s.costSettings={exchangeRate:0.024};s.procurement=[{variant_id:1,cost:{krw:10000,rate:0.024},version:1}];
+  s.customerCare={[bob.subject]:{note:'owner-only'}};s.customers.find(c=>c.id===bob.subject).phone='0900000000';
+  const before=structuredClone(s);
+  const result=operate(s,'customer/bootstrap','GET',{},anna,imagePrefix);
+  assert.deepEqual(result,{me:operate(s,'me','GET',{},anna,imagePrefix),catalog:operate(s,'catalog','GET',{},anna,imagePrefix)});
+  const serialized=JSON.stringify(result);
+  for(const privateValue of ['private.example','owner-only','0900000000','exchangeRate','costVersion','"cost"'])assert.ok(!serialized.includes(privateValue),privateValue);
+  assert.equal(result.me.user.id,anna.subject);assert.deepEqual(s,before);
+  for(const user of [null,owner,{role:'customer',subject:'line:missing'}])assert.throws(()=>operate(s,'customer/bootstrap','GET',{},user,imagePrefix),e=>e.status===401);
+});
 test('customer sessions cannot read or mutate admin routes',()=>{const s=fixture();assert.throws(()=>operate(s,'admin/state','GET',{},anna),e=>e.status===401);assert.throws(()=>operate(s,'admin/products','POST',product,anna),e=>e.status===401);});
 test('creating categories preserves every legacy product, variant and preorder field',()=>{
   const s=fixture();delete s.categories;submit(s);

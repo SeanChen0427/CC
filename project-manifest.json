@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.19",
+  "documentVersion": "0.3.20",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_match_customer_initiated_LINE_chat_and_use_manual_order_cards",
+  "nextStep": "deploy_and_verify_login_performance_without_business_data_changes",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -118,7 +118,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 109,
+    "integrationTestsPassed": 120,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -153,7 +153,7 @@
       390,
       768
     ],
-    "edgeVersion": 19,
+    "edgeVersion": 20,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -162,9 +162,12 @@
       390
     ],
     "liveSizePricingChecked": true,
-    "affectedTestsPassed": 8,
+    "affectedTestsPassed": 38,
     "affectedTests": [
-      "customer-care"
+      "customer-entry",
+      "line-auth",
+      "cloud",
+      "cloud-entry"
     ],
     "nativeGalleryScrollBrowserChecked": true,
     "galleryZoomAndReturnChecked": true,
@@ -621,5 +624,31 @@
       "apps/admin-web/order-card.js",
       "tests/customer-care.test.mjs"
     ]
+  },
+  "loginPerformance": {
+    "status": "isolated_verification_passed_pending_deployment",
+    "fullLoginApiRequests": {
+      "before": 5,
+      "after": 2
+    },
+    "validSessionEntryApiRequests": {
+      "before": 2,
+      "after": 1
+    },
+    "embeddedPublicCustomerConfig": true,
+    "customerModulePreloads": 9,
+    "legacyApiCompatible": true,
+    "sessionPolicyUnchanged": true,
+    "sourcePaths": [
+      "apps/customer-web/entry.js",
+      "shared/runtime.js",
+      "cloud/index.ts",
+      "cloud/core.mjs",
+      "scripts/build-pages.mjs",
+      "tests/customer-entry.test.mjs",
+      "tests/cloud-entry.test.mjs"
+    ],
+    "physicalIPhoneVerified": false,
+    "edgeSourceFilesVerified": 18
   }
 }

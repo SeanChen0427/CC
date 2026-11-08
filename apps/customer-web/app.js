@@ -1,4 +1,4 @@
-import { request, config, cloud, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js';
 import { art } from './product-art.js';
 import { enterCustomerSite } from './entry.js';
 import { imageForColor, photoIndexForColor } from './product-gallery.js';
@@ -384,7 +384,7 @@ window.addEventListener('pageshow',event=>{
 try {
   const query=new URLSearchParams(location.search);
   await enterCustomerSite({
-    cloud,returningFromLine:query.has('code')||query.has('error'),
+    cloud,hasSession,returningFromLine:query.has('code')||query.has('error'),
     finishLogin:finishLineLogin,request:api,
     showGate:(auth,message)=>{state.lineConfigured=auth.lineConfigured;state.lineChannelId=auth.lineChannelId;renderAuthGate(message);},
     login:channelId=>startLineLogin(channelId,{replace:true}),

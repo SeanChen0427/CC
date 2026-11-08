@@ -1,8 +1,10 @@
 # 跨 AI 工具共用索引
 
-更新：2026-11-08（Asia/Taipei）｜版本：0.3.19
+更新：2026-11-08（Asia/Taipei）｜版本：0.3.20
 
 品牌名稱已確認為 **CCBABY**。
+
+0.3.20 登入效能已完成隔離驗證，待正式發布：完整登入網站 API 5→2、有效登入進站 2→1，公開設定隨頁提供及必要模組預載；保留原驗證、恢復與購物車／預購／管理功能
 
 0.3.19 LINE 人工一對一聯繫、訂單圖卡與服務提醒已上線，Pages 46af662／Edge v19；109 項測試、四種螢幕寬度、正式 API 與 12 檔核對通過。客戶自行傳出第一則訊息，店主人工核對與傳送，到台後才提供匯款聯繫；既有商品、預購與活動保留
 
@@ -102,6 +104,11 @@ AGENTS.md、CLAUDE.md、GEMINI.md 內容保持一致；跨工具進度以儲存�
 
 - 操作與範圍：[CUSTOMER_CARE.md](docs/CUSTOMER_CARE.md)
 - 聯繫碼 shared/line-contact.js；規則 domain/customer-care.mjs；管理聯繫 apps/admin-web/customer-care.js；PNG 圖卡 apps/admin-web/order-card.js；驗證 tests/customer-care.test.mjs
+
+### 登入效能與相容（0.3.20）
+
+- 客戶入口 apps/customer-web/entry.js、shared/runtime.js；合併讀取 cloud/index.ts／cloud/core.mjs；預載與公開設定 scripts/build-pages.mjs
+- [入口請求與失效驗證](tests/customer-entry.test.mjs)、[實際 Edge handler 隔離驗證](tests/cloud-entry.test.mjs)，沿用 tests/cloud.test.mjs／line-auth.test.mjs
 
 ### LINE 跨瀏覽器恢復（0.3.17）
 

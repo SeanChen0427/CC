@@ -9,7 +9,11 @@ for(const role of ['customer','admin']){
   const target=role==='customer'?dist:join(dist,'admin');
   cpSync(join(root,'apps',role+'-web'),target,{recursive:true});
   const index=join(target,'index.html');
-  writeFileSync(index,readFileSync(index,'utf8').replace('src="./app.js"',`src="./app.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`));
+  const publicConfig={...deployment,mode:'cloud',role};
+  const embeddedConfig=JSON.stringify(publicConfig).replace(/</g,'\\u003c');
+  writeFileSync(index,readFileSync(index,'utf8').replace('src="./app.js"',`src="./app.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`)
+    .replace(/(rel="modulepreload" href="\.\/[^"?]+\.js)(")/g,`$1?v=${version}$2`)
+    .replace('<!-- CCBABY_PUBLIC_CONFIG -->',`<script type="application/json" id="ccbaby-config">${embeddedConfig}</script>`));
   cpSync(join(root,'shared/runtime.js'),join(target,'runtime.js'));
   cpSync(join(root,'shared/line-auth.js'),join(target,'line-auth.js'));
   cpSync(join(root,'shared/product-gallery.js'),join(target,'product-gallery.js'));
@@ -23,7 +27,7 @@ for(const role of ['customer','admin']){
     const path=join(target,name);
     writeFileSync(path,readFileSync(path,'utf8').replace(/(from\s+['"]|import\s*['"])(\.\/[^'"]+\.js)(['"])/g,`$1$2?v=${version}$3`));
   }
-  writeFileSync(join(target,'config.json'),JSON.stringify({...deployment,mode:'cloud',role},null,2)+'\n');
+  writeFileSync(join(target,'config.json'),JSON.stringify(publicConfig,null,2)+'\n');
 }
 writeFileSync(join(dist,'.nojekyll'),'');
 if(deployment.customDomain)writeFileSync(join(dist,'CNAME'),deployment.customDomain+'\n');

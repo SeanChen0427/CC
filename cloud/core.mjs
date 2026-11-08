@@ -101,6 +101,12 @@ export function upsertCustomer(s, identity) {
 
 // All mutations run on a private copy. The caller commits via an atomic revision check.
 export function operate(s, path, method, body, session, imagePrefix) {
+  if (path === 'customer/bootstrap' && method === 'GET') {
+    required(session,'customer');
+    const me = operate(s,'me','GET',{},session,imagePrefix);
+    if (!me.user) throw new AppError('請先登入',401);
+    return { me, catalog: operate(s,'catalog','GET',{},session,imagePrefix) };
+  }
   if (path === 'catalog' && method === 'GET') {
     required(session,'customer');
     return { campaign: s.campaign, categories: categoryNames(s.categories,s.products), products: orderedProducts(catalog(s),s.merchandising?.productIds), localOnly: false };

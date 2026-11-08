@@ -1,5 +1,9 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.20 登入效能 — 2026-11-08
+
+已完成隔離驗證，正式發布待查驗。無 DDL／RPC／LINE 設定或主機區域調整；verify_jwt=false 與原自訂 session 沿用。customer/bootstrap 需客戶 session，只回本人資料及受保護商品；exchange 選填 includeStartup，原呼叫者與 me／catalog 保持相容。前端只內嵌原公開設定並預載必要模組。發布前 revision 74、業務 MD5 c1f206d97f33333f81aefa73d477b444、16 商品／3 會員／1 預購／open
+
 版本 0.3.0｜2026-11-05。依使用者明確指定部署，參考副主席平台的靜態前端與 Supabase 後端分工。
 
 ## 入口與資源

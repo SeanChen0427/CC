@@ -27,6 +27,11 @@ async function backend(path, body, method='POST', extra={}) {
   return data;
 }
 const rpc=(name,body)=>backend('/rest/v1/rpc/'+name,body);
+function startup(state) {
+  const result=operate(state.data,'customer/bootstrap','GET',{},state.session,imagePrefix);
+  result.catalog={...result.catalog,lineConfigured,lineChannelId:lineConfigured?lineId:null};
+  return result;
+}
 async function session(role,subject) {
   const token=hex(crypto.getRandomValues(new Uint8Array(32)));
   await rpc('ccbaby_session_create',{p_hash:await digest(token),p_role:role,p_subject:subject});
@@ -63,6 +68,27 @@ Deno.serve(async req=>{
     if(path==='health'&&method==='GET')return json({ok:true,database:'supabase',localOnly:false,lineConfigured});
     if((path.startsWith('admin/')&&role!=='admin')||(path.startsWith('customer/')&&role!=='customer'))throw new AppError('請使用對應入口',403);
     if(path==='customer/line/config'&&method==='GET')return json({lineConfigured,lineChannelId:lineConfigured?lineId:null,requiresLogin:true});
+    if(path==='customer/login')throw new AppError('請使用 LINE 登入',403);
+    if(path==='customer/line/exchange'&&method==='POST'){
+      if(!lineConfigured)throw new AppError('LINE 登入準備中，開放時間將另行公告',503);
+      const code=text(body.code,'登入識別',2048),verifier=text(body.verifier,'登入驗證',128),nonce=text(body.nonce,'登入驗證',128);
+      if(!/^[A-Za-z0-9._~-]{43,128}$/.test(verifier))throw new AppError('登入驗證無效');
+      const response=await fetch('https://api.line.me/oauth2/v2.1/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:customerURL,client_id:lineId,client_secret:lineSecret,code_verifier:verifier})});
+      const line=await response.json();if(!response.ok||!line.id_token)throw new AppError('LINE 登入已失效，請重新登入',401);
+      const verified=await fetch('https://api.line.me/oauth2/v2.1/verify',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({id_token:line.id_token,client_id:lineId,nonce})});
+      const identity=await verified.json();if(!verified.ok||!identity.sub||identity.nonce!==nonce||String(identity.aud)!==lineId||identity.iss!=='https://access.line.me')throw new AppError('LINE 身分驗證失敗',401);
+      await rpc('ccbaby_line_customer',{p_id:'line:'+identity.sub,p_name:String(identity.name||'LINE 會員').slice(0,80)});
+      const token=await session('customer','line:'+identity.sub);
+      if(body.includeStartup===true){
+        // A transient catalog failure must not lose an already-created login.
+        // The client stores the token and can retry the protected bootstrap.
+        try{
+          const state=await rpc('ccbaby_load',{p_hash:await digest(token),p_role:'customer'});
+          return json({ok:true,token,startup:startup(state)});
+        }catch{console.warn('Customer startup unavailable after verified login');}
+      }
+      return json({ok:true,token});
+    }
     const token=(req.headers.get('authorization')||'').replace(/^Bearer /,'');
     const hash=await digest(token);
     let state=await rpc('ccbaby_load',{p_hash:hash,p_role:role});
@@ -74,18 +100,7 @@ Deno.serve(async req=>{
       if(!state.owner_id||auth.user.id!==state.owner_id)throw new AppError('此帳號沒有管理權限',403);
       return json({ok:true,token:await session('admin',auth.user.id)});
     }
-    if(path==='customer/login')throw new AppError('請使用 LINE 登入',403);
-    if(path==='customer/line/exchange'&&method==='POST'){
-      if(!lineConfigured)throw new AppError('LINE 登入準備中，開放時間將另行公告',503);
-      const code=text(body.code,'登入識別',2048),verifier=text(body.verifier,'登入驗證',128),nonce=text(body.nonce,'登入驗證',128);
-      if(!/^[A-Za-z0-9._~-]{43,128}$/.test(verifier))throw new AppError('登入驗證無效');
-      const response=await fetch('https://api.line.me/oauth2/v2.1/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:customerURL,client_id:lineId,client_secret:lineSecret,code_verifier:verifier})});
-      const line=await response.json();if(!response.ok||!line.id_token)throw new AppError('LINE 登入已失效，請重新登入',401);
-      const verified=await fetch('https://api.line.me/oauth2/v2.1/verify',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({id_token:line.id_token,client_id:lineId,nonce})});
-      const identity=await verified.json();if(!verified.ok||!identity.sub||identity.nonce!==nonce||String(identity.aud)!==lineId||identity.iss!=='https://access.line.me')throw new AppError('LINE 身分驗證失敗',401);
-      await rpc('ccbaby_line_customer',{p_id:'line:'+identity.sub,p_name:String(identity.name||'LINE 會員').slice(0,80)});
-      return json({ok:true,token:await session('customer','line:'+identity.sub)});
-    }
+    if(path==='customer/bootstrap'&&method==='GET')return json(startup(state));
     if(path==='catalog'&&method==='GET')return json({...operate(state.data,path,method,body,state.session,imagePrefix),lineConfigured,lineChannelId:lineConfigured?lineId:null});
     if(path==='me'&&method==='GET')return json(operate(state.data,path,method,body,state.session,imagePrefix));
     if(!state.session)throw new AppError('請先登入',401);

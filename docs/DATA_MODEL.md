@@ -1,5 +1,9 @@
 # 資料模型與報表規則
 
+## 0.3.20 登入查詢合併
+
+無資料表、RPC 或保存規則異動；customer/bootstrap 與選填 exchange.startup 只組合原本允許的本人 me 與商品 catalog，不傳他人資料、進價、來源或管理聯繫紀錄。session 仍為原雜湊、角色與 12 小時期限，每次受保護查詢由 PostgreSQL 驗證。正常 LINE 登入沿用原會員更新／revision，效能發布不主動寫入正式業務文件
+
 ## 0.3.17 短期 LINE 驗證暫存
 
 - ccbaby.line.attempt.v2.<state>：state、verifier、nonce、at、白名單 returnHash，同瀏覽器 sessionStorage／localStorage；10 分鐘有效、維護最多 8 筆舊紀錄，於後續登入／回呼清理超期值
