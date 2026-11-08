@@ -2,7 +2,9 @@
 
 ## 0.3.20 登入效能 — 2026-11-08
 
-已完成隔離驗證，正式發布待查驗。無 DDL／RPC／LINE 設定或主機區域調整；verify_jwt=false 與原自訂 session 沿用。customer/bootstrap 需客戶 session，只回本人資料及受保護商品；exchange 選填 includeStartup，原呼叫者與 me／catalog 保持相容。前端只內嵌原公開設定並預載必要模組。發布前 revision 74、業務 MD5 c1f206d97f33333f81aefa73d477b444、16 商品／3 會員／1 預購／open
+Edge v20 ACTIVE、main ec7c4d4、Pages 44860e83aff6f64bef4465cf89e3ee92937637b3／[run 42438895329](https://github.com/SeanChen0427/CC/actions/runs/42438895329) success。無 DDL／RPC／LINE 設定或主機區域調整；verify_jwt=false 與原自訂 session 沿用。customer/bootstrap 需客戶 session，只回本人資料及受保護商品；exchange 選填 includeStartup，原呼叫者與 me／catalog 保持相容。前端只內嵌原公開設定並預載必要模組，17 個公開成品、18 個 Edge 來源一致，正式權限拒絕與管理唯讀通過
+
+早期基準 revision 74／MD5 c1f206d97f33333f81aefa73d477b444；工作期間原 v19 的正常登入及商品儲存使其變為 revision 76／MD5 edc560aeb17fdd181edd99f004c62a9a（最後寫入 10:27:02），早於 Edge v20 發布 10:29:59。效能發布保留這筆正常變更；最新 16 商品／3 會員／1 預購／open，沒有正式示範送單、瀏覽事件或 LINE 發訊。實體 iPhone 往返尚未測量，請求數縮減已在隔離實際 handler 與瀏覽器驗證
 
 版本 0.3.0｜2026-11-05。依使用者明確指定部署，參考副主席平台的靜態前端與 Supabase 後端分工。
 

@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42403096138
+    "pagesRun": 42438895329
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "deploy_and_verify_login_performance_without_business_data_changes",
+  "nextStep": "observe_real_iPhone_login_latency_with_existing_customer_workflow",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -125,7 +125,7 @@
     "date": "2026-11-08",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "46af66261deeefc87400d67b297b058332b713ac",
+    "pagesCommit": "44860e83aff6f64bef4465cf89e3ee92937637b3",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -267,7 +267,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.19",
+    "lastLiveFrontendVersion": "0.3.20",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -279,16 +279,21 @@
     "pagesLiveFilesCompared": [
       "index.html",
       "app.js",
-      "line-contact.js",
+      "entry.js",
+      "runtime.js",
+      "line-auth.js",
       "style.css",
+      "config.json",
+      "gallery.js",
+      "browsing.js",
+      "line-contact.js",
+      "product-art.js",
+      "product-gallery.js",
+      "product-categories.js",
       "admin/index.html",
       "admin/app.js",
-      "admin/customer-care.js",
-      "admin/order-card.js",
-      "admin/browsing.js",
-      "admin/style.css",
       "admin/runtime.js",
-      "admin/line-contact.js"
+      "admin/config.json"
     ],
     "productSizeCostsBrowserChecked": true,
     "productSizeCostsDraftChecked": true,
@@ -359,7 +364,12 @@
     "liveCustomerCareChecked": true,
     "liveCustomerCareApiChecked": true,
     "liveCustomerCareBusinessDataUnchanged": true,
-    "liveCustomerCareInvalidWriteRejected": true
+    "liveCustomerCareInvalidWriteRejected": true,
+    "loginPerformanceBrowserChecked": true,
+    "liveLoginEntryOnlyConfigChecked": true,
+    "liveLoginBootstrapAuthorizationChecked": true,
+    "liveLoginPerformanceFilesChecked": true,
+    "liveConcurrentOwnerChangePreserved": true
   },
   "brandName": "CCBABY",
   "testData": {
@@ -626,7 +636,7 @@
     ]
   },
   "loginPerformance": {
-    "status": "isolated_verification_passed_pending_deployment",
+    "status": "live_verified",
     "fullLoginApiRequests": {
       "before": 5,
       "after": 2
@@ -649,6 +659,21 @@
       "tests/cloud-entry.test.mjs"
     ],
     "physicalIPhoneVerified": false,
-    "edgeSourceFilesVerified": 18
+    "edgeSourceFilesVerified": 18,
+    "livePublicFilesVerified": 17,
+    "diagnosticRedirectMsBefore": [
+      3798,
+      791,
+      755
+    ],
+    "diagnosticRedirectMsAfter": [
+      1482,
+      450,
+      498
+    ],
+    "diagnosticTimingIsFullLineLogin": false,
+    "businessRevisionAtFinalVerification": 76,
+    "businessHashAtFinalVerification": "edc560aeb17fdd181edd99f004c62a9a",
+    "concurrentPreDeploymentOwnerProductSavePreserved": true
   }
 }
