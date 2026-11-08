@@ -1,11 +1,11 @@
-import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.23';
-import { art } from './product-art.js?v=0.3.23';
-import { enterCustomerSite } from './entry.js?v=0.3.23';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.23';
-import { mountGallery } from './gallery.js?v=0.3.23';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.23';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.23';
-import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.23';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.24';
+import { art } from './product-art.js?v=0.3.24';
+import { enterCustomerSite } from './entry.js?v=0.3.24';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.24';
+import { mountGallery } from './gallery.js?v=0.3.24';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.24';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.24';
+import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.24';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -171,7 +171,7 @@ async function showLineContact({productId,orderId,orderCode}={}){
   const order=state.orders.find(o=>o.id===orderId)||(orderCode?{code:orderCode}:null);
   const context={product,order};
   const message=lineContactMessage(data.contactCode,context),url=lineContactURL(data.contactCode,context);
-  setModal(`<div class="modal-copy line-contact-copy"><div class="eyebrow">TALK WITH CCBABY</div><h2>${order?'和店主聯繫這份預購':'讓店主幫你一起選'}</h2><p>開啟 LINE 後，確認文字並按下傳送，我們就能在同一個聊天室回覆與確認後續進度</p><div class="line-contact-code"><small>你的會員聯繫碼</small><strong>${esc(data.contactCode)}</strong></div><p class="line-contact-message" id="line-contact-draft">${esc(message)}</p><button class="secondary-button" data-action="copy-line-contact">複製詢問文字</button><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">開啟 LINE，確認後傳送</a><p class="fine-print">如 LINE 提示加入好友，請先加入 CCBABY · 若電腦無法開啟，請在手機 LINE 加入 @445yxcey，再貼上詢問文字 · 預購以網站送出成功為準</p>${product?`<button class="secondary-button" data-action="product-return" data-id="${product.id}">返回商品</button>`:'<button class="secondary-button" data-action="close">返回選購</button>'}</div>`,'modal-small');
+  setModal(`<div class="modal-copy line-contact-copy"><div class="eyebrow">TALK WITH CCBABY</div><h2>${order?'和店主聯繫這份預購':'讓店主幫你一起選'}</h2><p>開啟 LINE 後，確認文字並按下傳送，我們就能在同一個聊天室回覆與確認後續進度</p>${data.contactCode?`<div class="line-contact-code"><small>你的會員聯繫碼</small><strong>${esc(data.contactCode)}</strong></div>`:''}<p class="line-contact-message" id="line-contact-draft">${esc(message)}</p><button class="secondary-button" data-action="copy-line-contact">複製詢問文字</button><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">開啟 LINE，確認後傳送</a><p class="fine-print">如 LINE 提示加入好友，請先加入 CCBABY · 若電腦無法開啟，請在手機 LINE 加入 @445yxcey，再貼上詢問文字 · 預購以網站送出成功為準</p>${product?`<button class="secondary-button" data-action="product-return" data-id="${product.id}">返回商品</button>`:'<button class="secondary-button" data-action="close">返回選購</button>'}</div>`,'modal-small');
 }
 
 function showProduct(id, retain = false) {
@@ -242,7 +242,7 @@ async function submitOrder(event) {
     saved=true;observe('submit_success',{quantity:result.added});
     state.cart=[];saveCart();state.pending=null;state.contactDraft=null;
     state.user=(await api('me')).user;renderCart();
-    setModal(`<div class="modal-copy"><div class="success-mark">${icon('check')}</div><div class="eyebrow">SAVED FOR YOUR NEXT JOURNEY</div><h2>預購已送出</h2><p>已記下這次的 ${result.added} 件選物，目前不用付款，商品到台後再另行通知</p><div class="success-code">${esc(result.code)}</div><p>謝謝你的預購，我們會依實際採買結果安排，並在到台後聯絡付款與交付</p><button class="primary-button" data-action="line-contact" data-order-id="${result.orderId}" data-order-code="${esc(result.code)}">用 LINE 和店主建立聯繫</button><p class="fine-print">傳出第一則訊息，方便店主後續提供預購圖卡與採購進度</p><button class="secondary-button" data-action="view-orders">查看我的預購 ${icon('arrow')}</button></div>`,'modal-small');
+    setModal(`<div class="modal-copy"><div class="success-mark">${icon('check')}</div><div class="eyebrow">SAVED FOR YOUR NEXT JOURNEY</div><h2>預購已送出</h2><p>已記下這次的 ${result.added} 件選物，目前不用付款，商品到台後再另行通知</p><div class="success-code">${esc(result.code)}</div><p>謝謝你的預購，我們會依實際採買結果安排，並在到台後聯絡付款與交付</p><button class="primary-button" data-action="line-contact" data-order-id="${result.orderId}" data-order-code="${esc(result.code)}">用 LINE 詢問這份預購</button><p class="fine-print">有問題可直接在官方帳號留言，預購明細也能隨時在網站查看</p><button class="secondary-button" data-action="view-orders">查看我的預購 ${icon('arrow')}</button></div>`,'modal-small');
   } catch(error) { if(!saved)observe('submit_failure');if ($('#submit-error')) $('#submit-error').textContent=error.message; else toast(error.message);button.disabled=false;button.innerHTML='重新送出預購 '+icon('arrow'); }
   finally {state.submitting=false;}
 }
