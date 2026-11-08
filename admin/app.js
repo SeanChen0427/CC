@@ -1,17 +1,17 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.22';
-import { art } from './product-art.js?v=0.3.22';
-import { mountImageEditor } from './image-editor.js?v=0.3.22';
-import { editorPricing } from './product-pricing.js?v=0.3.22';
-import { mountSizePricing } from './size-pricing.js?v=0.3.22';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.22';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.22';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.22';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.22';
-import { mountProductCost } from './product-cost.js?v=0.3.22';
-import { exportProductExcel } from './product-export.js?v=0.3.22';
-import { mountBrowsing } from './browsing.js?v=0.3.22';
-import { mountMerchandising } from './merchandising.js?v=0.3.22';
-import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.22';
+import { request, config, cloud, download } from './runtime.js?v=0.3.23';
+import { art } from './product-art.js?v=0.3.23';
+import { mountImageEditor } from './image-editor.js?v=0.3.23';
+import { editorPricing } from './product-pricing.js?v=0.3.23';
+import { mountSizePricing } from './size-pricing.js?v=0.3.23';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.23';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.23';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.23';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.23';
+import { mountProductCost } from './product-cost.js?v=0.3.23';
+import { exportProductExcel } from './product-export.js?v=0.3.23';
+import { mountBrowsing } from './browsing.js?v=0.3.23';
+import { mountMerchandising } from './merchandising.js?v=0.3.23';
+import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.23';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -283,10 +283,29 @@ function exchangeSettings(){
 
 function renderSettings(){
   const campaign=state.data.campaign;
+  const promotion=state.data.promotion||{enabled:false,text:'',version:0};
   const local=new Date(new Date(campaign.closesAt).getTime()+8*3600000).toISOString().slice(0,16);
   $('#content').innerHTML=heading('READY FOR THE NEXT JOURNEY','活動與工作台設定','設定預購活動、匯率與管理帳號')+exchangeSettings()+
+    `<section class="panel promotion-panel"><div class="panel-head"><h2>置頂優惠資訊</h2><span class="pill gray">客戶前台</span></div><form class="panel-body" id="promotion-form"><label class="checkbox-label"><input name="enabled" type="checkbox" ${promotion.enabled?'checked':''}>在前台顯示優惠資訊</label><label class="field">優惠文字<textarea name="text" maxlength="120" rows="3" placeholder="填寫本期優惠或活動公告" aria-describedby="promotion-help">${esc(promotion.text)}</textarea></label><p class="settings-foot" id="promotion-help">最多 120 字，開啟後置頂顯示於選物、購物車及我的預購，文字依畫面自然換行</p><div class="promotion-preview" aria-label="前台優惠預覽" hidden></div><p class="settings-foot">儲存後，客戶重新整理即可看到最新內容；關閉會保留文字，不影響活動階段與商品金額</p><div class="error" id="promotion-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">儲存優惠資訊</button></div></form></section>`+
     `<div class="settings-grid"><section class="panel"><div class="panel-head"><h2>本期預購活動</h2><span class="pill">${labels[campaign.status]}</span></div><form class="panel-body" id="campaign-form"><label class="field">活動名稱<input name="name" required maxlength="80" value="${esc(campaign.name)}"></label><label class="field">預購截止時間（台灣時間）<input name="closesAt" type="datetime-local" required value="${local}"></label><label class="field">目前階段<select name="status">${Object.entries(labels).map(([value,label])=>`<option value="${value}" ${campaign.status===value?'selected':''}>${label}</option>`).join('')}</select></label><p class="settings-foot">離開「開放預購」階段會停止客戶新增與修改，並保留結單採購快照，重新開放會恢復預購</p><div class="error" id="campaign-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">儲存活動</button></div></form></section>
     <div><section class="panel"><div class="panel-head"><h2>預購資料備份</h2>${icon('box')}</div><div class="panel-body"><p class="settings-foot" style="margin-top:0">下載商品、客戶預購、採買與異動紀錄，備份不含管理密碼或登入憑證，請自行妥善保存</p><div class="form-actions"><button class="button light" data-action="backup">${icon('download')}下載 JSON 備份</button>${exportButton()}</div></div></section><section class="panel" style="margin-top:23px"><div class="panel-head"><h2>唯一管理員密碼</h2><span class="pill gray">hannah</span></div><form class="panel-body" id="password-form"><label class="field">目前密碼<input name="current" type="password" autocomplete="current-password" required></label><label class="field">新密碼<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required placeholder="至少 12 個字元"></label><label class="field">再次輸入新密碼<input name="confirm" type="password" autocomplete="new-password" required></label><p class="settings-foot">更換後會撤銷所有舊管理登入，請用新密碼重新登入</p><div class="error" id="password-error" role="alert"></div><div class="form-actions"><button class="button light" type="submit">更換密碼</button></div></form></section></div></div>`;
+  const promotionForm=$('#promotion-form');
+  const previewPromotion=()=>{
+    const preview=$('.promotion-preview'),text=promotionForm.elements.namedItem('text').value.replace(/\s+/g,' ').trim();
+    preview.textContent=text;preview.hidden=!promotionForm.elements.namedItem('enabled').checked||!text;
+  };
+  promotionForm.addEventListener('input',previewPromotion);previewPromotion();
+  promotionForm.addEventListener('submit',async e=>{
+    e.preventDefault();const button=promotionForm.querySelector('button[type="submit"]');
+    if(button.disabled)return;
+    const fields=[...promotionForm.querySelectorAll('input,textarea,button')];fields.forEach(field=>field.disabled=true);$('#promotion-error').textContent='';
+    try{
+      const result=await api('admin/promotion',{method:'PUT',body:{enabled:promotionForm.elements.namedItem('enabled').checked,text:promotionForm.elements.namedItem('text').value,version:promotion.version}});
+      state.data.promotion=result.promotion;promotion.version=result.promotion.version;
+      promotionForm.elements.namedItem('text').value=result.promotion.text;previewPromotion();toast('優惠資訊已儲存');
+    }catch(error){$('#promotion-error').textContent=error.message;}
+    finally{fields.forEach(field=>field.disabled=false);}
+  });
   $('#cost-settings-form').addEventListener('submit',async e=>{
     e.preventDefault();const form=e.currentTarget,button=form.querySelector('button');button.disabled=true;
     try{await api('admin/cost-settings',{method:'PUT',body:formData(form)});await load();renderShell();toast('匯率已儲存，既有進價維持原匯率');}
