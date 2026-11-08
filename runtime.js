@@ -1,8 +1,10 @@
-import { saveLineAttempt, takeLineAttempt, markBrowserLineLogin, browserLineLoginNeeded, clearBrowserLineLogin } from './line-auth.js?v=0.3.19';
-export const config = await fetch(new URL('./config.json', import.meta.url), { cache: 'no-store' }).then(r => { if(!r.ok)throw new Error('config'); return r.json(); });
+import { saveLineAttempt, takeLineAttempt, markBrowserLineLogin, browserLineLoginNeeded, clearBrowserLineLogin } from './line-auth.js?v=0.3.20';
+const embeddedConfig = document.getElementById('ccbaby-config');
+export const config = embeddedConfig ? JSON.parse(embeddedConfig.textContent) : await fetch(new URL('./config.json', import.meta.url), { cache: 'no-store' }).then(r => { if(!r.ok)throw new Error('config'); return r.json(); });
 export const cloud = config.mode === 'cloud';
 const sessionKey = 'ccbaby.session.' + config.role + '.v1';
 function token(){ return sessionStorage.getItem(sessionKey) || ''; }
+export function hasSession(){ return Boolean(token()); }
 function clear(){ sessionStorage.removeItem(sessionKey); }
 async function response(path, options={}) {
   const auth=cloud&&token()?{Authorization:'Bearer '+token()}:{};
@@ -53,9 +55,11 @@ export async function finishLineLogin() {
     throw new Error('LINE 登入未能完成，請在此瀏覽器重新登入');
   }
   if(!pending){markBrowserLineLogin(browserStorage('sessionStorage'));throw new Error('登入驗證未能接續，請在此瀏覽器重新登入 LINE');}
-  try{await request('customer/line/exchange',{method:'POST',body:{code:q.get('code'),verifier:pending.verifier,nonce:pending.nonce}});}
+  let result;
+  try{result=await request('customer/line/exchange',{method:'POST',body:{code:q.get('code'),verifier:pending.verifier,nonce:pending.nonce,includeStartup:true}});}
   catch(error){markBrowserLineLogin(browserStorage('sessionStorage'));throw error;}
   clearBrowserLineLogin(browserStorage('sessionStorage'));
   const returnHash=['#shop','#cart','#orders'].includes(pending.returnHash)?pending.returnHash:'';
   history.replaceState(null,'',location.pathname+returnHash);
+  return result.startup;
 }

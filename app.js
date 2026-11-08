@@ -1,11 +1,11 @@
-import { request, config, cloud, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.19';
-import { art } from './product-art.js?v=0.3.19';
-import { enterCustomerSite } from './entry.js?v=0.3.19';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.19';
-import { mountGallery } from './gallery.js?v=0.3.19';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.19';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.19';
-import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.19';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.20';
+import { art } from './product-art.js?v=0.3.20';
+import { enterCustomerSite } from './entry.js?v=0.3.20';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.20';
+import { mountGallery } from './gallery.js?v=0.3.20';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.20';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.20';
+import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.20';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -384,7 +384,7 @@ window.addEventListener('pageshow',event=>{
 try {
   const query=new URLSearchParams(location.search);
   await enterCustomerSite({
-    cloud,returningFromLine:query.has('code')||query.has('error'),
+    cloud,hasSession,returningFromLine:query.has('code')||query.has('error'),
     finishLogin:finishLineLogin,request:api,
     showGate:(auth,message)=>{state.lineConfigured=auth.lineConfigured;state.lineChannelId=auth.lineChannelId;renderAuthGate(message);},
     login:channelId=>startLineLogin(channelId,{replace:true}),
