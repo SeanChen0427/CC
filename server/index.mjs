@@ -11,7 +11,7 @@ import { AppError } from '../domain/rules.mjs';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png',
-  '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };
+  '.jpg': 'image/jpeg', '.webp': 'image/webp', '.mp4': 'video/mp4', '.ico': 'image/x-icon' };
 
 export async function startApp({ directory = join(ROOT, '.local'), customerPort = 4173, adminPort = 4174,
   password, seed = false, quiet = false } = {}) {

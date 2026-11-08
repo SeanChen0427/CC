@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.20",
+  "documentVersion": "0.3.21",
   "updatedAt": "2026-11-08",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -96,7 +96,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "observe_real_iPhone_login_latency_with_existing_customer_workflow",
+  "nextStep": "publish_and_verify_login_wait_animation_static_assets",
   "runtime": {
     "node": "24+ (verified 24.14.1)",
     "frontend": "separate native HTML/CSS/JS applications",
@@ -675,5 +675,82 @@
     "businessRevisionAtFinalVerification": 76,
     "businessHashAtFinalVerification": "edc560aeb17fdd181edd99f004c62a9a",
     "concurrentPreDeploymentOwnerProductSavePreserved": true
+  },
+  "designPreviews": {
+    "goldenRetrieverLogin": {
+      "status": "approved_native_video_integrated_pending_deployment",
+      "interpolatedMotionAccepted": false,
+      "motionReplacementModel": "byte-plus-seedance-2",
+      "motionReplacementDurationSeconds": 4,
+      "firstDraftAccepted": false,
+      "replacementMethod": "openart_native_gif_with_local_rife_v4_6_interpolation",
+      "date": "2026-11-08",
+      "style": "single_color_silhouette",
+      "color": "#baa17c",
+      "loopMilliseconds": 1800,
+      "reducedMotionSupported": true,
+      "applicationFilesChanged": true,
+      "viewportsVerified": [
+        320,
+        390,
+        768,
+        1440
+      ],
+      "externalRequests": 0,
+      "paths": [
+        "design-previews/golden-login/README.md"
+      ],
+      "naturalShapeAccepted": true,
+      "sourceFrames": 9,
+      "sourceFps": 5,
+      "frames": 90,
+      "fps": 50,
+      "sourceHistoryId": "jOtVE7yzZ04gPFS75lgq",
+      "approvedVideoHistoryId": "O6PzyuFwKIcPvFZx94HQ",
+      "localOnlyDrafts": true
+    }
+  },
+  "loginAnimation": {
+    "status": "isolated_verification_passed_pending_pages_deployment",
+    "approvedVideoHistoryId": "O6PzyuFwKIcPvFZx94HQ",
+    "approvedResourceId": "hjNaPSMsXSVtffuGIKlv",
+    "originalCopyAndControlsPreserved": true,
+    "decorativeOnly": true,
+    "authAwaitsAnimation": false,
+    "minimumDisplayTime": false,
+    "mediaStartDelayMilliseconds": 150,
+    "fps": 24,
+    "frames": 97,
+    "durationSeconds": 4.041667,
+    "videoBytes": 40965,
+    "posterBytes": 2070,
+    "sameOriginAssets": true,
+    "optionalAsyncModule": true,
+    "reducedMotionPoster": true,
+    "paths": [
+      "apps/customer-web/login-animation.js",
+      "apps/customer-web/assets/login-run.mp4",
+      "apps/customer-web/assets/login-run-poster.webp"
+    ],
+    "verification": {
+      "integrationTestsPassed": 120,
+      "syntaxModules": 47,
+      "browserScenarios": 9,
+      "viewports": [
+        320,
+        390,
+        768,
+        1440
+      ],
+      "pageErrors": 0,
+      "mediaStallDoesNotBlockLogin": true,
+      "mediaFailureDoesNotBlockLogin": true,
+      "optionalModuleFailureDoesNotBlockLogin": true,
+      "autoplayRejectionDoesNotBlockLogin": true,
+      "fastEntrySkipsVideoRequest": true,
+      "originalCancelAndRecoveryCopyPreserved": true,
+      "cartReloadAndPreorderAndAdminChecked": true,
+      "physicalIPhoneChecked": false
+    }
   }
 }

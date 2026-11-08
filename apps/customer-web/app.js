@@ -59,7 +59,7 @@ function renderAuthGate(message, { loading=false, reload=false } = {}) {
   if(modal.open)modal.close();
   $('#header').innerHTML='';$('#bottom-nav').innerHTML='';
   const description=message||'登入後即可進入本期選物';
-  $('#main').innerHTML=`<section class="auth-gate"><div class="eyebrow">CCBABY</div><h1>${loading?'正在開啟 LINE 登入':'請先使用 LINE 登入'}</h1><p>${esc(description||'登入後即可進入本期選物')}</p>${!loading&&state.lineConfigured?`<button class="primary-button" data-action="line-login">${browserLineLoginRequired()?'在此瀏覽器重新登入 LINE':'使用 LINE 登入'}</button>`:''}${reload?'<button class="secondary-button" data-action="reload">重新載入</button>':''}</section>`;
+  $('#main').innerHTML=`<section class="auth-gate"><div class="eyebrow">CCBABY</div>${loading?'<video class="login-animation" data-login-animation data-src="./assets/login-run.mp4" poster="./assets/login-run-poster.webp" width="320" height="238" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"></video>':''}<h1>${loading?'正在開啟 LINE 登入':'請先使用 LINE 登入'}</h1><p>${esc(description||'登入後即可進入本期選物')}</p>${!loading&&state.lineConfigured?`<button class="primary-button" data-action="line-login">${browserLineLoginRequired()?'在此瀏覽器重新登入 LINE':'使用 LINE 登入'}</button>`:''}${reload?'<button class="secondary-button" data-action="reload">重新載入</button>':''}</section>`;
 }
 
 async function startLineLogin(channelId=state.lineChannelId, { replace=false } = {}) {

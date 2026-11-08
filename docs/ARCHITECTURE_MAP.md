@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.21 登入等待動畫
+
+客戶 index 初始等待／app.js 開啟 LINE 等待 → 裝飾性 video／同源海報；login-animation.js 為 async 可選模組，監看等待節點、登入狀態與減少動態效果，150ms 後才開始影片請求。登入 entry.js／runtime.js 不引用或等待此模組；成功渲染、失敗／重試、背景／離開即停止，沒有新增 API、後端、資料或認證依賴。建置沿用 customer-web 靜態複製，管理端不加入動畫；本機 server 僅增加 video/mp4 MIME
+
 ## 0.3.20 登入效能
 
 - 無 token → GET customer/line/config → LINE → POST customer/line/exchange（includeStartup:true）→ 同回應帶 token、本人 me 與受保護 catalog，直接渲染

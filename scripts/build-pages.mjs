@@ -11,7 +11,7 @@ for(const role of ['customer','admin']){
   const index=join(target,'index.html');
   const publicConfig={...deployment,mode:'cloud',role};
   const embeddedConfig=JSON.stringify(publicConfig).replace(/</g,'\\u003c');
-  writeFileSync(index,readFileSync(index,'utf8').replace('src="./app.js"',`src="./app.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`)
+  writeFileSync(index,readFileSync(index,'utf8').replace(/src="\.\/(app|login-animation)\.js"/g,(_,name)=>`src="./${name}.js?v=${version}"`).replace('href="./style.css"',`href="./style.css?v=${version}"`)
     .replace(/(rel="modulepreload" href="\.\/[^"?]+\.js)(")/g,`$1?v=${version}$2`)
     .replace('<!-- CCBABY_PUBLIC_CONFIG -->',`<script type="application/json" id="ccbaby-config">${embeddedConfig}</script>`));
   cpSync(join(root,'shared/runtime.js'),join(target,'runtime.js'));

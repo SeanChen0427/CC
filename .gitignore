@@ -22,5 +22,10 @@ coverage/
 docs/reference-ui/
 docs/preview-ui/
 
+# Keep rejected animation drafts local; production assets are under apps/customer-web/assets.
+design-previews/**
+!design-previews/golden-login/
+!design-previews/golden-login/README.md
+
 # Supabase CLI local cache.
 supabase/.temp/
