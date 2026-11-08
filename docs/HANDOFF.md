@@ -7,11 +7,12 @@
 - 發送先核對 @445yxcey 與實際 LINE 額度、收件身分；先保存 claim／推送意圖，再以固定 UUID Retry-Key 發送。並行／重按去重，逾時同 key 重試，超過 23 小時的不明發送只轉人工核對；API 接受不標成已讀或已付款
 - 後台顯示剩餘則數、收件人／訂單確認區、API 接受／人工／失敗狀態，保留複製及圖卡。人工標記後停止同通知重試。真實 LINE 登入會員的詢問入口免傳聯繫碼，舊資料保留
 - 139 項測試與 51 模組語法／建置通過；包含實際 Edge handler 的隔離 LINE／PostgREST、SQLite 重載、額度不足、並行與 409 重試。CUA IAB 隔離 UI 驗證確認／返回修改／送後禁重按、200/200 時停用 API 及複製備援，四寬無橫向溢出、頁面錯誤 0
-- UI 證據 /private/tmp/ccbaby-line-notify-confirm-mobile.png、ccbaby-line-notify-quota-desktop.png；只含虛構資料，不提交。隔離預覽服務 exec sessions 24971（4383/4384）、56147（4393/4394）使用假的 LINE API，結束時停止；不冒稱真實傳訊已驗證
+- UI 證據 /private/tmp/ccbaby-line-notify-confirm-mobile.png、ccbaby-line-notify-quota-desktop.png；只含虛構資料，不提交。隔離預覽服務 4383/4384、4393/4394 使用假的 LINE API，已停止並關閉預覽頁／重設 viewport；不冒稱真實傳訊已驗證
 - 正式唯讀基準 revision 91、business MD5 4e7fcb6ba7137f6002adb030a0259877、16 商品／3 會員／1 預購／open、0 通知工作；三位會員 ID 均為 line:U 格式。LINE Messaging API 已使用中，channel 2012401045 與 Login 2012401105 位於 CCbaby Provider；未更動 webhook／歡迎／選單或方案
 - Edge v22 ACTIVE（22 個來源逐位元一致、verify_jwt=false 保留）；Pages 58a9486cf1640b15ef2c474a564d3403051177eb／run 42500024196 success，正式前後台 9 個重點檔案與 dist 一致，health 200、LINE Login configured=true、lineNotificationsConfigured=false。發布後 revision 91／業務 MD5 與上述基準完全相同，沒有正式資料寫入或客戶發訊
 - LINE Developers 正確 Messaging API 分頁已讀取，@445yxcey 的 Channel access token (long-lived) 顯示 Issue，尚未簽發；未誤按 Basic settings 的 Channel secret Issue。待針對新發訊憑證／Supabase 保存取得具體同意後，保存 LINE_MESSAGING_ACCESS_TOKEN 與 LINE_NOTIFICATIONS_ENABLED=true，核對實際 OA／額度。電腦操作規則對新增安全敏感存取要求行動時確認；網站發布授權不需重問。不得把待憑證啟用當成已能自動傳送
 - 尚未用本人手機收訊；不得對既有客戶補發歷史通知或建立測試預購。待啟用畫面 /private/tmp/ccbaby-line-token-pending.png（無 Token），敏感憑證不得出現在聊天、Git 或截圖
+- 實作來源 main 23126ea 已推送。已透過非同步問題一次詢問簽發／僅保存 Supabase／啟用的具體同意，待回答；不是重新詢問發布或製作。Chrome 保留 LINE Messaging API 頁與 CCBABY Supabase functions/secrets 頁；後者專案名稱雖為 85starpet@gmail.com's Project，網址已核對 tukluknvmbsbsdzawmjf，現有 custom secrets 僅 LINE_CHANNEL_ID／LINE_CHANNEL_SECRET。連接工具未提供 secrets 寫入能力，因此改用官方後台；不得讀取或旋轉既有 Login Secret
 
 ## 加入歡迎詞已優化並套用 — 2026-11-08
 
