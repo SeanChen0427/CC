@@ -948,6 +948,9 @@
     "livePushTestPerformed": false,
     "historicalNotificationsSent": false,
     "credentialValueRecordedOutsideSupabase": false,
-    "liveUiQuotaVerified": true
+    "liveUiQuotaVerified": true,
+    "userSubmittedOrderObserved": true,
+    "liveApiAcceptedObserved": true,
+    "preorderAppendMergeExistingVerified": true
   }
 }
