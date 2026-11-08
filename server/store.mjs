@@ -3,6 +3,7 @@ import { mkdirSync, chmodSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomBytes, scryptSync } from 'node:crypto';
 import { categoryNames } from '../shared/product-categories.js';
+import { promotionSettings } from '../domain/promotion.mjs';
 
 export const DEMO_USERS = [
   { id: 'demo-visitor', name: '測試訪客' },
@@ -28,6 +29,9 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       id INTEGER PRIMARY KEY CHECK(id=1), exchange_rate REAL NOT NULL
     );
     CREATE TABLE IF NOT EXISTS merchandising_settings (
+      id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS promotion_settings (
       id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS customer_care (
@@ -147,6 +151,10 @@ export function openStore(filename, { seed = false, password, credentialPath } =
     merchandisingSettings() {
       const row=this.get('SELECT data FROM merchandising_settings WHERE id=1');
       return row?JSON.parse(row.data):{version:0,productIds:[],previousIds:[]};
+    },
+    promotionSettings() {
+      const row=this.get('SELECT data FROM promotion_settings WHERE id=1');
+      return promotionSettings(row?JSON.parse(row.data):undefined);
     },
     careRecords() {
       return Object.fromEntries(this.all('SELECT * FROM customer_care').map(r=>[r.customer_id,JSON.parse(r.data)]));

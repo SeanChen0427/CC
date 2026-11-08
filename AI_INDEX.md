@@ -1,10 +1,14 @@
 # 跨 AI 工具共用索引
 
+## 0.3.23 後台置頂優惠資訊
+
+已接入後台「活動與設定」的優惠文字、顯示開關及預覽，前台登入後顯示置頂公告。驗證／發布見 HANDOFF。共用規則 [domain/promotion.mjs](domain/promotion.mjs)，保存／權限驗證 [tests/promotion.test.mjs](tests/promotion.test.mjs) 及實際 Edge handler [tests/cloud-entry.test.mjs](tests/cloud-entry.test.mjs)
+
 ## 0.3.22 瀏覽用途揭露位置調整
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-08（Asia/Taipei）｜版本：0.3.22
+更新：2026-11-08（Asia/Taipei）｜版本：0.3.23
 
 品牌名稱已確認為 **CCBABY**。
 

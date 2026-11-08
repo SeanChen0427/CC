@@ -7,6 +7,7 @@ import { planProductCosts, costForProductVariant } from '../domain/product-costi
 import { sameCost } from '../shared/product-costing.js';
 import { orderedProducts, planProductOrder } from '../domain/merchandising.mjs';
 import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
+import { promotionSettings,publicPromotion,planPromotion } from '../domain/promotion.mjs';
 
 export function emptyState() {
   return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
@@ -109,7 +110,7 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   if (path === 'catalog' && method === 'GET') {
     required(session,'customer');
-    return { campaign: s.campaign, categories: categoryNames(s.categories,s.products), products: orderedProducts(catalog(s),s.merchandising?.productIds), localOnly: false };
+    return { campaign: s.campaign, promotion:publicPromotion(s.promotion), categories: categoryNames(s.categories,s.products), products: orderedProducts(catalog(s),s.merchandising?.productIds), localOnly: false };
   }
   if (path === 'me' && method === 'GET') return { authenticated: Boolean(session), role: session?.role, localOnly: false, profiles: [], user: session?.role === 'customer' ? s.customers.find(c => c.id === session.subject) || null : null };
   const role = path.startsWith('admin/') ? 'admin' : 'customer'; required(session, role);
@@ -180,7 +181,12 @@ export function operate(s, path, method, body, session, imagePrefix) {
   }
   if (path==='admin/state'&&method==='GET') {
     const os=orders(s), rs=report(s), active=os.filter(o=>o.quantity>0);
-    return {campaign:s.campaign,costSettings:s.costSettings || {exchangeRate:null},categories:categoryNames(s.categories,s.products),products:catalog(s,true),orders:os,report:rs,stats:{customers:active.length,quantity:active.reduce((a,o)=>a+o.quantity,0),total:active.reduce((a,o)=>a+o.total,0),products:s.products.filter(p=>p.active).length,...Object.fromEntries(['bought','shortage','remaining'].map(k=>[k,rs.reduce((a,r)=>a+r[k],0)]))},events:s.events.slice(-12).reverse().map(({detail,...e})=>e)};
+    return {campaign:s.campaign,promotion:promotionSettings(s.promotion),costSettings:s.costSettings || {exchangeRate:null},categories:categoryNames(s.categories,s.products),products:catalog(s,true),orders:os,report:rs,stats:{customers:active.length,quantity:active.reduce((a,o)=>a+o.quantity,0),total:active.reduce((a,o)=>a+o.total,0),products:s.products.filter(p=>p.active).length,...Object.fromEntries(['bought','shortage','remaining'].map(k=>[k,rs.reduce((a,r)=>a+r[k],0)]))},events:s.events.slice(-12).reverse().map(({detail,...e})=>e)};
+  }
+  if(path==='admin/promotion'&&method==='PUT') {
+    s.promotion=planPromotion(body,s.promotion);
+    event(s,'promotion.update','1',{enabled:s.promotion.enabled,version:s.promotion.version});
+    return {ok:true,promotion:s.promotion};
   }
   if(path==='admin/cost-settings'&&method==='PUT') {
     s.costSettings={exchangeRate:validateExchangeRate(body.exchangeRate)};

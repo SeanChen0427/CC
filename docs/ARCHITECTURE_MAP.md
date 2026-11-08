@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.23 置頂優惠設定
+
+管理 app.js 的獨立 promotion-form → PUT admin/promotion → domain/promotion.mjs 核對布林／120 字／版本 → 雲端 private JSONB promotion（原 revision 交易）或本機 promotion_settings.data（SQLite 交易）。admin/state 取得完整設定；受保護 catalog／bootstrap 僅取得啟用的 {text} 或 null，沿用既有請求，不新增登入 API 或輪詢。客戶 renderHeader 顯示純文字公告，ResizeObserver 同步分類與預購確認的固定間距；不影響活動設定與預購價格
+
 ## 0.3.22 揭露入口
 
 customer app.js 的 renderHeader 移除常駐用途列；共用 footer 在登入後顯示用途短句與原 browsing-privacy 操作，會員 account 對話框另提供同操作。沿用 browsingPrivacy 完整說明與既有 browsing.js／後端；只有客戶靜態介面變更，不增加 API 或資料欄位

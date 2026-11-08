@@ -14,6 +14,7 @@ import { sameCost } from '../shared/product-costing.js';
 import { validateBrowsing, browsingQuery, requireBrowsingRole, summarizeBrowsing, browsingPeople, browsingInterests, browsingPage, browsingContext } from '../domain/browsing.mjs';
 import { orderedProducts, planProductOrder, productSignals, merchandising } from '../domain/merchandising.mjs';
 import { assignContactCode,planCustomerCare,planNotice,careData } from '../domain/customer-care.mjs';
+import { publicPromotion,planPromotion } from '../domain/promotion.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -124,7 +125,7 @@ export async function api({ store, req, role, path, method, body, session, local
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
   if (path === '/api/catalog' && role === 'customer' && method === 'GET') {
-    return { campaign: store.campaign(), categories: store.categories(), products: orderedProducts(store.catalog(),store.merchandisingSettings().productIds), localOnly: true, lineConfigured: false };
+    return { campaign: store.campaign(), promotion:publicPromotion(store.promotionSettings()), categories: store.categories(), products: orderedProducts(store.catalog(),store.merchandisingSettings().productIds), localOnly: true, lineConfigured: false };
   }
   if (path === '/api/me' && method === 'GET') {
     return { authenticated: Boolean(session), role, localOnly: true,
@@ -315,10 +316,18 @@ export async function api({ store, req, role, path, method, body, session, local
   }
   if (path === '/api/admin/state' && method === 'GET') {
     return {
-      campaign: store.campaign(), costSettings:store.costSettings(), categories: store.categories(), products: store.catalog(true), orders: store.orders(),
+      campaign: store.campaign(), promotion:store.promotionSettings(), costSettings:store.costSettings(), categories: store.categories(), products: store.catalog(true), orders: store.orders(),
       report: store.report(), stats: summary(store),
       events: store.all('SELECT id,kind,subject,created_at FROM events ORDER BY id DESC LIMIT 12'),
     };
+  }
+  if (path === '/api/admin/promotion' && method === 'PUT') {
+    return store.transaction(()=>{
+      const promotion=planPromotion(body,store.promotionSettings());
+      store.run('INSERT INTO promotion_settings(id,data) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data',JSON.stringify(promotion));
+      store.event('promotion.update','1',{enabled:promotion.enabled,version:promotion.version});
+      return {ok:true,promotion};
+    });
   }
   if (path === '/api/admin/cost-settings' && method === 'PUT') {
     const rate=validateExchangeRate(body.exchangeRate);
@@ -455,7 +464,7 @@ export async function api({ store, req, role, path, method, body, session, local
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename: 'ccbaby-preorder.xlsx' };
   }
   if (path === '/api/admin/backup' && method === 'GET') {
-    const tables = ['campaign','cost_settings','merchandising_settings','customer_care','order_notices','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
+    const tables = ['campaign','cost_settings','merchandising_settings','promotion_settings','customer_care','order_notices','categories','customers','products','variants','preorders','items','procurement','events','closing_snapshots'];
     return { buffer: Buffer.from(JSON.stringify({ schemaVersion: 1, exportedAt: now(),
       tables: Object.fromEntries(tables.map(table => [table, store.all('SELECT * FROM ' + table)])) }, null, 2)),
       type: 'application/json', filename: 'ccbaby-preorder-backup.json' };

@@ -1,5 +1,12 @@
 # 資料模型與報表規則
 
+## 0.3.23 置頂優惠欄位
+
+- promotion = {enabled:boolean, text:string, version:integer}，文字正規化空白後最多 120 字，啟用不可空白；未設定視為 false／空字串／版本 0，不在讀取時寫入舊資料
+- PUT admin/promotion 只接受店主，version 需與目前相同，成功加一；雲端保存 store.data.promotion 並沿用 ccbaby_commit revision，本機獨立 promotion_settings(id=1,data JSON)，不改 campaign 與商品／訂單
+- catalog／customer/bootstrap 回 promotion:null 或 {text}，不傳關閉草稿、enabled、version 或其他管理資料；本人訂單不需要此設定
+- 雲端業務 JSON 備份自然含 promotion，本機備份新增 promotion_settings；沒有 Postgres DDL、RPC 或權限調整
+
 ## 0.3.20 登入查詢合併
 
 無資料表、RPC 或保存規則異動；customer/bootstrap 與選填 exchange.startup 只組合原本允許的本人 me 與商品 catalog，不傳他人資料、進價、來源或管理聯繫紀錄。session 仍為原雜湊、角色與 12 小時期限，每次受保護查詢由 PostgreSQL 驗證。正常 LINE 登入沿用原會員更新／revision，效能發布不主動寫入正式業務文件

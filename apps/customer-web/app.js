@@ -26,6 +26,7 @@ const paths = {
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.bag}</svg>`;
 const state = { products: [], campaign: null, user: null, profiles: [], category: '全部選物', search: '', limit: 24, cart: [], orders: [], selection: null, submitting: false, pending: null, contactDraft: null, lineConfigured: false, lineChannelId: null };
 const modal = $('#modal');
+if(globalThis.ResizeObserver)new ResizeObserver(()=>document.documentElement.style.setProperty('--header-height',$('#header').getBoundingClientRect().height+'px')).observe($('#header'));
 let toastTimer, browsing=null, searchTimer;
 function startBrowsing(){
   browsing?.dispose();
@@ -116,7 +117,7 @@ function renderHeader() {
     <a href="#shop" class="brand" aria-label="CCBABY 首頁"><span class="brand-mark">${icon('bag')}</span><span><span class="brand-name">CCBABY</span><span class="brand-sub">韓國・日常選物</span></span></a>
     <nav class="header-nav" aria-label="主要頁面"><a href="#shop" class="${tab === 'shop' ? 'active' : ''}">本期選物</a><a href="#orders" class="${tab === 'orders' ? 'active' : ''}">我的預購</a><a href="#shop" data-action="about">預購說明</a></nav>
     <div class="header-actions"><button class="login-button" data-action="${state.user ? 'account' : 'login'}">${icon('user')}<span>${state.user ? esc(state.user.display_name) : '會員登入'}</span></button><a href="#cart" class="cart-icon" aria-label="購物車 ${count} 件">${icon('bag')}${count ? `<span class="count">${count}</span>` : ''}</a></div>
-  </div>`;
+  </div>${state.promotion?.text?`<div class="promotion-strip" aria-label="優惠資訊"><div>${esc(state.promotion.text)}</div></div>`:''}`;
   $('#bottom-nav').innerHTML = [['shop','grid','選購'],['cart','bag','購物車'],['orders','list','我的預購']].map(([id, image, name]) =>
     `<a href="#${id}" class="${tab === id ? 'active' : ''}">${icon(image)}<span>${name}</span>${id === 'cart' && count ? `<b class="count">${count}</b>` : ''}</a>`).join('');
 }
@@ -389,7 +390,7 @@ try {
     showGate:(auth,message)=>{state.lineConfigured=auth.lineConfigured;state.lineChannelId=auth.lineChannelId;renderAuthGate(message);},
     login:channelId=>startLineLogin(channelId,{replace:true}),
     ready:(catalog,me)=>{
-      state.products=catalog.products;state.categories=catalog.categories||[];state.campaign=catalog.campaign;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
+      state.products=catalog.products;state.categories=catalog.categories||[];state.campaign=catalog.campaign;state.promotion=catalog.promotion;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
       if(state.user)startBrowsing();state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();void browsing?.flush();
     },
   });

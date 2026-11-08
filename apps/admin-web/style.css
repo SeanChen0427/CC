@@ -790,6 +790,10 @@ td small {
   gap:23px;
   align-items:start
 }
+.promotion-panel {margin-bottom:23px}
+.promotion-panel .checkbox-label {white-space:normal;font-size:13px;margin-bottom:18px;min-height:32px}
+.promotion-panel .checkbox-label input {width:16px;min-height:16px;flex-shrink:0}
+.promotion-preview {padding:12px 18px;background:#344f40;color:#fffefa;text-align:center;font-size:12px;line-height:1.8;overflow-wrap:anywhere;border-radius:4px}
 .form-grid {
   display:grid;
   grid-template-columns:1fr 1fr;

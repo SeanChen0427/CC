@@ -7,7 +7,7 @@ import { emptyState, upsertCustomer } from '../cloud/core.mjs';
 // No network request or real session is created by this test.
 const originalFetch=globalThis.fetch,originalDeno=globalThis.Deno;
 const env={SUPABASE_URL:'https://backend.test',SUPABASE_SERVICE_ROLE_KEY:'test-service',LINE_CHANNEL_ID:'test-channel',LINE_CHANNEL_SECRET:'test-secret'};
-let handler,s,events,sessions,failStartup,nonce;
+let handler,s,events,sessions,failStartup,nonce,revision,commitConflict;
 const digest=value=>createHash('sha256').update(value).digest('hex');
 globalThis.Deno={env:{get:key=>env[key]},serve:fn=>{handler=fn;}};
 globalThis.fetch=async(url,options={})=>{
@@ -20,13 +20,22 @@ globalThis.fetch=async(url,options={})=>{
   if(path==='/rest/v1/rpc/ccbaby_load'){
     if(failStartup)return Response.json({error:'temporary'}, {status:503});
     const found=sessions.get(body.p_hash),session=found?.role===body.p_role?found:null;
-    return Response.json({data:s,session,revision:1,owner_id:'test-owner'});
+    return Response.json({data:s,session,revision,owner_id:'test-owner'});
+  }
+  if(path==='/rest/v1/rpc/ccbaby_commit'){
+    if(commitConflict){
+      if(commitConflict==='promotion')s.promotion={version:1,enabled:true,text:'其他畫面已儲存'};
+      else s.campaign.description='另一筆正常活動編輯';
+      revision++;commitConflict=null;return Response.json(false);
+    }
+    if(body.p_revision!==revision)return Response.json(false);
+    s=body.p_data;revision++;return Response.json(true);
   }
   throw new Error('Unexpected test request: '+path);
 };
 await import('../cloud/index.ts');
 after(()=>{globalThis.fetch=originalFetch;if(originalDeno===undefined)delete globalThis.Deno;else globalThis.Deno=originalDeno;});
-beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';});
+beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';revision=1;commitConflict=null;});
 const invoke=(path,{body,token,role='customer',method=body?'POST':'GET'}={})=>handler(new Request('https://backend.test/functions/v1/ccbaby-api/'+path,{method,headers:{Origin:'https://ccbaby.beecharge.live','Content-Type':'application/json','x-ccbaby-role':role,...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined}));
 const credentials={code:'test-code',verifier:'v'.repeat(43),nonce:'test-nonce'};
 
@@ -63,4 +72,30 @@ test('startup rejects anonymous, wrong-role, expired and missing-customer sessio
     const response=await invoke('customer/bootstrap',options);assert.ok([401,403].includes(response.status));
     const data=await response.json();assert.equal(data.catalog,undefined);assert.equal(data.me,undefined);
   }
+});
+
+test('actual promotion handler requires owner session and commits only valid settings',async()=>{
+  sessions.set(digest('owner'),{role:'admin',subject:'test-owner'});
+  const body={version:0,enabled:true,text:'本期公告'};
+  for(const options of [{role:'admin'},{role:'customer',token:'owner'}]){
+    assert.ok([401,403].includes((await invoke('admin/promotion',{...options,method:'PUT',body})).status));
+  }
+  assert.ok(!events.includes('/rest/v1/rpc/ccbaby_commit'));
+  assert.equal((await invoke('admin/promotion',{role:'admin',token:'owner',method:'PUT',body:{...body,text:''}})).status,400);
+  const saved=await invoke('admin/promotion',{role:'admin',token:'owner',method:'PUT',body});
+  assert.equal(saved.status,200);assert.deepEqual((await saved.json()).promotion,{...body,version:1});
+  assert.equal(revision,2);assert.equal(saved.headers.get('cache-control'),'no-store');
+  const stale=await invoke('admin/promotion',{role:'admin',token:'owner',method:'PUT',body});
+  assert.equal(stale.status,409);assert.equal(revision,2);
+});
+
+test('promotion revision retry preserves concurrent changes and refuses another promotion overwrite',async()=>{
+  sessions.set(digest('owner'),{role:'admin',subject:'test-owner'});
+  const options={role:'admin',token:'owner',method:'PUT',body:{version:0,enabled:true,text:'本期公告'}};
+  commitConflict='unrelated';
+  assert.equal((await invoke('admin/promotion',options)).status,200);
+  assert.equal(s.campaign.description,'另一筆正常活動編輯');assert.equal(s.promotion.text,'本期公告');
+  delete s.promotion;commitConflict='promotion';
+  assert.equal((await invoke('admin/promotion',options)).status,409);
+  assert.equal(s.promotion.text,'其他畫面已儲存');
 });
