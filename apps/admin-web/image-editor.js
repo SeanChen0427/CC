@@ -9,8 +9,9 @@ export function mountImageEditor(root, { images = [], bindings = [], bindingEnab
   let controller;
   const enabled = bindingEnabled;
   root.innerHTML = `<div class="photo-editor-heading"><h3>商品照片</h3><span id="photo-count"></span></div>
-    <div class="photo-dropzone" tabindex="0" role="button" aria-label="選取或拖曳多張商品照片"><strong>拖曳多張照片到這裡</strong><span>或點一下選取照片，可分批追加</span><input type="file" id="image-upload" multiple accept="image/png,image/jpeg,image/webp" hidden></div>
-    <p class="photo-help">最多 8 張，較大的照片會自動縮圖，支援 JPG／PNG／WebP，原檔每張 20 MB 以內</p>
+    <div class="photo-dropzone" tabindex="0" role="button" aria-label="選取或拖曳多張商品照片"><strong>拖曳多張照片到這裡</strong><span>或點一下選取照片，可分批追加</span><input type="file" id="image-upload" multiple accept="image/png,image/jpeg,image/webp,image/gif" hidden></div>
+    <p class="photo-help">最多 8 張，支援 JPG／PNG／WebP／GIF</p>
+    <p class="photo-help">一般照片原檔每張 20 MB 以內，較大時自動縮圖；GIF 每張 1.4 MB 以內，保留動畫</p>
     <p class="photo-help">拖曳照片或使用左右按鈕調整順序，第一張就是封面</p>
     <div id="image-list" class="photo-list" aria-label="商品照片排序"></div>
     <p id="photo-notice" class="photo-notice" role="status" aria-live="polite"></p>

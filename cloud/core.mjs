@@ -57,7 +57,7 @@ export function validateProduct(input, imagePrefix) {
   if (!['vest','coat','bag','bowl','bed','toy','scarf'].includes(input.kind)) throw new AppError('請選擇有效的示意圖類型');
   const tone = /^#[a-fA-F0-9]{6}$/.test(input.tone) ? input.tone : '#b9a38b';
   const images = Array.isArray(input.images) ? input.images : [];
-  if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
+  if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp|gif)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
   const imageBindings = validateImageBindings(input.imageBindings, images, colors);
   const sizeSurcharges = validateSizeSurcharges(input, sizes, price);
   return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, sourceUrl:productSourceUrl(input.sourceUrl), videoUrl:productVideoUrl(input.videoUrl), videoLayout:productVideoLayout(input.videoLayout), kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };

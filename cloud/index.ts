@@ -160,9 +160,9 @@ Deno.serve(async req=>{
       await rpc('ccbaby_revoke',{p_hash:'',p_all_admin:true});return json({ok:true});
     }
     if(path==='admin/upload'&&method==='POST'){
-      const match=String(body.data||'').match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);if(!match)throw new AppError('僅支援 PNG、JPG、WebP');
+      const match=String(body.data||'').match(/^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/);if(!match)throw new AppError('僅支援 PNG、JPG、WebP、GIF');
       let bytes;try{bytes=Uint8Array.from(atob(match[2]),c=>c.charCodeAt(0));}catch{throw new AppError('圖片格式無效');}
-      const valid=match[1]==='png'?hex(bytes.slice(0,8))==='89504e470d0a1a0a':match[1]==='jpeg'?hex(bytes.slice(0,3))==='ffd8ff':new TextDecoder().decode(bytes.slice(0,4))==='RIFF'&&new TextDecoder().decode(bytes.slice(8,12))==='WEBP';
+      const valid=match[1]==='png'?hex(bytes.slice(0,8))==='89504e470d0a1a0a':match[1]==='jpeg'?hex(bytes.slice(0,3))==='ffd8ff':match[1]==='gif'?bytes.length>=14&&['GIF87a','GIF89a'].includes(new TextDecoder().decode(bytes.slice(0,6)))&&(bytes[6]||bytes[7])&&(bytes[8]||bytes[9])&&bytes.at(-1)===0x3b:new TextDecoder().decode(bytes.slice(0,4))==='RIFF'&&new TextDecoder().decode(bytes.slice(8,12))==='WEBP';
       if(!valid||!bytes.length||bytes.length>1400000)throw new AppError('圖片格式無效或超過 1.4 MB');
       const name=crypto.randomUUID()+'.'+(match[1]==='jpeg'?'jpg':match[1]);
       const uploaded=await fetch(base+'/storage/v1/object/ccbaby-products/'+name,{method:'POST',headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'image/'+match[1],'Cache-Control':'3600'},body:bytes});

@@ -1,5 +1,9 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.27 商品 GIF（待發布）
+
+商品照片後端與靜態前端同時更新；Storage 的 ccbaby-products 僅在既有 allowed_mime_types 追加 image/gif，file_size_limit 保持 1400000、public 與角色權限保持。這是 bucket 格式設定，不新增資料表、RPC 或公開寫入權限；發布前後比對業務雜湊與 Edge 全部來源，實際結果見 HANDOFF
+
 ## 0.3.26 商品影片發布 — 2026-11-10
 
 main 66834cd；Pages 2b88e819373d35248ed8a924f7c01ea999e52a53／[run 42761781482](https://github.com/SeanChen0427/CC/actions/runs/42761781482) success；Edge v25 ACTIVE、verify_jwt=false，23 個相對來源逐位元符合本機。48 個正式公開檔案與 dist 一致，另含 CNAME／.nojekyll 共 50 個建置檔。

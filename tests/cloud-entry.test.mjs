@@ -2,17 +2,19 @@ import test, { after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { emptyState, upsertCustomer } from '../cloud/core.mjs';
+import { productGif, productGifData } from './fixtures/product-gif.mjs';
 
 // Exercise the actual Edge handler with isolated LINE/PostgREST responses.
 // No network request or real session is created by this test.
 const originalFetch=globalThis.fetch,originalDeno=globalThis.Deno;
 const env={SUPABASE_URL:'https://backend.test',SUPABASE_SERVICE_ROLE_KEY:'test-service',LINE_CHANNEL_ID:'test-channel',LINE_CHANNEL_SECRET:'test-secret'};
-let handler,s,events,sessions,failStartup,nonce,revision,commitConflict;
+let handler,s,events,sessions,failStartup,nonce,revision,commitConflict,uploaded;
 const digest=value=>createHash('sha256').update(value).digest('hex');
 globalThis.Deno={env:{get:key=>env[key]},serve:fn=>{handler=fn;}};
 globalThis.fetch=async(url,options={})=>{
   const path=new URL(url).pathname,body=options.body?JSON.parse(String(options.body).startsWith('{')?options.body:'{}'):{};
   events.push(path);
+  if(path.startsWith('/storage/v1/object/ccbaby-products/')){uploaded={path,type:options.headers['Content-Type'],bytes:Buffer.from(options.body)};return Response.json({Key:path});}
   if(path==='/oauth2/v2.1/token')return Response.json({id_token:'test-id-token'});
   if(path==='/oauth2/v2.1/verify')return Response.json({sub:'test-person',name:'Verified member',nonce,aud:'test-channel',iss:'https://access.line.me'});
   if(path==='/rest/v1/rpc/ccbaby_line_customer'){upsertCustomer(s,{id:body.p_id,display_name:body.p_name});return Response.json(null);}
@@ -35,9 +37,26 @@ globalThis.fetch=async(url,options={})=>{
 };
 await import('../cloud/index.ts');
 after(()=>{globalThis.fetch=originalFetch;if(originalDeno===undefined)delete globalThis.Deno;else globalThis.Deno=originalDeno;});
-beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';revision=1;commitConflict=null;});
+beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';revision=1;commitConflict=null;uploaded=null;});
 const invoke=(path,{body,token,role='customer',method=body?'POST':'GET'}={})=>handler(new Request('https://backend.test/functions/v1/ccbaby-api/'+path,{method,headers:{Origin:'https://ccbaby.beecharge.live','Content-Type':'application/json','x-ccbaby-role':role,...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined}));
 const credentials={code:'test-code',verifier:'v'.repeat(43),nonce:'test-nonce'};
+
+test('actual GIF handler verifies role, preserves bytes and rejects invalid content before Storage',async()=>{
+  const token='gif-owner';sessions.set(digest(token),{role:'admin',subject:'test-owner'});
+  assert.equal((await invoke('admin/upload',{body:{data:productGifData},role:'admin'})).status,401);
+  assert.equal((await invoke('admin/upload',{body:{data:productGifData},token,role:'customer'})).status,403);
+  assert.equal(uploaded,null);
+  const result=await invoke('admin/upload',{body:{data:productGifData},token,role:'admin'});
+  assert.equal(result.status,200);const {url}=await result.json();assert.match(url,/ccbaby-products\/[a-f0-9-]+\.gif$/);
+  assert.equal(uploaded.type,'image/gif');assert.equal(uploaded.bytes.toString('base64'),productGif);
+  assert.equal(revision,1);assert.deepEqual(s.products,[]);
+  for(const data of [productGifData.replace('image/gif','image/png'),'data:image/gif;base64,'+Buffer.from('GIF89a').toString('base64'),'data:image/gif;base64,'+Buffer.alloc(1400001).toString('base64')]){
+    uploaded=null;assert.equal((await invoke('admin/upload',{body:{data},token,role:'admin'})).status,400);assert.equal(uploaded,null);
+  }
+  const product={code:'GIF',name:'動畫商品',category:'衣著',price:590,colors:'藍',sizes:'S',kind:'vest',images:[url],imageBindings:[{color:'藍',url}]};
+  assert.equal((await invoke('admin/products',{body:product,token,role:'admin'})).status,200);
+  assert.deepEqual(s.products[0].images,[url]);assert.deepEqual(s.products[0].imageBindings,product.imageBindings);
+});
 
 test('actual video handler preserves concurrent edits, protects writes and returns video only through verified catalog',async()=>{
   const token='test-video-owner',customerToken='test-video-customer';

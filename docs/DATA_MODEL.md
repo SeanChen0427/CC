@@ -69,7 +69,7 @@
 - 伺服器驗證顏色屬於商品、URL 屬於該相簿，每個顏色最多一筆；排序不破壞 URL 綁定，移除照片清除該綁定
 - 本機 products.image_bindings 保存同一份 JSON，啟動時安全加欄；客戶及管理 API 統一回 imageBindings
 - 照片順序／綁定不改變 variants 身分、價格或已成立預購快照；商品分類與相簿沒有連動
-- 上傳單張檔案仍限 1.4 MB 並驗證格式／檔頭；前端處理每張原圖上限 20 MB，最長邊 2000px 以內
+- 上傳單張檔案仍限 1.4 MB 並驗證格式／檔頭；JPG／PNG／WebP 前端原圖上限 20 MB，自動縮圖至最長邊 2000px 以內；D-48 新增 GIF，原檔 1.4 MB 以內直接保存，保留影格／時序，不套用靜態縮圖或 2000px 縮放。CSV／草稿保存原 .gif URL，商品 Excel 內嵌靜態 JPEG 縮圖
 - 移除相簿參照不立即刪除 Storage 原檔，完整圖片清理／備份還原另行處理
 
 > 0.3.0 最新狀態：使用者已授權 GitHub Pages /CC/、/CC/admin/ 與 Supabase，測試資料已清空，LINE 待設定，活動 draft。下方舊版本／完整目標保留供對照，以 [DEPLOYMENT.md](DEPLOYMENT.md) 與 HANDOFF.md 為目前實作依據。

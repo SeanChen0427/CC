@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.27 商品 GIF（D-48）
+
+image-editor.js 接受 image/gif，多選／拖入沿用原佇列；image-upload.js 讀圖後原封保留 GIF data URL，單張 1.4 MB，不走 canvas 縮圖。cloud/index.ts／server/api.mjs 驗證檔頭、尺寸、結尾及大小，Storage 僅追加 GIF MIME；cloud/core.mjs／本機驗證允許既有受限來源的 .gif URL，本機靜態服務回 image/gif。商品 images／imageBindings 與草稿資料結構不變，客戶原生 img 播放，商品匯出繼續產生靜態 JPEG 縮圖。驗證見 tests/image-upload.test.mjs、tests/cloud-entry.test.mjs；無業務 DDL／新 RPC
+
 ## 0.3.26 商品影片（D-47）
 
 管理商品 app.js 的 videoUrl／videoLayout → product-draft.js 白名單草稿 → domain/validation.mjs 與 shared/youtube.js 驗證／正規化 → 原 admin/products 與 revision 提交 → 雲端私有 JSONB 商品或本機 products.video_url／video_layout → 受保護 catalog／bootstrap → customer app.js 的卡片及詳情按鈕 → product-video.js 獨立 native dialog／YouTube iframe。

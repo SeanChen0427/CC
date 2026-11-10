@@ -83,7 +83,7 @@ function validateProduct(input) {
   if (!kinds.includes(input.kind)) throw new AppError('請選擇有效的示意圖類型');
   const tone = /^#[a-fA-F0-9]{6}$/.test(input.tone) ? input.tone : '#b9a38b';
   const images = Array.isArray(input.images) ? input.images : [];
-  if (images.length > 8 || images.some(x => typeof x !== 'string' || !/^\/uploads\/[a-f0-9]{24}\.(png|jpg|webp)$/.test(x))) {
+  if (images.length > 8 || images.some(x => typeof x !== 'string' || !/^\/uploads\/[a-f0-9]{24}\.(png|jpg|webp|gif)$/.test(x))) {
     throw new AppError('商品圖片位置無效');
   }
   return {
@@ -462,12 +462,13 @@ export async function api({ store, req, role, path, method, body, session, local
     });
   }
   if (path === '/api/admin/upload' && method === 'POST') {
-    const match = String(body.data || '').match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);
-    if (!match) throw new AppError('請選擇 PNG、JPG 或 WebP 圖片');
+    const match = String(body.data || '').match(/^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) throw new AppError('請選擇 PNG、JPG、WebP 或 GIF 圖片');
     const buffer = Buffer.from(match[2], 'base64');
     if (buffer.length > 1400000) throw new AppError('圖片需小於 1.4 MB');
     const valid = match[1] === 'png' ? buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
       : match[1] === 'jpeg' ? buffer[0] === 255 && buffer[1] === 216
+      : match[1] === 'gif' ? buffer.length >= 14 && ['GIF87a', 'GIF89a'].includes(buffer.toString('ascii', 0, 6)) && buffer.readUInt16LE(6) > 0 && buffer.readUInt16LE(8) > 0 && buffer.at(-1) === 0x3b
       : buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
     if (!valid) throw new AppError('圖片內容與檔案類型不符');
     mkdirSync(join(localDir, 'uploads'), { recursive: true, mode: 0o700 });

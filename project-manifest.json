@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.26",
+  "documentVersion": "0.3.27",
   "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -468,7 +468,47 @@
     "independentGallery": true,
     "optionalColorBindings": true,
     "nativeSwipe": true,
-    "photoCounter": true
+    "photoCounter": true,
+    "formats": [
+      "jpeg",
+      "png",
+      "webp",
+      "gif"
+    ],
+    "gifMaxBytes": 1400000,
+    "gifPreservesAnimation": true,
+    "gifResize": false,
+    "gifExcelThumbnail": "static_jpeg",
+    "gifStatus": "edge_live_pages_pending",
+    "sourcePaths": [
+      "apps/admin-web/image-editor.js",
+      "apps/admin-web/image-upload.js",
+      "cloud/index.ts",
+      "cloud/core.mjs",
+      "server/api.mjs",
+      "server/index.mjs",
+      "tests/image-upload.test.mjs",
+      "tests/cloud-entry.test.mjs",
+      "tests/fixtures/product-gif.mjs"
+    ],
+    "gifDecision": "D-48",
+    "gifIntegrationTestsPassed": 148,
+    "gifSyntaxModules": 53,
+    "gifViewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "gifBrowserAnimationChecked": true,
+    "gifDraftOrderBindingsChecked": true,
+    "gifExcelDownloaded": true,
+    "gifCartPreorderAppendAndAdminChecked": true,
+    "gifPhysicalIPhoneChecked": false,
+    "gifProductionBusinessWrites": false,
+    "gifEdgeVersion": 26,
+    "gifEdgeSourceFilesVerified": 23,
+    "gifStorageMimeEnabled": true
   },
   "productPricing": {
     "basePrice": true,
