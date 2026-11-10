@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42817276423
+    "pagesRun": 42821160805
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -109,7 +109,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "verify_and_publish_product_share_preserving_existing_customer_modal",
+  "nextStep": "owner_accept_product_share_in_physical_iphone_line_browser",
   "lineEntryFunnel": {
     "status": "live_menu_and_replies_configured",
     "publicationHandledBy": "agent_after_owner_image_upload",
@@ -340,7 +340,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.27",
+    "lastLiveFrontendVersion": "0.3.28",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -1120,7 +1120,7 @@
   },
   "productSharing": {
     "decision": "D-49",
-    "status": "implemented_verifying_release",
+    "status": "live_verified",
     "hashFormat": "#product/<positive_safe_integer_id>",
     "adminCopyOnly": true,
     "standaloneProductPage": false,
@@ -1154,7 +1154,15 @@
       "videoPlaybackReturnAndProductSwitchChecked": true,
       "hiddenMissingAndClosedProductChecked": true,
       "pageErrors": 0,
-      "builtFiles": 52
+      "builtFiles": 52,
+      "livePublicFilesVerified": 50,
+      "liveAdminVersionChecked": true,
+      "liveAnonymousShareRedirectToLineChecked": true,
+      "liveHealthChecked": true,
+      "liveRealLineCodeExchanged": false,
+      "productionDatabaseReadOrWritePerformed": false,
+      "previewServerStopped": true,
+      "verificationTabsClosed": true
     },
     "rollback": {
       "version": "0.3.27",
@@ -1164,6 +1172,10 @@
       "edgeVersion": 26,
       "tagPushed": true,
       "preserveCurrentBusinessData": true
-    }
+    },
+    "sourceCommit": "98b9396cc9a862eee9a467b793508e25ba0413c9",
+    "pagesCommit": "d18a850ac1d44dc8d9474a675858d9d87d16d389",
+    "pagesRun": 42821160805,
+    "edgeVersion": 26
   }
 }

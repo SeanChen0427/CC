@@ -1,6 +1,6 @@
 # 跨 AI 工具共用索引
 
-## 0.3.28 單品分享連結（D-49，發布驗證中）
+## 0.3.28 單品分享連結（D-49，已發布）
 
 後台商品清單增加複製連結，`#product/商品ID` 在 LINE 驗證後直接開啟既有商品視窗；客端 HTML／CSS 與原商品模板不變，不建立獨立商品頁。共用 [連結白名單](shared/product-link.js)、[登入及連結驗證](tests/product-link.test.mjs)；實際結果見 [交接](docs/HANDOFF.md)。還原點 `checkpoint/before-product-links-0.3.27` 已推送 GitHub，來源 `9827d64`／Pages `e052d6c`，回復不還原業務資料
 

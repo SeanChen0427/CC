@@ -1,8 +1,8 @@
 # GitHub Pages 與 Supabase 部署
 
-## 0.3.28 單品分享（發布驗證中）
+## 0.3.28 單品分享（已發布）
 
-本次僅發布靜態前端，兩入口共用 product-link.js，Edge v26、私有資料、RPC、Storage 與 LINE 設定沿用。部署版本與測試結果見 HANDOFF。使用者已明確授權直接上架；還原點 tag `checkpoint/before-product-links-0.3.27`／main 9827d64／gh-pages e052d6c。若要求回上一版，依 tag 還原本次來源並重新建置／發布，或以該 Pages 成品建立新還原提交；不得回復正式資料庫或以強制推送破壞歷史
+本次僅發布靜態前端，兩入口共用 product-link.js，Edge v26、私有資料、RPC、Storage 與 LINE 設定沿用。main 98b9396／Pages d18a850（run 42821160805 success），50 個公開檔案逐位元一致，health 200、正式入口已確認；詳細結果見 HANDOFF。使用者已明確授權直接上架；還原點 tag `checkpoint/before-product-links-0.3.27`／main 9827d64／gh-pages e052d6c。若要求回上一版，依 tag 還原本次來源並重新建置／發布，或以該 Pages 成品建立新還原提交；不得回復正式資料庫或以強制推送破壞歷史
 
 ## 0.3.27 商品 GIF（已發布）
 
