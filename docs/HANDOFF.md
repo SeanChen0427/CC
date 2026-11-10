@@ -1,6 +1,6 @@
 # 最新交接狀態
 
-## 0.3.31 指定帳號瀏覽紀錄管理 — 2026-11-10（migration／Edge 已發布，Pages 發布中）
+## 0.3.31 指定帳號瀏覽紀錄管理 — 2026-11-10（已發布）
 
 - 店主選擇按帳號清除，並可排除後續統計（D-52）。原瀏覽詳情新增兩個操作，列表可篩「已排除統計」。清除前顯示該會員姓名／LINE 暱稱／全部保存筆數，勾選後才能確認，不受目前觀察天數影響
 - 新 browsing_controls 私有表，excluded／version／accept_after／cleared_at；只供 service_role，RPC 再驗證 owner session。依會員控制列鎖序列化管理與回報，清除時間至少涵蓋已保存事件，舊重送不復活；排除停止新寫入、總覽及商品排序觀察同步排除，恢復只記新的瀏覽
@@ -9,8 +9,9 @@
 - PostgreSQL 使用獨立 schema／函式與虛構身分驗證，整批 rollback，未操作正式 store／會員／事件；權限、清除計數、其他客戶保持、舊版本、排除寫入與排序、恢復及未來時間事件重送均通過。可由 build-browsing-control-test.mjs 重建驗證腳本
 - CUA 隔離四寬無橫向溢出、390px 視覺檢查通過；確認前禁用／取消保留、排除後保留舊紀錄、清除後零筆／關注商品清空、恢復可用，另一會員紀錄保持，頁面錯誤 0。只操作 /tmp 虛構資料，未發 LINE
 - Migration 20261110143206 已套用並對齊本機檔名；Edge v29 ACTIVE／verify_jwt=false、25 個來源逐位元一致，相對 v28 只有 index.ts／browsing.mjs／新 browsing-controls.mjs。安全 advisor 只多刻意私有表的 RLS 無 policy 資訊，沒有公開政策或密碼設定變更
-- 正式發布基準 revision 226／MD5 871669f5c29141add1b98b293e556ca7，287 筆瀏覽／MD5 6985dab55b1256b06543fd87aefd68aa；migration 後保持，48 商品／7 會員／open，正式會員變更設定數為 0
-- 尚待 Pages 發布與正式讀取／來源核對、隔離服務／分頁清理及本節更新。實際清除／排除測試帳號由店主操作，不拿正式會員作發布示範
+- 正式發布前後 revision 226／MD5 871669f5c29141add1b98b293e556ca7，287 筆瀏覽／MD5 6985dab55b1256b06543fd87aefd68aa 一致；48 商品／7 會員／open，正式會員變更設定數為 0
+- main 676e32e 已推送；Pages eb5f11a3fdfd94d40033eff122cc14b78837bb24／[run 42836339294](https://github.com/SeanChen0427/CC/actions/runs/42836339294) success。50 公開檔案逐位元符合 dist（另有 CNAME／.nojekyll 共 52 個建置檔）；正式管理 0.3.31 的瀏覽清單、已排除篩選、會員管理兩個按鈕與全部保存筆數通過唯讀 CUA 核對，頁面錯誤 0。未操作正式清除／排除，實際帳號由店主自行選擇
+- 隔離 4395／4396 服務已停止並刪除臨時 seed 資料，驗證分頁關閉、viewport 重設；使用者原 Chrome 管理頁保留在瀏覽清單，既有工作階段未登出，.local 持久業務資料未清空
 
 ## 店主指定測試預購清理 — 2026-11-10（已完成，無程式變更）
 

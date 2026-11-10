@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42826974315
+    "pagesRun": 42836339294
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -200,7 +200,7 @@
     "date": "2026-11-10",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "b617805378d265483ab3f5abb266cac6bffe30c9",
+    "pagesCommit": "eb5f11a3fdfd94d40033eff122cc14b78837bb24",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -228,7 +228,7 @@
       390,
       768
     ],
-    "edgeVersion": 28,
+    "edgeVersion": 29,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -340,7 +340,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.29",
+    "lastLiveFrontendVersion": "0.3.31",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -1278,12 +1278,17 @@
   },
   "browsingAccountControls": {
     "decision": "D-52",
-    "status": "pages_release_in_progress",
+    "status": "live",
+    "sourceCommit": "676e32e",
+    "pagesCommit": "eb5f11a3fdfd94d40033eff122cc14b78837bb24",
+    "pagesRun": 42836339294,
     "edgeVersion": 29,
     "migrationVersion": "20261110143206",
     "productionAccountsCleared": 0,
     "productionAccountsExcluded": 0,
     "businessRevisionUnchanged": true,
+    "productionBusinessHashUnchanged": true,
+    "productionBrowsingHashUnchanged": true,
     "verification": {
       "integrationTestsPassed": 163,
       "syntaxModules": 61,
@@ -1297,7 +1302,14 @@
       "clearConfirmationAndCancelChecked": true,
       "accountExclusionClearRestoreAndPeerPreservationChecked": true,
       "pageErrors": 0,
-      "liveEdgeSourcesVerified": 25
+      "liveEdgeSourcesVerified": 25,
+      "pagesLiveFilesCompared": 50,
+      "pagesBuildFiles": 52,
+      "liveAdminVersion": "0.3.31",
+      "liveAdminControlsReadOnlyChecked": true,
+      "temporaryServerStopped": true,
+      "temporaryTabsClosed": true,
+      "viewportReset": true
     }
   }
 }

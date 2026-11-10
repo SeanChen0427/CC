@@ -1,8 +1,8 @@
 # 跨 AI 工具共用索引
 
-## 0.3.31 瀏覽紀錄管理（D-52，發布中）
+## 0.3.31 瀏覽紀錄管理（D-52，已發布）
 
-按帳號清除、排除／恢復瀏覽統計；原瀏覽頁內操作，商品排序觀察同步排除，會員／訂單不動。163 項測試、61 模組語法及四寬通過，migration／Edge v29 已發布；Pages 見 [交接](docs/HANDOFF.md)。程式：[管理驗證](domain/browsing-controls.mjs)、[介面](apps/admin-web/browsing.js)、[migration](supabase/migrations/20261110143206_ccbaby_browsing_controls.sql)、[測試](tests/browsing-controls.test.mjs)、[PostgreSQL 隔離驗證建置](scripts/build-browsing-control-test.mjs)／[檢查片段](tests/browsing-controls.sql)，實際帳號由店主自行設定
+按帳號清除、排除／恢復瀏覽統計；原瀏覽頁內操作，商品排序觀察同步排除，會員／訂單不動。163 項測試、61 模組語法及四寬通過，migration／Edge v29／Pages eb5f11a 已發布；正式 50 檔與管理功能核對通過，見 [交接](docs/HANDOFF.md)。程式：[管理驗證](domain/browsing-controls.mjs)、[介面](apps/admin-web/browsing.js)、[migration](supabase/migrations/20261110143206_ccbaby_browsing_controls.sql)、[測試](tests/browsing-controls.test.mjs)、[PostgreSQL 隔離驗證建置](scripts/build-browsing-control-test.mjs)／[檢查片段](tests/browsing-controls.sql)，實際帳號由店主自行設定
 
 ## 0.3.30 商品詢問網址縮圖（D-51，已發布）
 
