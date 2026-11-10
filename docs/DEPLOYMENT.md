@@ -1,8 +1,8 @@
 # GitHub Pages 與 Supabase 部署
 
-## 0.3.29 GIF 2 MB（待發布）
+## 0.3.29 GIF 2 MB（已發布）
 
-Storage ccbaby-products 的 file_size_limit 由 1400000 改為 2000000；原 MIME 白名單、公開商品圖讀取與後端店主寫入規則不變。Edge 與本機只允許 GIF 使用 2 MB，其他圖片仍 1.4 MB；管理上傳 JSON 2.8 MB，其他路由仍 2.2 MB。沒有新 DDL／RPC／LINE／Auth 設定，來源與正式資料雜湊核對見 HANDOFF
+Storage ccbaby-products 的 file_size_limit 由 1400000 改為 2000000；原 MIME 白名單、公開商品圖讀取與後端店主寫入規則不變。Edge 與本機只允許 GIF 使用 2 MB，其他圖片仍 1.4 MB；管理上傳 JSON 2.8 MB，其他路由仍 2.2 MB。沒有新 DDL／RPC／LINE／Auth 設定，Edge v27 ACTIVE、23 來源一致，Pages 589321a／[run 42823394785](https://github.com/SeanChen0427/CC/actions/runs/42823394785) success、50 公開檔案一致；發布前後 revision 208／MD5 4eba44cbfc17711c130891b313c0cc3d 保持，完整證據見 HANDOFF
 
 ## 0.3.28 單品分享（已發布）
 

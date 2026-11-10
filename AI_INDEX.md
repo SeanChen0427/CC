@@ -1,8 +1,8 @@
 # 跨 AI 工具共用索引
 
-## 0.3.29 GIF 上限調整為 2 MB（D-50，驗證中）
+## 0.3.29 GIF 上限調整為 2 MB（D-50，已發布）
 
-依店主實際檔案大小，GIF 原檔上限從 1.4 MB 提高為 2 MB，原動畫及相簿功能保留；實際發布見 [交接](docs/HANDOFF.md)。沿用 image-upload.js、image-editor.js、Edge／本機上傳入口與既有 GIF 測試，不新增程式路徑
+依店主實際檔案大小，GIF 原檔上限從 1.4 MB 提高為 2 MB，原動畫及相簿功能保留；154 項測試、54 模組語法及實際 2 MB 上傳／動畫／購物回歸通過，Edge v27／Pages 589321a 已發布；正式 50 檔／23 後端來源一致，見 [交接](docs/HANDOFF.md)。沿用 image-upload.js、image-editor.js、Edge／本機上傳入口與既有 GIF 測試，不新增程式路徑
 
 ## 0.3.28 單品分享連結（D-49，已發布）
 

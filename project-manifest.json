@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42821160805
+    "pagesRun": 42823394785
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -193,14 +193,14 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 148,
+    "integrationTestsPassed": 154,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
     "date": "2026-11-10",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "e052d6c2b379a4a26d4f3df336a59a64d5c15e4a",
+    "pagesCommit": "589321a0d206f754afeeb816e299080a9c29a323",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -340,7 +340,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.28",
+    "lastLiveFrontendVersion": "0.3.29",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -439,7 +439,7 @@
     "liveLoginBootstrapAuthorizationChecked": true,
     "liveLoginPerformanceFilesChecked": true,
     "liveConcurrentOwnerChangePreserved": true,
-    "syntaxModules": 53,
+    "syntaxModules": 54,
     "liveLoginAnimationChecked": true
   },
   "brandName": "CCBABY",
@@ -479,7 +479,7 @@
     "gifPreservesAnimation": true,
     "gifResize": false,
     "gifExcelThumbnail": "static_jpeg",
-    "gifStatus": "2mb_edge_live_pages_pending",
+    "gifStatus": "live_verified_2mb",
     "sourcePaths": [
       "apps/admin-web/image-editor.js",
       "apps/admin-web/image-upload.js",
@@ -509,15 +509,15 @@
     "gifEdgeVersion": 27,
     "gifEdgeSourceFilesVerified": 23,
     "gifStorageMimeEnabled": true,
-    "gifSourceCommit": "b3627f6",
-    "gifPagesCommit": "e052d6c2b379a4a26d4f3df336a59a64d5c15e4a",
-    "gifPagesRun": 42817276423,
-    "gifLivePublicFilesVerified": 48,
+    "gifSourceCommit": "326f70a",
+    "gifPagesCommit": "589321a0d206f754afeeb816e299080a9c29a323",
+    "gifPagesRun": 42823394785,
+    "gifLivePublicFilesVerified": 50,
     "gifLiveHealthChecked": true,
     "gifLiveAnonymousLineRedirectChecked": true,
     "gifLiveAdminLoginPageChecked": true,
-    "gifBusinessRevisionAtVerification": 201,
-    "gifBusinessHashAtVerification": "ce4ae7a9ba69f2ad00c85ecc30e8f354",
+    "gifBusinessRevisionAtVerification": 208,
+    "gifBusinessHashAtVerification": "4eba44cbfc17711c130891b313c0cc3d",
     "gifProductionUploadWriteTested": false,
     "gifPreviewServerStopped": true,
     "gifUploadRequestMaxBytes": 2800000,
@@ -527,7 +527,11 @@
     "gifExactLimitBytesChecked": 2000000,
     "gifLimitPlusOneRejected": true,
     "gifUploadRouteBodyLimitChecked": true,
-    "gifShareCartPreorderAppendAndAdminChecked": true
+    "gifShareCartPreorderAppendAndAdminChecked": true,
+    "gifLiveEncodedRequestChecked": true,
+    "gifLiveEncodedRequestBytes": 2666701,
+    "gifLiveAnonymousUploadRejected": true,
+    "gifOtherRouteOversizeRejected": true
   },
   "productPricing": {
     "basePrice": true,

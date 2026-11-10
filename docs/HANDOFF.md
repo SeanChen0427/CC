@@ -1,15 +1,20 @@
 # 最新交接狀態
 
-## 0.3.29 GIF 大小調整 — 2026-11-10（Edge 已發布／Pages 待發布）
+## 0.3.29 GIF 大小調整 — 2026-11-10（已發布）
 
 - 店主回報 GIF 都在 2M 內，本次依 D-50 把單張 GIF 上限改為 2,000,000 bytes；其他圖片輸出 1.4 MB、原圖 20 MB 與 8 張相簿保留
 - 基準為現行 0.3.28 單品分享版本 b9f52c0／Pages d18a850／Edge v26；保留分享與原商品視窗，不改其還原點或正式業務資料
 - 前端／Edge／本機已修改；管理上傳 JSON 2.8 MB，其他路由 2.2 MB。本機超限回 413 前排空輸入，避免連線重設
-- 正式唯讀基準 revision 207／MD5 4eba44cbfc17711c130891b313c0cc3d，48 商品／7 會員／2 預購／2 通知／open；Storage 已更新為 2 MB，MIME／公開讀取／寫入角色保持。154 項測試／54 模組語法／建置／diff 通過，尚待正式發布
-- Playwright 實際上傳合法雙影格 2,000,000-byte GIF，下載逐位元一致，管理與客戶畫面動畫正常；2,000,001 bytes 提示並阻擋，四寬 320／390／768／1440px 無橫向溢出、390px 視覺檢查通過
+- 正式唯讀基準 revision 207／MD5 4eba44cbfc17711c130891b313c0cc3d，48 商品／7 會員／2 預購／2 通知／open；Storage 已更新為 2 MB，MIME／公開讀取／寫入角色保持。154 項測試／54 模組語法／建置／diff 通過，已完成正式發布
+- Playwright 實際上傳合法雙影格 2,000,000-byte GIF，下載逐位元一致，管理與客戶畫面動畫正常；2,000,001 bytes 提示並阻擋，管理表單四寬 320／390／768／1440px 無橫向溢出、390px 視覺檢查通過；客戶 390px 動畫與購物流程通過
 - 隔離單品分享開原商品視窗，購物車 2 件重載保留，成立 KR26-0007 後追加 1 件仍同編號，前後台 3 件／1,770 一致，管理登入／查單／登出與零頁面錯誤通過。未用正式會員送單或發 LINE，實體 iPhone LINE 尚未驗收
 
-- 發布前 revision 208，業務 MD5 仍為 4eba44cbfc17711c130891b313c0cc3d；保留工作期間正常 revision 更新。Edge v27 ACTIVE、verify_jwt=false，23 個來源逐位元與本機一致，只有 cloud/index.ts 變更；Pages 待發布
+- 發布前 revision 208，業務 MD5 仍為 4eba44cbfc17711c130891b313c0cc3d；保留工作期間正常 revision 更新。Edge v27 ACTIVE、verify_jwt=false，23 個來源逐位元與本機一致，只有 cloud/index.ts 變更；Pages 已發布
+
+- main 326f70a 已推送；Pages 589321a0d206f754afeeb816e299080a9c29a323／[run 42823394785](https://github.com/SeanChen0427/CC/actions/runs/42823394785) success。依 gh-pages 的 52 個追蹤檔案（含 CNAME／.nojekyll）核對，50 個公開資源逐位元符合 dist；本機 dist 另有未發布的重複檔，未納入正式清單或提交
+- 正式 health 200，LINE Login／通知 configured；管理登入頁載入 0.3.29，頁面錯誤 0。匿名送 2,000,000-byte GIF 的 2,666,701-byte JSON 到 admin/upload 回 401（通過容量檢查後仍要求登入），同內容送其他路由回 413；沒有正式登入／商品上傳／送單／LINE 發訊
+- Storage 回讀 file_size_limit=2000000、原四種 MIME／public 保持；發布前後 revision 208／MD5 4eba44cbfc17711c130891b313c0cc3d 一致，48 商品／7 會員／2 預購／2 通知／open 保留
+- 隔離 4385／4386 服務已停止並清除臨時資料，瀏覽器回空白、viewport 重設；本機 .local 業務資料未操作。截圖 /private/tmp/ccbaby-gif2-admin-mobile.png 只含虛構資料，不提交 Git
 
 ## 0.3.28 單品分享連結 — 2026-11-10（已發布）
 
