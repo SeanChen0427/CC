@@ -1,8 +1,8 @@
 # 跨 AI 工具共用索引
 
-## 0.3.30 商品詢問網址縮圖（D-51，發布中）
+## 0.3.30 商品詢問網址縮圖（D-51，已發布）
 
-商品詢問與管理複製共用預覽網址，Vercel OGP 接回原 LINE 驗證／商品視窗。公開僅上架商品編號／名稱／首圖，160 項測試及四寬／購物／追加通過；Edge v28／Vercel READY，Pages 見 [交接](docs/HANDOFF.md)。程式：[連結](shared/product-link.js)、[最少投影](domain/product-preview.mjs)、[預覽服務](services/product-preview/preview.mjs)、[建置](scripts/build-product-preview.mjs)、[驗證](tests/product-preview.test.mjs)；操作／來源見 [CUSTOMER_CARE](docs/CUSTOMER_CARE.md)，部署見 [DEPLOYMENT](docs/DEPLOYMENT.md)。官方帳號兩個收訊端縮圖尚待實機驗收
+商品詢問與管理複製共用預覽網址，Vercel OGP 接回原 LINE 驗證／商品視窗。公開僅上架商品編號／名稱／首圖，160 項測試及四寬／購物／追加通過；Edge v28／Vercel READY／Pages b617805 已發布，正式 50 檔核對一致，見 [交接](docs/HANDOFF.md)。程式：[連結](shared/product-link.js)、[最少投影](domain/product-preview.mjs)、[預覽服務](services/product-preview/preview.mjs)、[建置](scripts/build-product-preview.mjs)、[驗證](tests/product-preview.test.mjs)；操作／來源見 [CUSTOMER_CARE](docs/CUSTOMER_CARE.md)，部署見 [DEPLOYMENT](docs/DEPLOYMENT.md)。官方帳號兩個收訊端縮圖尚待實機驗收
 
 ## 0.3.29 GIF 上限調整為 2 MB（D-50，已發布）
 

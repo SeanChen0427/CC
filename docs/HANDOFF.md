@@ -1,6 +1,6 @@
 # 最新交接狀態
 
-## 0.3.30 商品詢問網址縮圖 — 2026-11-10（Edge／Vercel 已發布，Pages 發布中）
+## 0.3.30 商品詢問網址縮圖 — 2026-11-10（已發布）
 
 - 店主偏好傳網址即有縮圖，確認手機官方帳號 App／電腦後台都會收訊，明確指示「那就上架吧」（D-51）。詢問原文字自動帶一個商品網址，管理複製也用此網址，點擊仍接回原 LINE 驗證及相同商品視窗
 - shared/product-link.js 的 productShareLink 提供 id 與封面／名稱版本；未設預覽網址時回原 hash。公開 Edge route 僅回 `{id,code,name,image}`，上架商品才可讀；圖片白名單、HTML 轉義與固定目的地，未公開完整目錄、售價規格、會員、預購、來源或進價
@@ -8,8 +8,10 @@
 - 160 項測試全部通過、59 模組語法／兩份建置／diff 通過。CUA 詢問 320／390／768／1440px 無橫向溢出、390px 視覺通過；詢問與管理複製成功提示，LINE 預填與畫面共用文字。剪貼簿工具未讀出內容，不把提示當成跨裝置剪貼簿驗收
 - 隔離 CUA 會員登入、選規格、購物車 2 件重載保存、送出 KR26-0007，再由原 #product/1 加 1 件沿用編號，管理查驗 3 件／1,770 一致；管理登入／查單／登出及零頁面錯誤通過。只用 /tmp 虛構資料，沒有正式送單或 LINE 發訊
 - Edge v28 ACTIVE／verify_jwt=false，24 個來源逐位元符合本機；只有 index.ts／line-contact.js／新 product-preview.mjs 相對 v27 變動。Vercel `dpl_HFCMkS8QvTiNnpgkKapfpijUP53M` production READY，GD09 id=1 的 OGP 首圖／名稱正確；正式分享人點擊已回原 LINE 登入確認頁，未交換真實 OAuth code
-- 正式唯讀基準 revision 211／48 商品／7 會員／2 預購／2 通知／open，期間正常營運更新為 revision 217，保留最新資料，不能把完整 MD5 變動稱為部署前後相同。新路由只讀 ccbaby_load，未執行正式業務提交；最終 subset／來源及 Pages 核對待補
-- 尚待：Pages 發布與正式檔案核對、清理隔離服務／分頁、更新本節。手機官方帳號 App／電腦後台的實際收訊縮圖與實體 iPhone 回站尚未驗收，不以 OGP HTTP 成功冒稱實機通過
+- 正式唯讀基準 revision 211／48 商品／7 會員／2 預購／2 通知／open，期間正常營運更新為 revision 217，保留最新資料，不能把完整 MD5 變動稱為部署前後相同。新路由只讀 ccbaby_load，未執行正式業務提交；最終 revision 218，發布前後（217→218）的 campaign／preorders／items／lineNotifications 子文件 MD5 保持一致，仍 48 商品／7 會員／2 預購／2 通知／open；Edge 24 來源已核對一致
+- main 程式提交 edd4b5c 已推送；Pages b617805378d265483ab3f5abb266cac6bffe30c9／[run 42826974315](https://github.com/SeanChen0427/CC/actions/runs/42826974315) success。52 個追蹤成品中 50 個公開資源逐位元符合 dist；正式管理登入頁載入 app.js?v=0.3.30，零頁面錯誤。匿名完整 catalog 仍 401、不存在分享 404 無 OGP、首圖下載 200 image/png 並視覺核對為指定泰迪熊外套；Vercel 本次部署 30 分鐘 error／fatal 查詢無紀錄
+- 隔離 4391／4392 代理及 4393／4394 本機服務已停止，臨時 seed 資料由服務退出清理；所有本次 IAB 分頁已關閉、viewport 重設，持久 .local 業務資料未操作。沒有正式商品上架測寫、送單或 LINE 發訊
+- 手機官方帳號 App／電腦後台的實際收訊縮圖與實體 iPhone 回站尚未驗收，不以 OGP HTTP 成功冒稱實機通過
 
 ## 0.3.29 GIF 大小調整 — 2026-11-10（已發布）
 

@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42823394785
+    "pagesRun": 42826974315
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -200,7 +200,7 @@
     "date": "2026-11-10",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "589321a0d206f754afeeb816e299080a9c29a323",
+    "pagesCommit": "b617805378d265483ab3f5abb266cac6bffe30c9",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -228,7 +228,7 @@
       390,
       768
     ],
-    "edgeVersion": 21,
+    "edgeVersion": 28,
     "liveImageEditorChecked": true,
     "legacyImageMigrationChecked": true,
     "sizePricingBrowserChecked": true,
@@ -1192,7 +1192,7 @@
   },
   "productInquiryPreview": {
     "decision": "D-51",
-    "status": "frontend_release_in_progress",
+    "status": "live_verified_http_and_isolated_browser",
     "previewURL": "https://ccbaby-share.vercel.app/",
     "publicFields": [
       "id",
@@ -1244,7 +1244,22 @@
       "physicalOfficialAccountMobilePreviewVerified": false,
       "officialAccountWebReceiverPreviewVerified": false,
       "productionBusinessWrites": false,
-      "productionMessagesSent": false
-    }
+      "productionMessagesSent": false,
+      "livePublicFilesVerified": 50,
+      "liveEdgeSourcesVerified": 24,
+      "liveAdminVersion": "0.3.30",
+      "liveCatalogAnonymousDenied": true,
+      "liveMissingPreview404": true,
+      "liveCoverVisuallyVerified": true,
+      "vercelErrorFatalLogsFound": 0,
+      "vercelLogsWindow": "30m",
+      "protectedBusinessSubdocumentsUnchanged": true,
+      "normalBusinessUpdatesPreserved": true,
+      "previewServerStopped": true,
+      "verificationTabsClosed": true
+    },
+    "sourceCommit": "edd4b5c",
+    "pagesCommit": "b617805378d265483ab3f5abb266cac6bffe30c9",
+    "pagesRun": 42826974315
   }
 }

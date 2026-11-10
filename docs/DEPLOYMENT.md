@@ -1,12 +1,12 @@
 # GitHub Pages 與 Supabase 部署
 
-## 0.3.30 商品詢問網址縮圖（D-51，Pages 發布中）
+## 0.3.30 商品詢問網址縮圖（D-51，已發布）
 
 原 GitHub Pages 客戶／管理入口及 LINE callback 不變。新增公開唯讀 `ccbaby-api/public/product-preview/商品ID`，只投影 id／code／name／image，Edge v28 ACTIVE、verify_jwt=false 沿用，24 個來源逐位元符合本機；不改 SQL／Storage／session／LINE 設定。原完整 catalog 仍要求客戶登入
 
 預覽服務：[ccbaby-share.vercel.app](https://ccbaby-share.vercel.app/)，Vercel team `beecharges-projects`／project `prj_04KqDg81jQn7IBUnyvqK8O3ua4jO`，Node 24／sin1、無新套件／秘密／資料庫。部署 `dpl_HFCMkS8QvTiNnpgkKapfpijUP53M` 為 production READY。只上傳 build:preview 明確挑選的七個檔案；沒有連接其他 repo 或變更既有 Vercel 專案。預覽必須公開，不套用登入保護；只公開已授權的最少商品資訊
 
-維護：服務程式在 services/product-preview，`npm run build:preview` 後由 Vercel create_deployment 上傳七個明確檔案；只更換商品／圖片不用發布服務或 GitHub。主站 build／publish:pages 沿用。預覽問題可將 deployment.json.productPreviewURL 移除再發主站，回復原 hash 行為，保留業務資料。此次曾唯讀檢查 Cloudflare 登入失效，未部署 Cloudflare 或更動 DNS
+維護：服務程式在 services/product-preview，`npm run build:preview` 後由 Vercel create_deployment 上傳七個明確檔案；只更換商品／圖片不用發布服務或 GitHub。主站 build／publish:pages 沿用。預覽問題可將 deployment.json.productPreviewURL 移除再發主站，回復原 hash 行為，保留業務資料。此次曾唯讀檢查 Cloudflare 登入失效，未部署 Cloudflare 或更動 DNS。main edd4b5c／Pages b617805／run 42826974315 success，50 公開檔案與成品一致；完整驗證與營運資料更新保留見 HANDOFF
 
 ## 0.3.29 GIF 2 MB（已發布）
 
