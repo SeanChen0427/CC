@@ -1,4 +1,4 @@
-import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.30';
+import { analyzeJourney, prioritizeJourneys } from './browsing-insights.js?v=0.3.31';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 const stamp=v=>v?new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(v)):'尚無紀錄';
 const duration=ms=>{const n=Math.floor(ms/1000);return n>=3600?`${Math.floor(n/3600)} 小時 ${Math.floor(n%3600/60)} 分`:n>=60?`${Math.floor(n/60)} 分 ${n%60} 秒`:n?`${n} 秒`:'少於 1 秒';};
@@ -17,27 +17,45 @@ function eventText(e){
   return text;
 }
 export function mountBrowsing(root,{request,context={},onOrder=()=>{},onCare=()=>{},toast=()=>{}}){
-  const state={days:30,people:[],person:null,detail:null,search:'',filter:'all',busy:false,seq:0};
+  const state={days:30,people:[],person:null,detail:null,search:'',filter:'all',busy:false,managing:false,confirmClear:false,seq:0};
   const note=`<p class="browse-note">從功能上線後開始記錄，保留最近 180 天，僅含登入後的本站活動 · 停留為前景估算，背景與閒置一分鐘後暫停，斷線或關頁可能缺漏 · 預購結果以「客戶預購」為準</p>`;
   function shell(){
-    root.innerHTML=`<div class="heading"><div><div class="eyebrow">CUSTOMER JOURNEYS</div><h1>瀏覽紀錄</h1><p>了解每位客戶看過什麼，以及每次選購的過程</p></div><div class="heading-actions"><button class="button light" data-browse="refresh">更新紀錄</button></div></div><div class="browse-controls"><label class="field">觀察期間<select id="browse-days">${[7,30,180].map(n=>`<option value="${n}" ${state.days===n?'selected':''}>最近 ${n} 天</option>`).join('')}</select></label>${!state.person?`<label class="field browse-search">搜尋客戶<input id="browse-search" type="search" placeholder="LINE 暱稱或聯絡姓名" value="${esc(state.search)}"></label><label class="field">觀察對象<select id="browse-filter">${[['all','所有客戶'],['unsubmitted','尚未預購'],['cart','曾加購但未預購'],['repeat','多次造訪']].map(([id,label])=>`<option value="${id}" ${state.filter===id?'selected':''}>${label}</option>`).join('')}</select></label>`:'<button class="button light" data-browse="back">← 所有客戶</button>'}</div>${note}<div id="browse-body" aria-live="polite"></div>`;
+    root.innerHTML=`<div class="heading"><div><div class="eyebrow">CUSTOMER JOURNEYS</div><h1>瀏覽紀錄</h1><p>了解每位客戶看過什麼，以及每次選購的過程</p></div><div class="heading-actions"><button class="button light" data-browse="refresh">更新紀錄</button></div></div><div class="browse-controls"><label class="field">觀察期間<select id="browse-days">${[7,30,180].map(n=>`<option value="${n}" ${state.days===n?'selected':''}>最近 ${n} 天</option>`).join('')}</select></label>${!state.person?`<label class="field browse-search">搜尋客戶<input id="browse-search" type="search" placeholder="LINE 暱稱或聯絡姓名" value="${esc(state.search)}"></label><label class="field">觀察對象<select id="browse-filter">${[['all','計入統計的客戶'],['unsubmitted','尚未預購'],['cart','曾加購但未預購'],['repeat','多次造訪'],['excluded','已排除統計']].map(([id,label])=>`<option value="${id}" ${state.filter===id?'selected':''}>${label}</option>`).join('')}</select></label>`:'<button class="button light" data-browse="back">← 所有客戶</button>'}</div>${note}<div id="browse-body" aria-live="polite"></div>`;
     root.querySelector('#browse-days').addEventListener('change',e=>{state.days=Number(e.target.value);void load();});
     root.querySelector('#browse-search')?.addEventListener('input',e=>{state.search=e.target.value;list();});
     root.querySelector('#browse-filter')?.addEventListener('change',e=>{state.filter=e.target.value;list();});
   }
   function list(){
-    const people=prioritizeJourneys(state.people,context).map(row=>({...row.person,insight:row.insight})).filter(p=>(name(p)+' '+p.displayName).toLocaleLowerCase().includes(state.search.toLocaleLowerCase())&&(state.filter==='all'||state.filter==='unsubmitted'&&!p.hasPreorder||state.filter==='cart'&&p.cartAdds>0&&!p.hasPreorder||state.filter==='repeat'&&p.visits>1));
-    const totals=state.people.reduce((s,p)=>({visits:s.visits+p.visits,productViews:s.productViews+p.productViews,activeMs:s.activeMs+p.activeMs,cartAdds:s.cartAdds+p.cartAdds}),{visits:0,productViews:0,activeMs:0,cartAdds:0});
-    root.querySelector('#browse-body').innerHTML=`<div class="browse-summary"><span>有紀錄 ${state.people.filter(p=>p.visits).length} 位／已登入會員 ${state.people.length} 位</span>${figures(totals)}</div><p class="browse-note">符合條件 ${people.length} 位 · 依有效預購、近期加購與回訪整理處理順序，開啟客戶可查看對話建議 · 加購次數不代表目前購物車內容</p><div class="browse-customers">${people.map(p=>`<button class="browse-person" data-browse="person" data-id="${esc(p.customerId)}"><div class="browse-person-head"><div><strong>${esc(name(p))}</strong><small>LINE ${esc(p.displayName)}</small></div><span class="status-chip">${esc(p.insight.label)}</span></div><div class="browse-next"><strong>${esc(p.insight.title)}</strong><span>${esc(p.insight.next)}</span></div>${figures(p)}<div class="browse-last"><span>最近活動 ${stamp(p.lastSeen)}</span><span>查看下一步與歷程 →</span></div></button>`).join('')||'<div class="panel empty">目前沒有符合條件的客戶</div>'}</div>`;
+    const included=state.people.filter(p=>!p.browsingExcluded);
+    const candidates=state.people.filter(p=>state.filter==='excluded'?p.browsingExcluded:!p.browsingExcluded);
+    const people=prioritizeJourneys(candidates,context).map(row=>({...row.person,insight:row.person.browsingExcluded?{label:'已排除統計',title:'測試操作不影響統計',next:'可在帳號內恢復統計或清除舊紀錄'}:row.insight})).filter(p=>(name(p)+' '+p.displayName).toLocaleLowerCase().includes(state.search.toLocaleLowerCase())&&(state.filter==='all'||state.filter==='excluded'||state.filter==='unsubmitted'&&!p.hasPreorder||state.filter==='cart'&&p.cartAdds>0&&!p.hasPreorder||state.filter==='repeat'&&p.visits>1));
+    const totals=included.reduce((s,p)=>({visits:s.visits+p.visits,productViews:s.productViews+p.productViews,activeMs:s.activeMs+p.activeMs,cartAdds:s.cartAdds+p.cartAdds}),{visits:0,productViews:0,activeMs:0,cartAdds:0});
+    root.querySelector('#browse-body').innerHTML=`<div class="browse-summary"><span>有紀錄 ${included.filter(p=>p.visits).length} 位／統計對象 ${included.length} 位 · 已排除 ${state.people.length-included.length} 位</span>${figures(totals)}</div><p class="browse-note">符合條件 ${people.length} 位 · 依有效預購、近期加購與回訪整理處理順序，開啟客戶可查看對話建議 · 加購次數不代表目前購物車內容</p><div class="browse-customers">${people.map(p=>`<button class="browse-person" data-browse="person" data-id="${esc(p.customerId)}"><div class="browse-person-head"><div><strong>${esc(name(p))}</strong><small>LINE ${esc(p.displayName)}</small></div><span class="status-chip">${esc(p.insight.label)}</span></div><div class="browse-next"><strong>${esc(p.insight.title)}</strong><span>${esc(p.insight.next)}</span></div>${figures(p)}<div class="browse-last"><span>最近活動 ${stamp(p.lastSeen)}</span><span>查看下一步與歷程 →</span></div></button>`).join('')||'<div class="panel empty">目前沒有符合條件的客戶</div>'}</div>`;
   }
   function advice(d){
+    if(d.person.browsingExcluded)return '<section class="panel browse-advice"><h2>此帳號已排除瀏覽統計</h2><p>新的測試操作不再保存，也不納入商品排序建議；既有紀錄可另外清除，登入與預購照常使用</p></section>';
     const i=analyzeJourney({...context,person:d.person,events:d.events,interests:d.interests,partial:Boolean(d.nextCursor)});
     return `<section class="panel browse-advice"><div class="panel-head"><h2>下一步建議</h2><button class="text-button" data-browse="care">LINE 聯繫與提醒 →</button><span class="pill">${esc(i.label)}</span></div><div class="panel-body"><h3>${esc(i.title)}</h3><p>${esc(i.next)}</p><div class="browse-facts">${i.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div><ol>${i.steps.map(step=>`<li>${esc(step)}</li>`).join('')}</ol>${i.focus.length?`<p>可先準備：${i.focus.map(p=>esc(p.productCode+' '+p.productName)).join('、')}</p>`:''}${i.lastCart?`<p class="browse-note">最近加購紀錄：${esc(i.lastCart.productCode+' '+i.lastCart.productName)}${i.lastCart.color?' · '+esc(i.lastCart.color+' / '+i.lastCart.size):''} · ${stamp(i.lastCart.at)}，不代表目前購物車</p>`:''}${i.orderId?`<button class="button light" data-browse="order" data-id="${i.orderId}">核對客戶預購</button>`:''}${i.draft?`<label class="field browse-draft">對話草稿，可先修改<textarea id="browse-draft" rows="5" maxlength="2000">${esc(i.draft)}</textarea></label><div class="form-actions"><button class="button" data-browse="copy">複製對話草稿</button><a class="button light" href="https://manager.line.biz/" target="_blank" rel="noopener noreferrer">開啟 LINE 官方帳號</a></div><p class="browse-note">先在官方帳號核對客戶與過往對話，再人工傳送；LINE 暱稱不保證唯一，網站登入不代表好友或可聯繫狀態 · 草稿修改僅保留於本畫面</p>`:''}<p class="browse-note">${esc(i.limit)} · 建議為規則判讀，仍需確認需求，不代表購買意願或流失原因</p></div></section>`;
+  }
+  function management(p){
+    const count=p.browsingRecordCount;
+    return `<section class="panel browse-management"><h2>瀏覽紀錄管理</h2><p>${p.browsingExcluded?'已排除瀏覽統計，新操作不再保存':'目前正常記錄瀏覽，測試帳號可設為排除統計'}</p><div class="form-actions"><button class="button light" data-browse="exclusion">${p.browsingExcluded?'恢復計入瀏覽統計':'排除這位的瀏覽統計'}</button><button class="button light danger-text" data-browse="clear" ${count?'':'disabled'}>清除這位的瀏覽紀錄</button></div><p class="browse-note">目前保存 ${count} 筆 · 只處理這個帳號的瀏覽資料，會員、購物車與預購不受影響</p>${state.confirmClear?`<div class="browse-clear-confirm" role="group" aria-label="清除瀏覽紀錄確認"><strong>清除 ${esc(name(p))} 的瀏覽紀錄</strong><p>LINE ${esc(p.displayName)} · 將清除目前保存的全部 ${count} 筆，包含其他觀察期間的紀錄，清除後無法復原</p><label class="browse-clear-consent"><input id="browse-clear-consent" type="checkbox">我確認只清除這位的瀏覽紀錄</label><div class="form-actions"><button class="button danger" data-browse="confirm-clear" disabled>確認清除 ${count} 筆紀錄</button><button class="button light" data-browse="cancel-clear">保留紀錄</button></div></div>`:''}</section>`;
+  }
+  async function manage(action){
+    if(state.busy||state.managing||!state.detail)return;
+    const p=state.detail.person;
+    state.managing=true;
+    root.querySelectorAll('.browse-management button').forEach(button=>{button.disabled=true;});
+    try{
+      const result=await request('admin/browsing/control',{method:'POST',body:{customerId:p.customerId,version:p.browsingVersion,action,confirm:action==='clear',...(action==='exclusion'?{excluded:!p.browsingExcluded}:{})}});
+      toast(action==='clear'?`已清除 ${result.deleted} 筆瀏覽紀錄`:p.browsingExcluded?'已恢復計入瀏覽統計':'已排除此帳號的瀏覽統計');
+    }catch(error){toast(error.message);}
+    finally{state.confirmClear=false;state.managing=false;await load();}
   }
   function detail(){
     const d=state.detail,p=d.person,visits=new Map();
     for(const e of d.events){if(!visits.has(e.visitId))visits.set(e.visitId,[]);visits.get(e.visitId).push(e);}
-    root.querySelector('#browse-body').innerHTML=`<section class="panel browse-profile"><div class="browse-person-head"><div><h2>${esc(name(p))}</h2><p>LINE ${esc(p.displayName)} · ${p.hasPreorder?'已有有效預購':'尚未預購'}</p></div><span>最近活動 ${stamp(p.lastSeen)}</span></div>${figures(p)}</section>${advice(d)}<section class="panel browse-interests"><div class="panel-head"><h2>關注商品</h2><small>依瀏覽次數排序</small></div><div class="browse-interest-list">${d.interests.map(i=>`<div><strong>${esc(i.productCode)} ${esc(i.productName)}</strong><span>瀏覽 ${i.views} 次 · 停留 ${duration(i.activeMs)} · 加購 ${i.cartAdds} 次</span></div>`).join('')||'<div class="empty">這段期間尚無商品操作紀錄</div>'}</div></section><section class="browse-journeys"><h2>逐次造訪歷程</h2><p class="browse-note">每次開啟或重整頁面算一次造訪，閒置 30 分鐘後再操作另算一次 · 多個分頁各自計時，停留合計可能重疊</p>${[...visits.values()].map((rows,index)=>`<article class="panel browse-visit"><div class="panel-head"><h3>造訪 ${visits.size-index}${d.nextCursor?'（已載入部分）':''}</h3><small>${rows.length} 筆紀錄</small></div><ol class="browse-events">${[...rows].sort((a,b)=>a.at.localeCompare(b.at)||a.id.localeCompare(b.id)).map(e=>`<li class="${e.type==='page_view'?'browse-view':'browse-action'}"><time>${stamp(e.at)}</time><div><strong>${esc(eventText(e))}</strong>${e.type==='page_view'?`<span>前景停留 ${duration(e.activeMs)}</span>`:`<span>${pageNames[e.page]}</span>`}</div></li>`).join('')}</ol></article>`).join('')||'<div class="panel empty">這段期間尚無瀏覽紀錄，上線前的歷程無法回補</div>'}${d.nextCursor?'<button class="button light" data-browse="more">載入較早紀錄</button>':''}</section>`;
+    root.querySelector('#browse-body').innerHTML=`<section class="panel browse-profile"><div class="browse-person-head"><div><h2>${esc(name(p))}</h2><p>LINE ${esc(p.displayName)} · ${p.hasPreorder?'已有有效預購':'尚未預購'}</p></div><span>最近活動 ${stamp(p.lastSeen)}</span></div>${figures(p)}</section>${management(p)}${advice(d)}<section class="panel browse-interests"><div class="panel-head"><h2>關注商品</h2><small>依瀏覽次數排序</small></div><div class="browse-interest-list">${d.interests.map(i=>`<div><strong>${esc(i.productCode)} ${esc(i.productName)}</strong><span>瀏覽 ${i.views} 次 · 停留 ${duration(i.activeMs)} · 加購 ${i.cartAdds} 次</span></div>`).join('')||'<div class="empty">這段期間尚無商品操作紀錄</div>'}</div></section><section class="browse-journeys"><h2>逐次造訪歷程</h2><p class="browse-note">每次開啟或重整頁面算一次造訪，閒置 30 分鐘後再操作另算一次 · 多個分頁各自計時，停留合計可能重疊</p>${[...visits.values()].map((rows,index)=>`<article class="panel browse-visit"><div class="panel-head"><h3>造訪 ${visits.size-index}${d.nextCursor?'（已載入部分）':''}</h3><small>${rows.length} 筆紀錄</small></div><ol class="browse-events">${[...rows].sort((a,b)=>a.at.localeCompare(b.at)||a.id.localeCompare(b.id)).map(e=>`<li class="${e.type==='page_view'?'browse-view':'browse-action'}"><time>${stamp(e.at)}</time><div><strong>${esc(eventText(e))}</strong>${e.type==='page_view'?`<span>前景停留 ${duration(e.activeMs)}</span>`:`<span>${pageNames[e.page]}</span>`}</div></li>`).join('')}</ol></article>`).join('')||'<div class="panel empty">這段期間尚無瀏覽紀錄，上線前的歷程無法回補</div>'}${d.nextCursor?'<button class="button light" data-browse="more">載入較早紀錄</button>':''}</section>`;
   }
   async function load(more=false){
     const seq=++state.seq;state.busy=true;
@@ -60,17 +78,25 @@ export function mountBrowsing(root,{request,context={},onOrder=()=>{},onCare=()=
   }
   root.addEventListener('click',event=>{
     const button=event.target.closest('[data-browse]');if(!button)return;
+    if(state.managing)return;
     const action=button.dataset.browse;
+    if(action==='clear'){state.confirmClear=true;detail();return;}
+    if(action==='cancel-clear'){state.confirmClear=false;detail();return;}
+    if(action==='confirm-clear'&&state.confirmClear&&root.querySelector('#browse-clear-consent')?.checked){void manage('clear');return;}
+    if(action==='exclusion'){void manage('exclusion');return;}
     if(action==='care'&&state.detail)onCare(state.detail.person.customerId);
     if(action==='order')onOrder(Number(button.dataset.id));
     if(action==='copy'){
       const field=root.querySelector('#browse-draft');
       void navigator.clipboard.writeText(field.value).then(()=>toast('草稿已複製，請至官方帳號核對客戶後傳送')).catch(()=>{field.focus();field.select();toast('請選取草稿後手動複製');});
     }
-    if(action==='person'){state.person=button.dataset.id;void load();window.scrollTo(0,0);}
-    if(action==='back'){state.person=null;state.detail=null;void load();}
+    if(action==='person'){state.confirmClear=false;state.person=button.dataset.id;void load();window.scrollTo(0,0);}
+    if(action==='back'){state.confirmClear=false;state.person=null;state.detail=null;void load();}
     if(action==='refresh')void load();
     if(action==='more'&&!state.busy)void load(true);
+  });
+  root.addEventListener('change',event=>{
+    if(event.target.id==='browse-clear-consent')root.querySelector('[data-browse="confirm-clear"]').disabled=!event.target.checked;
   });
   void load();
 }

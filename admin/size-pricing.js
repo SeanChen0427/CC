@@ -1,4 +1,4 @@
-import { parseSizes } from './product-pricing.js?v=0.3.30';
+import { parseSizes } from './product-pricing.js?v=0.3.31';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 

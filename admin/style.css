@@ -1586,3 +1586,9 @@ dialog::backdrop {
 }
 .care-send-confirm { margin: 20px 0; padding: 20px; background: #f0f3e9; border: 1px solid #dbe1d1; border-radius: 8px; overflow-wrap: anywhere; }
 .care-send-confirm p { margin: 10px 0; }
+.browse-management {margin-top:20px}
+.browse-management .form-actions {flex-wrap:wrap}
+.browse-clear-confirm {margin-top:20px;padding:16px;border:1px solid #d9b4aa;border-radius:8px;background:#fffaf7}
+.browse-clear-confirm p {overflow-wrap:anywhere}
+.browse-clear-consent {display:flex;gap:8px;align-items:flex-start;line-height:1.7}
+.browse-clear-consent input {width:18px;min-width:18px;height:18px;min-height:18px;padding:0;flex:0 0 18px;margin:4px 0 0}
