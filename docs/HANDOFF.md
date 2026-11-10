@@ -1,13 +1,17 @@
 # 最新交接狀態
 
-## 0.3.27 商品 GIF — 2026-11-10（Edge 已發布／Pages 待發布）
+## 0.3.27 商品 GIF — 2026-11-10（已發布）
 
 - 使用者要求商品照片支援 GIF（D-48）；管理選檔／拖入及本機／Edge 已接入，保留原動畫，單張 1.4 MB、共 8 張，一般照片維持 20 MB 自動縮圖
 - 正式基準 Edge v25 的 23 個檔案與修改前 HEAD 一致；唯讀 revision 201／48 商品／6 會員／2 預購／2 通知／open。Storage 已只追加 image/gif MIME，上限 1.4 MB 與原權限保持
 - 148 項測試、53 模組語法、建置與 diff 檢查通過。Playwright 實測 GIF／PNG／JPG／WebP 混合上傳，GIF 管理預覽、客戶卡片與放大畫面均觀察到影格改變；排序／封面／顏色綁定、草稿重載／儲存重開、超限提示與移除通過
 - 管理表單及客戶詳情 320／390／768／1440px 無橫向溢出，390px 視覺檢查通過。商品 Excel 實際下載成功，ZIP 含 GIF 首圖轉成的 JPEG 縮圖；CSV 複製與重啟保存由整合測試驗證
 - 隔離購物車 2 件重載保留，預購 KR26-0007 成立，追加 1 件沿用原編號；前後台一致 3 件／1,770，管理登入／查單／登出通過，頁面錯誤 0。未用正式會員送單／發 LINE，實體 iPhone LINE GIF 未驗收
-- 正式 Edge v26 ACTIVE、verify_jwt=false，23 個來源逐位元符合本機；僅 cloud/index.ts／cloud/core.mjs 兩個來源變更。Storage 設定已回讀確認；Pages 待發布。既有正式資料與 .local 持久資料不作測試
+- 正式 Edge v26 ACTIVE、verify_jwt=false，23 個來源逐位元符合本機；僅 cloud/index.ts／cloud/core.mjs 兩個來源變更。Storage 設定已回讀確認
+- main b3627f6 已推送；Pages e052d6c2b379a4a26d4f3df336a59a64d5c15e4a／run 42817276423 success。48 個正式公開檔案逐位元符合 dist（另含 CNAME／.nojekyll 共 50 個建置檔）；部署切換時的舊快取已於成功後重新核對
+- 正式 health 200，LINE Login／通知設定可用；管理登入頁載入 0.3.27、匿名客戶自動轉 LINE，未交換真實 code。未登入正式店主或進行正式 GIF 上傳測寫，雲端正向上傳由實際 handler 隔離驗證與 Storage 設定／來源核對涵蓋
+- 發布前後 revision 201／MD5 ce4ae7a9ba69f2ad00c85ecc30e8f354 一致，48 商品／6 會員／2 預購／2 通知／open 保留，活動、預購、明細及通知雜湊均保持；沒有正式業務資料寫入或發訊
+- 隔離 4383／4384 服務已停止、臨時資料已移除、瀏覽器回空白並重設 viewport；.local 持久業務資料未操作。測試截圖 /private/tmp/ccbaby-gif-admin-mobile.png 只含虛構資料，不提交 Git
 
 ## 0.3.26 商品影片 — 2026-11-10（已發布）
 

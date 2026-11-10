@@ -1,8 +1,8 @@
 # GitHub Pages 與 Supabase 部署
 
-## 0.3.27 商品 GIF（待發布）
+## 0.3.27 商品 GIF（已發布）
 
-商品照片後端與靜態前端同時更新；Storage 的 ccbaby-products 僅在既有 allowed_mime_types 追加 image/gif，file_size_limit 保持 1400000、public 與角色權限保持。這是 bucket 格式設定，不新增資料表、RPC 或公開寫入權限；發布前後比對業務雜湊與 Edge 全部來源，實際結果見 HANDOFF
+商品照片後端與靜態前端同時更新；Storage 的 ccbaby-products 僅在既有 allowed_mime_types 追加 image/gif，file_size_limit 保持 1400000、public 與角色權限保持。這是 bucket 格式設定，不新增資料表、RPC 或公開寫入權限；Edge v26 ACTIVE、23 來源一致；Pages e052d6c／[run 42817276423](https://github.com/SeanChen0427/CC/actions/runs/42817276423) success，48 公開檔案與 dist 一致。發布前後 revision 201／MD5 ce4ae7a9ba69f2ad00c85ecc30e8f354 保持，詳見 HANDOFF
 
 ## 0.3.26 商品影片發布 — 2026-11-10
 

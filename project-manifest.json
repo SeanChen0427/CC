@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42761781482
+    "pagesRun": 42817276423
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -193,14 +193,14 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 139,
+    "integrationTestsPassed": 148,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
-    "date": "2026-11-08",
+    "date": "2026-11-10",
     "cloudSmokeChecked": true,
     "pagesLiveChecked": true,
-    "pagesCommit": "404f9715b04451c7104ea22c26f22805a9157c6b",
+    "pagesCommit": "e052d6c2b379a4a26d4f3df336a59a64d5c15e4a",
     "adminCredentialsChangedAndVerified": true,
     "typographyViewports": [
       320,
@@ -340,7 +340,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.26",
+    "lastLiveFrontendVersion": "0.3.27",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -439,7 +439,7 @@
     "liveLoginBootstrapAuthorizationChecked": true,
     "liveLoginPerformanceFilesChecked": true,
     "liveConcurrentOwnerChangePreserved": true,
-    "syntaxModules": 48,
+    "syntaxModules": 53,
     "liveLoginAnimationChecked": true
   },
   "brandName": "CCBABY",
@@ -479,7 +479,7 @@
     "gifPreservesAnimation": true,
     "gifResize": false,
     "gifExcelThumbnail": "static_jpeg",
-    "gifStatus": "edge_live_pages_pending",
+    "gifStatus": "live_verified",
     "sourcePaths": [
       "apps/admin-web/image-editor.js",
       "apps/admin-web/image-upload.js",
@@ -508,7 +508,18 @@
     "gifProductionBusinessWrites": false,
     "gifEdgeVersion": 26,
     "gifEdgeSourceFilesVerified": 23,
-    "gifStorageMimeEnabled": true
+    "gifStorageMimeEnabled": true,
+    "gifSourceCommit": "b3627f6",
+    "gifPagesCommit": "e052d6c2b379a4a26d4f3df336a59a64d5c15e4a",
+    "gifPagesRun": 42817276423,
+    "gifLivePublicFilesVerified": 48,
+    "gifLiveHealthChecked": true,
+    "gifLiveAnonymousLineRedirectChecked": true,
+    "gifLiveAdminLoginPageChecked": true,
+    "gifBusinessRevisionAtVerification": 201,
+    "gifBusinessHashAtVerification": "ce4ae7a9ba69f2ad00c85ecc30e8f354",
+    "gifProductionUploadWriteTested": false,
+    "gifPreviewServerStopped": true
   },
   "productPricing": {
     "basePrice": true,

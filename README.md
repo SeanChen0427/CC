@@ -1,8 +1,8 @@
 # CCBABY 韓國年度預購網站
 
-## 0.3.27 商品 GIF（驗證中）
+## 0.3.27 商品 GIF（已發布）
 
-商品照片新增 GIF，保留動畫、可作封面與相簿照片，單張 1.4 MB 以內；JPG／PNG／WebP 的原圖 20 MB 自動縮圖規則保留。實際驗證與發布狀態見 [HANDOFF](docs/HANDOFF.md)
+商品照片新增 GIF，保留動畫、可作封面與相簿照片，單張 1.4 MB 以內；JPG／PNG／WebP 的原圖 20 MB 自動縮圖規則保留。148 項測試與四寬 UI 通過，Edge v26／Pages e052d6c 已上線；詳見 [HANDOFF](docs/HANDOFF.md)
 
 ## 0.3.26 商品影片
 

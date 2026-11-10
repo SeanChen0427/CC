@@ -42,7 +42,7 @@
 - 使用現行 LINE 方案額度，顯示剩餘則數；不足、設定缺漏或發送失敗保留可複製訊息及圖卡供人工處理，不自動升級／加購。店主自行升級後重新整理可使用新額度
 - 先保存訂單與通知，再發送並記錄結果；重按／重試不得重複通知。API 接受不代表已送達／已讀，人工標記不代表付款；本次未新增收款、對帳或物流
 
-版本：0.3.27｜日期：2026-11-10｜階段：GitHub Pages + Supabase + LINE Login 已啟用；商品影片發布進度見 HANDOFF
+版本：0.3.27｜日期：2026-11-10｜階段：GitHub Pages + Supabase + LINE Login 已啟用；最新發布進度見 HANDOFF
 
 目前實際完成範圍見 [實作對照](docs/IMPLEMENTATION_STATUS.md)，部署見 [DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 
