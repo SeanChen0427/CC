@@ -22,8 +22,8 @@ export function notificationMessage(kind,order,campaign){
   if(!notificationKinds.includes(kind)||!notice.eligible)throw new AppError(notice.blocked||'目前不能發送此通知',409);
   const p=orderProgress(order),url='https://ccbaby.beecharge.live/#orders';
   const intro=kind==='thanks'
-    ?`CCBABY 已收到你的預購 🤍\n預購編號：${order.code}\n目前預購共 ${p.quantity} 件，預估商品小計 ${money(p.total)}\n現在不用付款，實際供貨依採購結果為準，到台後再通知付款`
-    :`CCBABY 到台通知 🤍\n預購編號：${order.code}\n已分配給你的 ${p.bought} 件商品已到台，商品小計 ${money(p.boughtTotal)}\n${p.shortage?`確認缺貨 ${p.shortage} 件\n`:''}${p.pending?`另有 ${p.pending} 件仍待確認\n`:''}我們會在這裡核對運費、付款及交付方式，請等確認總額後再付款`;
+    ?`CCBABY 已收到你的預購 🤍\n預購編號：${order.code}\n目前預購共 ${p.quantity} 件，預估商品小計 ${money(p.total)}\n請於下單後 24 小時內完成付款，確認付款後才安排採購，收款資料與總額請在這裡確認\n實際供貨依韓國採購結果為準，缺貨可選擇退款或更換款式；依付款順序寄出，預計 11/30 起陸續出貨`
+    :`CCBABY 到台通知 🤍\n預購編號：${order.code}\n已分配給你的 ${p.bought} 件商品已到台，商品小計 ${money(p.boughtTotal)}\n${p.shortage?`確認缺貨 ${p.shortage} 件，可選擇退款或更換款式\n`:''}${p.pending?`另有 ${p.pending} 件仍待確認\n`:''}我們會在這裡核對運費及交付方式；依付款順序寄出，預計 11/30 起陸續出貨`;
   const details=order.items.filter(i=>i.quantity>0).map(i=>`${i.product_code} ${i.product_name}｜${i.color}／${i.size} × ${i.quantity}${kind==='arrived'?`（買到 ${i.bought||0}／缺貨 ${i.shortage||0}）`:''}`).join('\n');
   const ending=`\n\n完整明細與進度\n${url}\n有問題直接在這裡留言就好`;
   // A large order uses its protected full-detail link rather than a truncated list.

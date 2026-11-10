@@ -11,7 +11,7 @@ import { promotionSettings,publicPromotion,planPromotion } from '../domain/promo
 import { queueNotification,notificationCareData,orderNoticeForSend,lineRecipient } from '../domain/line-notifications.mjs';
 
 export function emptyState() {
-  return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，到台後再通知付款。' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
+  return { schemaVersion: 1, campaign: { id: 1, name: 'CCBABY 韓國預購', status: 'draft', closesAt: new Date().toISOString(), description: '韓國親自採買，下單後 24 小時內付款，確認付款後安排採購' }, seq: {}, categories: [], products: [], variants: [], customers: [], preorders: [], items: [], procurement: [], submissions: [], events: [], closing_snapshots: [] };
 }
 const stamp = () => new Date().toISOString();
 const next = (s, key) => s.seq[key] = (s.seq[key] || 0) + 1;

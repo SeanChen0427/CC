@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.24",
-  "updatedAt": "2026-11-09",
+  "documentVersion": "0.3.25",
+  "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
@@ -75,7 +75,7 @@
     "merchantClassification": false,
     "checkout": false,
     "onlinePayments": false,
-    "paymentTiming": "after_arrival_in_taiwan",
+    "paymentTiming": "within_24_hours_after_order_before_procurement",
     "paymentCommunication": "manual_LINE",
     "automatedPush": "order_and_confirmed_arrival_enabled"
   },
@@ -675,7 +675,7 @@
       "payment"
     ],
     "purchaseRequiresPersonalAllocation": true,
-    "paymentRequiresArrivalAndBoughtAllocation": true,
+    "paymentRequiresArrivalAndBoughtAllocation": false,
     "paymentTracking": false,
     "noticeVersionAndSignatureGuard": true,
     "pngSize": [
@@ -691,7 +691,8 @@
       "apps/admin-web/customer-care.js",
       "apps/admin-web/order-card.js",
       "tests/customer-care.test.mjs"
-    ]
+    ],
+    "paymentUsesFullPreorderSnapshot": true
   },
   "loginPerformance": {
     "status": "live_verified",
@@ -952,5 +953,23 @@
     "userSubmittedOrderObserved": true,
     "liveApiAcceptedObserved": true,
     "preorderAppendMergeExistingVerified": true
+  },
+  "preorderPolicy": {
+    "decision": "D-46",
+    "paymentDeadlineHours": 24,
+    "paymentVerifiedManually": true,
+    "procurementAfterPayment": true,
+    "shippingOrder": "manual_payment_order",
+    "shippingStartsAt": "2026-11-30",
+    "shortageChoices": [
+      "refund",
+      "replacement"
+    ],
+    "petBreedAndGenderOptionalViaLine": true,
+    "campaignDatesChanged": false,
+    "automaticPaymentTracking": false,
+    "automaticOrderExpiry": false,
+    "nativeLineSettingsChanged": false,
+    "status": "verification_in_progress"
   }
 }

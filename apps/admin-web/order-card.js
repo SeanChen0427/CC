@@ -15,11 +15,11 @@ export function layoutOrderCards(order,notice,measure){
   for(const item of order.items.filter(i=>i.quantity>0)){
     const name=wrapCardText(item.product_code+' '+item.product_name,940,text=>measure(text,28));
     const spec=wrapCardText(item.color+' / '+item.size,940,text=>measure(text,24));
-    const status=notice.kind==='thanks'?`預購 ${item.quantity} 件 · 單價 ${money(item.price)}`:`預購 ${item.quantity} 件 · 已買到 ${item.bought} 件 · 缺貨 ${item.shortage} 件 · 待確認 ${Math.max(0,item.quantity-item.bought-item.shortage)} 件`;
+    const status=['thanks','payment'].includes(notice.kind)?`預購 ${item.quantity} 件 · 單價 ${money(item.price)}`:`預購 ${item.quantity} 件 · 已買到 ${item.bought} 件 · 缺貨 ${item.shortage} 件 · 待確認 ${Math.max(0,item.quantity-item.bought-item.shortage)} 件`;
     const statusLines=wrapCardText(status,940,text=>measure(text,22));
     const rowHeight=28+name.length*38+spec.length*32+statusLines.length*30+36;
     if(rows.length&&height+rowHeight>1230){pages.push(rows);rows=[];height=top;}
-    rows.push({name,spec,status:statusLines,amount:money((notice.kind==='thanks'?item.quantity:item.bought)*item.price),height:rowHeight});height+=rowHeight;
+    rows.push({name,spec,status:statusLines,amount:money((['thanks','payment'].includes(notice.kind)?item.quantity:item.bought)*item.price),height:rowHeight});height+=rowHeight;
   }
   if(rows.length)pages.push(rows);
   return {names,top,pages};
@@ -49,10 +49,10 @@ export async function renderOrderCards(order,notice,{document:doc=document,now=D
       c.fillStyle='#314f3b';font(c,24,500);c.textAlign='right';c.fillText(row.amount,1010,y+16);c.textAlign='left';y+=64;
     }
     c.fillStyle='#eef2e7';c.fillRect(70,1280,940,114);c.fillStyle='#52664a';font(c,23);
-    c.fillText(notice.kind==='thanks'?'整份預購商品小計':'整份已分配買到商品小計',94,1323);
-    c.fillStyle='#314f3b';font(c,34,600);c.fillText(money(notice.kind==='thanks'?notice.progress.total:notice.progress.boughtTotal),94,1370);
+    c.fillText(['thanks','payment'].includes(notice.kind)?'整份預購商品小計':'整份已分配買到商品小計',94,1323);
+    c.fillStyle='#314f3b';font(c,34,600);c.fillText(money(['thanks','payment'].includes(notice.kind)?notice.progress.total:notice.progress.boughtTotal),94,1370);
     font(c,24,500);c.fillText(notice.kind==='thanks'?'謝謝你的預購，讓我們一起期待這趟選物':notice.kind==='payment'?'請核對收款資料與總額後，再安排匯款':'謝謝你的等待，有進度會再和你說明',70,1440);
-    c.fillStyle='#77836b';font(c,20);c.fillText(notice.kind==='payment'?'以上為商品金額，運費與最終匯款總額另行確認':'代購登記不代表現貨保證 · 到台後另行確認付款與交付',70,1484);
+    c.fillStyle='#77836b';font(c,20);c.fillText(notice.kind==='payment'?'以上為商品金額，運費與最終匯款總額另行確認':'下單後 24 小時內付款 · 確認付款後安排採購',70,1484);
     const date=new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(now);
     font(c,18);c.fillText('圖卡製作 '+date,70,1530);c.textAlign='right';c.fillText(`${index+1} / ${layout.pages.length} 張`,1010,1530);
     const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('圖卡產生失敗')),'image/png'));

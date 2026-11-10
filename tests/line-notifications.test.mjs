@@ -48,10 +48,12 @@ test('recipient uses verified LINE identity and customer contact requires no cod
 test('notifications include the order snapshot and protected link, never cost, phone or notes',()=>{
   const msg=notificationMessage('thanks',{...order,phone:'private-phone',note:'private-note'},campaign);
   assert.match(msg,/P1 測試商品｜白／M × 2/);assert.match(msg,/#orders/);assert.doesNotMatch(msg,/private/);
+  assert.match(msg,/24 小時內完成付款/);assert.match(msg,/確認付款後才安排採購/);assert.match(msg,/依付款順序寄出/);assert.doesNotMatch(msg,/不用付款|到台後再通知付款/);
   assert.throws(()=>notificationMessage('arrived',order,campaign));
   assert.throws(()=>notificationMessage('arrived',order,{status:'arrived'}));
   const arrived=notificationMessage('arrived',{...order,items:[{...order.items[0],bought:1,shortage:1}]},{status:'arrived'});
   assert.match(arrived,/NT\$ 500/);assert.match(arrived,/確認缺貨 1/);
+  assert.match(arrived,/退款或更換/);assert.doesNotMatch(arrived,/再付款|付款及交付/);
   const long=notificationMessage('thanks',{...order,items:Array.from({length:150},()=>({...order.items[0],product_name:'長商品名'.repeat(20)}))},campaign);
   assert.ok(long.length<=3000);assert.match(long,/完整明細/);assert.doesNotMatch(long,/長商品名/);
 });

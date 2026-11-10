@@ -225,7 +225,7 @@ export function openStore(filename, { seed = false, password, credentialPath } =
   if (!store.get('SELECT id FROM campaign')) {
     const close = new Date(Date.now() + 14 * 86400000).toISOString();
     store.run('INSERT INTO campaign VALUES(1,?,?,?,?)', 'CCBABY 韓國預購', seed ? 'open' : 'draft', close,
-      '把喜歡的，先收進清單。韓國親自採買，到台後再通知付款。');
+      '把喜歡的，先收進清單。韓國親自採買，下單後 24 小時內付款，確認付款後安排採購');
   }
   if (seed && !store.get('SELECT id FROM products LIMIT 1')) seedData(store);
   return store;

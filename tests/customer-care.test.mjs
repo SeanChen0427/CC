@@ -37,16 +37,22 @@ test('manual chat verification and follow-up validate versions, dates and allowe
   const cleared=planCustomerCare({version:1,chatConfirmed:false,followUpAt:null},next);assert.equal(cleared.chatConfirmedAt,null);assert.equal(cleared.followUpAt,null);
 });
 
-test('purchase and payment notices depend on this customer allocation and actual arrival',()=>{
+test('payment reminder uses the full preorder before procurement; progress and arrival still require own allocation',()=>{
   assert.equal(orderNotice('thanks',order,campaign).eligible,true);
   assert.equal(orderNotice('purchased',order,campaign).eligible,false);
-  assert.equal(orderNotice('payment',order,campaign).eligible,false);
+  const earlyPayment=orderNotice('payment',order,campaign);
+  assert.equal(earlyPayment.eligible,true);assert.match(earlyPayment.message,/24 小時內/);assert.match(earlyPayment.message,/NT\$ 1,800/);
+  const paymentCard=layoutOrderCards(order,earlyPayment,(text,size)=>Array.from(text).length*size);
+  assert.deepEqual(paymentCard.pages.flat().map(row=>row.amount),['NT$ 1,000','NT$ 800']);
+  assert.equal(orderNotice('payment',{...order,items:[]},campaign).eligible,false);
+  assert.equal(orderNotice('arrived',order,{status:'arrived'}).eligible,false);
   const partial=structuredClone(order);partial.items[0].bought=1;
   const progress=orderNotice('purchased',partial,campaign);assert.equal(progress.title,'採購進度通知');assert.match(progress.message,/已買到 1 件/);assert.doesNotMatch(progress.message,/已全部買到/);
-  assert.equal(orderNotice('payment',partial,campaign).eligible,false);
-  const payment=orderNotice('payment',partial,{status:'arrived'});assert.equal(payment.eligible,true);assert.equal(payment.progress.boughtTotal,500);assert.match(payment.message,/NT\$ 500/);assert.doesNotMatch(payment.message,/NT\$ 1,800/);
+  assert.equal(orderNotice('payment',partial,campaign).eligible,true);
+  const payment=orderNotice('payment',partial,{status:'arrived'});assert.equal(payment.eligible,true);assert.equal(payment.progress.boughtTotal,500);assert.match(payment.message,/NT\$ 1,800/);
+  assert.equal(payment.signature,earlyPayment.signature);
   const full=structuredClone(order);full.items.forEach(i=>i.bought=i.quantity);assert.equal(orderNotice('purchased',full,campaign).title,'已全部買到通知');
-  const shortage=structuredClone(order);shortage.items.forEach(i=>i.shortage=i.quantity);assert.equal(orderNotice('purchased',shortage,campaign).title,'缺貨結果確認');assert.equal(orderNotice('payment',shortage,{status:'arrived'}).eligible,false);
+  const shortage=structuredClone(order);shortage.items.forEach(i=>i.shortage=i.quantity);const shortageNotice=orderNotice('purchased',shortage,campaign);assert.equal(shortageNotice.title,'缺貨結果確認');assert.match(shortageNotice.message,/退款或更換/);
 });
 
 test('notification marks require manual identity confirmation and become pending after relevant changes',()=>{
@@ -88,7 +94,7 @@ test('cloud contact/care stay role-isolated and private metadata never enters cu
   const care=operate(state,'admin/customer-care','GET',{},admin);assert.equal(care.people[0].care.followUpNote,'店主私有備註');
 });
 
-test('local contact workflow persists and blocks stale, wrong-role, unallocated and early payment notices',async()=>{
+test('local contact workflow persists, permits early manual payment reminders and protects actual arrival notices',async()=>{
   const directory=await mkdtemp(join(tmpdir(),'ccbaby-care-test-')),password=randomUUID();
   let app=await startApp({directory,customerPort:0,adminPort:0,seed:true,password,quiet:true});
   const cookies={};
@@ -114,13 +120,16 @@ test('local contact workflow persists and blocks stale, wrong-role, unallocated 
     assert.equal((await call('admin','admin/customer-care',{customerId:'demo-anna',version:0,chatConfirmed:true},'PUT')).status,409);
     assert.equal((await call('admin','admin/order-notice',mark,'PUT')).status,200);
     assert.equal((await call('admin','admin/order-notice',mark,'PUT')).status,409);
+    data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');
+    const payment=o.notices.find(n=>n.kind==='payment');assert.equal(payment.eligible,true);assert.match(payment.message,/24 小時內/);
+    assert.equal((await call('admin','admin/order-notice',{orderId:o.id,version:o.noticeVersion,kind:'payment',status:'sent',signature:payment.signature},'PUT')).status,200);
     assert.doesNotMatch(JSON.stringify((await call('customer','me')).data),/私有提醒|followUpAt|chatConfirmed/);
     assert.equal(snapshot(),business);
     const raw=app.store.orders().find(row=>row.id===o.id&&row.customer_id==='demo-anna'),item=raw.items[0],row=app.store.report().find(r=>r.variant_id===item.variant_id);
     assert.equal((await call('admin','admin/procurement/'+item.variant_id,{version:row.version,bought:1,shortage:0,note:''},'PUT')).status,200);
     data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='purchased').eligible,false);
     assert.equal((await call('admin','admin/allocation',{itemId:item.id,bought:1,shortage:0})).status,200);
-    data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='purchased').eligible,true);assert.equal(o.notices.find(n=>n.kind==='payment').eligible,false);
+    data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='purchased').eligible,true);assert.equal(o.notices.find(n=>n.kind==='payment').eligible,true);assert.equal(o.notices.find(n=>n.kind==='payment').done,true);
     await call('admin','admin/campaign',{name:app.store.campaign().name,status:'arrived',closesAt:app.store.campaign().closesAt},'PUT');
     data=(await call('admin','admin/customer-care')).data;o=data.orders.find(o=>o.customer_id==='demo-anna');assert.equal(o.notices.find(n=>n.kind==='payment').progress.boughtTotal,item.price);
     const arrived=o.notices.find(n=>n.kind==='arrived');

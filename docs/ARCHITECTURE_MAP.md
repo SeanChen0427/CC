@@ -1,5 +1,11 @@
 # 架構地圖與樹狀圖
 
+## 0.3.25 文案與人工付款時序（D-46）
+
+客戶商品／購物車／送單成功／我的預購／說明／頁尾 → LINE 人工確認下單後 24 小時內付款 → 店主人工安排採購 → 既有採買／分配 → arrived＋本人買到後逐筆通知交付。
+
+domain/customer-care.mjs 的 payment 以有效正數預購判斷，金額使用全預購快照；其內容簽章不依採購數量或到台狀態重置。apps/admin-web/order-card.js 的付款圖卡同樣按預購數量計算。domain/line-notifications.mjs 只更新新工作文案，已保存通知原文、claim／Retry-Key／權限不變。沒有新增 API、資料表、付款狀態或排程，付款與寄件順序由 LINE 人工作業；日期設定不變
+
 ## 0.3.24 LINE 通知資料流（D-45）
 
 customer/preorders → 同次私有 JSONB revision 保存訂單＋lineNotifications → Edge background task → 原子 claim → 核對官方帳號／額度／收件人 → 保存推送意圖 → LINE Push（固定 Retry-Key）→ 原子記錄 API 接受或轉人工。到台走 admin/line-notification，逐筆 confirm＋owner／版本／內容簽章／arrived／本人分配驗證後使用同一流程。
@@ -118,7 +124,7 @@ shared/runtime.js → shared/line-auth.js，依隨機 state 分隔 10 分鐘登�
 │  ├─ 購物車
 │  │  ├─ 加入／合併同規格／增減／移除
 │  │  ├─ 件數與預估小計
-│  │  └─ 送出預購（不用付款）
+│  │  └─ 送出預購 → LINE 人工確認付款
 │  ├─ 成立確認
 │  │  └─ 預購編號／時間／明細／追加入口
 │  └─ 我的預購

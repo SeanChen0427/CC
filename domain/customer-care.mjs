@@ -50,8 +50,8 @@ export function orderProgress(order){
   return {quantity,bought,shortage,pending:Math.max(0,quantity-bought-shortage),boughtTotal:items.reduce((n,i)=>n+(i.bought||0)*i.price,0),total:items.reduce((n,i)=>n+i.quantity*i.price,0)};
 }
 export function noticeSignature(kind,order,campaign){
-  return JSON.stringify([kind,order.id,order.version,...(kind==='arrived'||kind==='payment'?[campaign.status]:[]),
-    order.items.filter(i=>i.quantity>0).map(i=>[i.id,i.product_code,i.product_name,i.color,i.size,i.price,i.quantity,...(kind==='thanks'?[]:[i.bought||0,i.shortage||0])])]);
+  return JSON.stringify([kind,order.id,order.version,...(kind==='arrived'?[campaign.status]:[]),
+    order.items.filter(i=>i.quantity>0).map(i=>[i.id,i.product_code,i.product_name,i.color,i.size,i.price,i.quantity,...(['thanks','payment'].includes(kind)?[]:[i.bought||0,i.shortage||0])])]);
 }
 
 export function orderNotice(kind,order,campaign,record={}){
@@ -62,21 +62,21 @@ export function orderNotice(kind,order,campaign,record={}){
   const intro=`嗨～${order.name||'你好'}，這是 CCBABY 預購 ${order.code} 的更新`;
   if(kind==='thanks'){
     base.title='預購確認與感謝';
-    base.message=`${intro}\n謝謝你的預購！已收到 ${p.quantity} 件選物需求，預估商品小計 ${money(p.total)}\n這是代購登記，成立時不代表現貨，實際供貨依採購結果為準；付款會在商品到台後另外確認\n附上預購明細圖卡，若有品項或規格需要確認，歡迎在這裡告訴我`;
+    base.message=`${intro}\n謝謝你的預購！已收到 ${p.quantity} 件選物需求，預估商品小計 ${money(p.total)}\n請於下單後 24 小時內完成付款，確認付款後才安排採購；收款資料與總額會在這裡人工核對\n實際供貨依韓國採購結果為準，缺貨可選擇退款或更換款式；依付款順序寄出，預計 11/30 起陸續出貨\n附上預購明細圖卡，尺寸或商品有問題，直接在這裡留言就好`;
   }else if(kind==='purchased'){
     base.eligible=p.bought+p.shortage>0;
     base.title=p.bought===p.quantity?'已全部買到通知':p.bought>0?'採購進度通知':'缺貨結果確認';
     const result=p.bought===p.quantity?`這次預購的 ${p.bought} 件商品已全部買到`:`目前已買到 ${p.bought} 件、確認缺貨 ${p.shortage} 件，還有 ${p.pending} 件等待採買或分配確認`;
-    base.message=`${intro}\n${result}\n${isArrived?'商品已到台，後續會在這裡與你核對付款與交付':'到台前不用付款；後續到台進度會再和你說明'}\n圖卡列出目前各品項的採購結果，謝謝你的等待`;
+    base.message=`${intro}\n${result}\n${p.shortage?'缺貨商品可選擇退款或更換其他款式，請在這裡告訴我\n':''}${isArrived?'商品已到台，後續會在這裡與你核對交付方式':'後續到台進度會再和你說明'}\n依付款順序寄出，預計 11/30 起陸續出貨；圖卡列出目前各品項的採購結果，謝謝你的等待`;
     base.blocked='先在採買清單記錄結果，並分配到這位客戶的預購，才可產生採購通知';
   }else if(kind==='arrived'){
     base.eligible=isArrived&&p.bought>0;base.title='到台通知';
-    base.message=`${intro}\n已分配給你的 ${p.bought} 件商品已到台，謝謝你的耐心等待\n${p.pending?`另有 ${p.pending} 件仍待採買或分配確認，我會分開說明\n`:''}${p.shortage?`本次有 ${p.shortage} 件確認缺貨，明細已列在圖卡\n`:''}接下來會和你核對品項、運費及付款與交付方式`;
+    base.message=`${intro}\n已分配給你的 ${p.bought} 件商品已到台，謝謝你的耐心等待\n${p.pending?`另有 ${p.pending} 件仍待採買或分配確認，我會分開說明\n`:''}${p.shortage?`本次有 ${p.shortage} 件確認缺貨，可選擇退款或更換款式，明細已列在圖卡\n`:''}接下來會和你核對品項、運費及交付方式，依付款順序寄出，預計 11/30 起陸續出貨`;
     base.blocked='活動需設為「商品已到台」，且此客戶已有分配買到的商品';
   }else{
-    base.eligible=isArrived&&p.bought>0;base.title='匯款聯繫提醒';
-    base.message=`${intro}\n已分配買到並到台的商品共 ${p.bought} 件，商品小計 ${money(p.boughtTotal)}（運費另行確認）\n想和你確認後續匯款與交付，我會在這裡另外提供收款資料及核對後的總額，請確認後再匯款\n謝謝你的訂購，有需要確認的地方都可以直接問我`;
-    base.blocked='到台且已有分配買到商品後，才可準備匯款聯繫';
+    base.title='匯款聯繫提醒';
+    base.message=`${intro}\n目前預購共 ${p.quantity} 件，預估商品小計 ${money(p.total)}（運費另行確認）\n請於下單後 24 小時內完成付款，確認付款後才安排採購；我會在這裡提供收款資料及核對後的總額，請確認後再匯款\n若已付款，請在這裡告訴我以便人工核對；依付款順序寄出，預計 11/30 起陸續出貨\n缺貨可選擇退款或更換款式，有需要確認的地方都可以直接留言`;
+    base.blocked='需有有效預購品項，才可準備匯款聯繫';
   }
   base.done=base.record?.status==='sent'&&base.record.signature===base.signature;
   base.changed=base.record?.status==='sent'&&!base.done;

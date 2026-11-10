@@ -1,5 +1,11 @@
 # 資料模型與報表規則
 
+## 0.3.25 營運付款規則（D-46）
+
+網站保留原登入、購物車、預購成立／追加／修改、採購與分配流程；不新增付款回報、實收／退款紀錄、24 小時自動取消、付款順序排序或採購付款閘門。付款、退款與寄件順序由店主在 LINE 人工核對及作業，預購資料成立不代表已付款。
+
+匯款提醒與圖卡取有效正數預購全部明細的 quantity × price；採購／到台圖卡仍取本人 bought 分配。payment 簽章保留預購版本及明細快照，不再含 campaign.status／bought／shortage，避免採購進度變動誤列新的匯款提醒；預購實際變更仍需重新人工核對。既存通知工作保存原文，不遷移、不補發；正式資料與活動原樣保留
+
 ## 0.3.24 通知工作與結果（D-45）
 
 - 私有 JSONB 新增 lineNotifications[]；本機 line_notifications(id,data)，不遷移或清空既有商品／預購。工作含 id(UUID，同 Retry-Key)、orderId、customerId、kind(thanks/arrived)、signature、不可於首次嘗試後更換的 message、automatic、status、reason、claim／leaseUntil、attempts、firstPushAt、mayHaveSent、acceptedAt 及時間
