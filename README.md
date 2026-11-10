@@ -1,5 +1,9 @@
 # CCBABY 韓國年度預購網站
 
+## 0.3.29 GIF 每張 2 MB（驗證中）
+
+商品 GIF 上限提高為每張 2 MB，保留動畫，與其他照片合計最多 8 張；重新整理管理後台使用。實際發布與驗證結果見 [HANDOFF](docs/HANDOFF.md)
+
 ## 0.3.27 商品 GIF（已發布）
 
 商品照片新增 GIF，保留動畫、可作封面與相簿照片，單張 1.4 MB 以內；JPG／PNG／WebP 的原圖 20 MB 自動縮圖規則保留。148 項測試與四寬 UI 通過，Edge v26／Pages e052d6c 已上線；詳見 [HANDOFF](docs/HANDOFF.md)
@@ -16,7 +20,7 @@
 
 139 項測試與四種寬度驗證通過，Edge v24／Pages 8ad2919 已發布，45 個正式公開檔案核對一致；詳見 HANDOFF。下方保留各版本歷史
 
-版本：0.3.27｜更新：2026-11-10（Asia/Taipei）
+版本：0.3.29｜更新：2026-11-10（Asia/Taipei）
 
 跨 AI 接手先讀 [AI_INDEX.md](AI_INDEX.md)，最新工作狀態見 [HANDOFF.md](docs/HANDOFF.md)。
 

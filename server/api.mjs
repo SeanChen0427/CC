@@ -465,7 +465,8 @@ export async function api({ store, req, role, path, method, body, session, local
     const match = String(body.data || '').match(/^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/);
     if (!match) throw new AppError('請選擇 PNG、JPG、WebP 或 GIF 圖片');
     const buffer = Buffer.from(match[2], 'base64');
-    if (buffer.length > 1400000) throw new AppError('圖片需小於 1.4 MB');
+    const limit = match[1] === 'gif' ? 2000000 : 1400000;
+    if (buffer.length > limit) throw new AppError(`圖片需在 ${limit / 1000000} MB 以內`);
     const valid = match[1] === 'png' ? buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
       : match[1] === 'jpeg' ? buffer[0] === 255 && buffer[1] === 216
       : match[1] === 'gif' ? buffer.length >= 14 && ['GIF87a', 'GIF89a'].includes(buffer.toString('ascii', 0, 6)) && buffer.readUInt16LE(6) > 0 && buffer.readUInt16LE(8) > 0 && buffer.at(-1) === 0x3b

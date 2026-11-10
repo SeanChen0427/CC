@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.28",
+  "documentVersion": "0.3.29",
   "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -460,7 +460,7 @@
   "productImages": {
     "maxCount": 8,
     "sourceMaxBytes": 20000000,
-    "uploadMaxBytes": 1400000,
+    "uploadMaxBytes": 2000000,
     "multipleSelection": true,
     "fileDrop": true,
     "reorder": true,
@@ -475,11 +475,11 @@
       "webp",
       "gif"
     ],
-    "gifMaxBytes": 1400000,
+    "gifMaxBytes": 2000000,
     "gifPreservesAnimation": true,
     "gifResize": false,
     "gifExcelThumbnail": "static_jpeg",
-    "gifStatus": "live_verified",
+    "gifStatus": "2mb_edge_live_pages_pending",
     "sourcePaths": [
       "apps/admin-web/image-editor.js",
       "apps/admin-web/image-upload.js",
@@ -491,9 +491,9 @@
       "tests/cloud-entry.test.mjs",
       "tests/fixtures/product-gif.mjs"
     ],
-    "gifDecision": "D-48",
-    "gifIntegrationTestsPassed": 148,
-    "gifSyntaxModules": 53,
+    "gifDecision": "D-50",
+    "gifIntegrationTestsPassed": 154,
+    "gifSyntaxModules": 54,
     "gifViewports": [
       320,
       390,
@@ -506,7 +506,7 @@
     "gifCartPreorderAppendAndAdminChecked": true,
     "gifPhysicalIPhoneChecked": false,
     "gifProductionBusinessWrites": false,
-    "gifEdgeVersion": 26,
+    "gifEdgeVersion": 27,
     "gifEdgeSourceFilesVerified": 23,
     "gifStorageMimeEnabled": true,
     "gifSourceCommit": "b3627f6",
@@ -519,7 +519,15 @@
     "gifBusinessRevisionAtVerification": 201,
     "gifBusinessHashAtVerification": "ce4ae7a9ba69f2ad00c85ecc30e8f354",
     "gifProductionUploadWriteTested": false,
-    "gifPreviewServerStopped": true
+    "gifPreviewServerStopped": true,
+    "gifUploadRequestMaxBytes": 2800000,
+    "otherRequestMaxBytes": 2200000,
+    "storageMaxBytes": 2000000,
+    "stillUploadMaxBytes": 1400000,
+    "gifExactLimitBytesChecked": 2000000,
+    "gifLimitPlusOneRejected": true,
+    "gifUploadRouteBodyLimitChecked": true,
+    "gifShareCartPreorderAppendAndAdminChecked": true
   },
   "productPricing": {
     "basePrice": true,

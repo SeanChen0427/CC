@@ -2,7 +2,7 @@ import test, { after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { emptyState, upsertCustomer } from '../cloud/core.mjs';
-import { productGif, productGifData } from './fixtures/product-gif.mjs';
+import { productGifData, productGifOfSize } from './fixtures/product-gif.mjs';
 
 // Exercise the actual Edge handler with isolated LINE/PostgREST responses.
 // No network request or real session is created by this test.
@@ -46,13 +46,18 @@ test('actual GIF handler verifies role, preserves bytes and rejects invalid cont
   assert.equal((await invoke('admin/upload',{body:{data:productGifData},role:'admin'})).status,401);
   assert.equal((await invoke('admin/upload',{body:{data:productGifData},token,role:'customer'})).status,403);
   assert.equal(uploaded,null);
-  const result=await invoke('admin/upload',{body:{data:productGifData},token,role:'admin'});
+  const fullGif=productGifOfSize(2000000),fullData='data:image/gif;base64,'+fullGif.toString('base64');
+  const result=await invoke('admin/upload',{body:{data:fullData},token,role:'admin'});
   assert.equal(result.status,200);const {url}=await result.json();assert.match(url,/ccbaby-products\/[a-f0-9-]+\.gif$/);
-  assert.equal(uploaded.type,'image/gif');assert.equal(uploaded.bytes.toString('base64'),productGif);
+  assert.equal(uploaded.type,'image/gif');assert.deepEqual(uploaded.bytes,fullGif);
   assert.equal(revision,1);assert.deepEqual(s.products,[]);
-  for(const data of [productGifData.replace('image/gif','image/png'),'data:image/gif;base64,'+Buffer.from('GIF89a').toString('base64'),'data:image/gif;base64,'+Buffer.alloc(1400001).toString('base64')]){
+  for(const data of [productGifData.replace('image/gif','image/png'),'data:image/gif;base64,'+Buffer.from('GIF89a').toString('base64'),'data:image/gif;base64,'+productGifOfSize(2000001).toString('base64')]){
     uploaded=null;assert.equal((await invoke('admin/upload',{body:{data},token,role:'admin'})).status,400);assert.equal(uploaded,null);
   }
+  const still=await invoke('admin/upload',{body:{data:fullData.replace('image/gif','image/png')},token,role:'admin'});
+  assert.equal(still.status,400);assert.match((await still.json()).error,/1.4 MB/);assert.equal(uploaded,null);
+  assert.equal((await invoke('admin/products',{body:{data:fullData},token,role:'admin'})).status,413);
+  assert.equal((await invoke('admin/upload',{body:{data:'x'.repeat(2800001)},token,role:'admin'})).status,413);
   const product={code:'GIF',name:'動畫商品',category:'衣著',price:590,colors:'藍',sizes:'S',kind:'vest',images:[url],imageBindings:[{color:'藍',url}]};
   assert.equal((await invoke('admin/products',{body:product,token,role:'admin'})).status,200);
   assert.deepEqual(s.products[0].images,[url]);assert.deepEqual(s.products[0].imageBindings,product.imageBindings);

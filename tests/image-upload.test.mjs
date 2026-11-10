@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { prepareUpload } from '../apps/admin-web/image-upload.js';
 import { startApp } from '../server/index.mjs';
-import { productGif, productGifData } from './fixtures/product-gif.mjs';
+import { productGif, productGifData, productGifOfSize } from './fixtures/product-gif.mjs';
 
 test('GIF preparation preserves every source byte and bypasses still-image resizing', async () => {
   const original = { Image: globalThis.Image, FileReader: globalThis.FileReader, document: globalThis.document };
@@ -25,8 +25,10 @@ test('GIF preparation preserves every source byte and bypasses still-image resiz
     for (const type of ['image/gif', '']) {
       assert.equal(await prepareUpload(new File([Buffer.from(productGif, 'base64')], 'animation.GIF', { type })), productGifData);
     }
-    assert.equal(revoked, 2);
-    await assert.rejects(prepareUpload(new File([new Uint8Array(1400001)], 'large.gif', { type: 'image/gif' })), /1.4 MB.*保留動畫/);
+    const fullGif = productGifOfSize(2000000);
+    assert.equal(await prepareUpload(new File([fullGif], 'full.gif', {type:'image/gif'})), 'data:image/gif;base64,' + fullGif.toString('base64'));
+    assert.equal(revoked, 3);
+    await assert.rejects(prepareUpload(new File([productGifOfSize(2000001)], 'large.gif', { type: 'image/gif' })), /2 MB.*保留動畫/);
     await assert.rejects(prepareUpload(new File([], 'empty.gif', { type: 'image/gif' })), /空檔案/);
     await assert.rejects(prepareUpload(new File(['<svg/>'], 'image.svg', { type: 'image/svg+xml' })), /JPG.*GIF/);
   } finally {
@@ -41,7 +43,8 @@ test('local GIF upload enforces role, content and size, and preserves gallery or
   const jars = {};
   const request = async (role, path, body) => {
     const base = `http://127.0.0.1:${app[role + 'Port']}`;
-    const response = await fetch(base + '/api/' + path, { method: body ? 'POST' : 'GET', headers: { Origin: base, 'Content-Type': 'application/json', ...(jars[role] ? { Cookie: jars[role] } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    const response = await fetch(base + '/api/' + path, { method: body ? 'POST' : 'GET', headers: { Origin: base, 'Content-Type': 'application/json', ...(jars[role] ? { Cookie: jars[role] } : {}) }, body: body ? JSON.stringify(body) : undefined })
+      .catch(cause => { throw new Error(`Request failed: ${role}/${path} (${body ? JSON.stringify(body).length : 0} bytes)`, {cause}); });
     const cookie = response.headers.get('set-cookie'); if (cookie) jars[role] = cookie.split(';')[0];
     return { status: response.status, data: await response.json() };
   };
@@ -49,13 +52,18 @@ test('local GIF upload enforces role, content and size, and preserves gallery or
     assert.equal((await request('admin', 'admin/upload', { data: productGifData })).status, 401);
     assert.equal((await request('customer', 'admin/upload', { data: productGifData })).status, 403);
     assert.equal((await request('admin', 'admin/login', { username: 'hannah', password })).status, 200);
-    const gif = await request('admin', 'admin/upload', { data: productGifData });
+    const fullGif = productGifOfSize(2000000), fullData = 'data:image/gif;base64,' + fullGif.toString('base64');
+    const gif = await request('admin', 'admin/upload', { data: fullData });
     assert.equal(gif.status, 200); assert.match(gif.data.url, /^\/uploads\/[a-f0-9]{24}\.gif$/);
     const served = await fetch(`http://127.0.0.1:${app.customerPort}` + gif.data.url);
     assert.equal(served.headers.get('content-type'), 'image/gif');
-    assert.equal(Buffer.from(await served.arrayBuffer()).toString('base64'), productGif);
-    const invalid = ['data:image/gif;base64,' + Buffer.from('GIF89a').toString('base64'), productGifData.replace('image/gif', 'image/png'), 'data:image/gif;base64,' + Buffer.alloc(1400001).toString('base64')];
+    assert.deepEqual(Buffer.from(await served.arrayBuffer()), fullGif);
+    const invalid = ['data:image/gif;base64,' + Buffer.from('GIF89a').toString('base64'), productGifData.replace('image/gif', 'image/png'), 'data:image/gif;base64,' + productGifOfSize(2000001).toString('base64')];
     for (const data of invalid) assert.equal((await request('admin', 'admin/upload', { data })).status, 400);
+    const still = await request('admin', 'admin/upload', {data:fullData.replace('image/gif','image/png')});
+    assert.equal(still.status,400); assert.match(still.data.error,/1.4 MB/);
+    assert.equal((await request('admin', 'admin/products', {data:fullData})).status,413);
+    assert.equal((await request('admin', 'admin/upload', {data:'x'.repeat(2800001)})).status,413);
     const png = '/uploads/' + 'a'.repeat(24) + '.png';
     const body = { code: 'GIF', name: '動畫測試商品', category: '衣著', price: 590, colors: '紅,藍', sizes: 'S', kind: 'vest', tone: '#b9a38b', images: [png, gif.data.url], imageBindings: [{ color: '藍', url: gif.data.url }] };
     assert.equal((await request('admin', 'admin/products', body)).status, 200);

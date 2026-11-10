@@ -47,11 +47,14 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
           if (!['GET','HEAD'].includes(method)) {
             if (!hosts.map(h => 'http://' + h).includes(req.headers.origin)) throw new AppError('請從本機網站操作', 403);
             if (!(req.headers['content-type'] || '').startsWith('application/json')) throw new AppError('請使用 JSON', 415);
-            let raw = '';
+            let raw = '', oversized = false;
+            const bodyLimit = url.pathname === '/api/admin/upload' && role === 'admin' ? 2800000 : 2200000;
             for await (const chunk of req) {
+              if (oversized) continue;
               raw += chunk;
-              if (Buffer.byteLength(raw) > 2200000) throw new AppError('資料超過允許大小', 413);
+              if (Buffer.byteLength(raw) > bodyLimit) { oversized = true; raw = ''; }
             }
+            if (oversized) throw new AppError('資料超過允許大小', 413);
             try { body = raw ? JSON.parse(raw) : {}; }
             catch { throw new AppError('資料格式不正確'); }
             if (!body || typeof body !== 'object' || Array.isArray(body)) throw new AppError('資料格式不正確');

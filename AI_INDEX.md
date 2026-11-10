@@ -1,5 +1,9 @@
 # 跨 AI 工具共用索引
 
+## 0.3.29 GIF 上限調整為 2 MB（D-50，驗證中）
+
+依店主實際檔案大小，GIF 原檔上限從 1.4 MB 提高為 2 MB，原動畫及相簿功能保留；實際發布見 [交接](docs/HANDOFF.md)。沿用 image-upload.js、image-editor.js、Edge／本機上傳入口與既有 GIF 測試，不新增程式路徑
+
 ## 0.3.28 單品分享連結（D-49，已發布）
 
 後台商品清單增加複製連結，`#product/商品ID` 在 LINE 驗證後直接開啟既有商品視窗；客端 HTML／CSS 與原商品模板不變，不建立獨立商品頁。共用 [連結白名單](shared/product-link.js)、[登入及連結驗證](tests/product-link.test.mjs)；實際結果見 [交接](docs/HANDOFF.md)。還原點 `checkpoint/before-product-links-0.3.27` 已推送 GitHub，來源 `9827d64`／Pages `e052d6c`，回復不還原業務資料
@@ -52,7 +56,7 @@ LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200�
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-10（Asia/Taipei）｜版本：0.3.28
+更新：2026-11-10（Asia/Taipei）｜版本：0.3.29
 
 品牌名稱已確認為 **CCBABY**。
 

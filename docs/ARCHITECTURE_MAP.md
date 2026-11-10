@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.29 GIF 2 MB 傳輸
+
+image-upload.js 保留 GIF 原檔，上限 2,000,000 bytes；image-editor.js 同步顯示 2 MB。Edge／本機 admin/upload 依 MIME 使用 GIF 2 MB／其他圖片 1.4 MB，角色與檔案驗證沿用；只有管理上傳 JSON 上限提高為 2,800,000 bytes，其他路由維持 2,200,000 bytes。本機超限時排空剩餘輸入並回 413，避免中途關閉連線而失去錯誤訊息。Storage file_size_limit 改 2 MB，無新 schema／RPC／資料欄位；單品分享與客端 UI 不變
+
 ## 0.3.28 單品分享入口（D-49）
 
 admin app.js → shared/product-link.js → 設定 customerURL + #product/ID → 原 customer entry／runtime LINE 驗證 → 原 catalog／bootstrap → app.js 的 openLinkedProduct → 原 showProduct，背景仍是 renderShop。沒有新增頁面、API 或資料欄位；普通圖卡不改 hash。關閉／加購時 replaceState 到 #shop，避免新增多餘返回步驟；hashchange 開啟其他分享商品時，過時 close 事件不清掉新相簿。分享 hash 與原 #shop／#cart／#orders 由同一白名單供 runtime／line-auth 使用，無效值不作任意導向。build-pages 與本機 server 共用檔案映射都追加 product-link.js；Edge v26 沿用

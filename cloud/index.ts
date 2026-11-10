@@ -74,7 +74,7 @@ Deno.serve(async req=>{
     let body={};
     if(method!=='GET'){
       if(!(req.headers.get('content-type')||'').startsWith('application/json'))throw new AppError('請使用 JSON',415);
-      const raw=await req.text();if(new TextEncoder().encode(raw).length>2200000)throw new AppError('資料超過允許大小',413);
+      const raw=await req.text(),bodyLimit=path==='admin/upload'&&role==='admin'?2800000:2200000;if(new TextEncoder().encode(raw).length>bodyLimit)throw new AppError('資料超過允許大小',413);
       try{body=JSON.parse(raw);}catch{throw new AppError('資料格式不正確');}
       if(!body||typeof body!=='object'||Array.isArray(body))throw new AppError('資料格式不正確');
     }
@@ -163,7 +163,8 @@ Deno.serve(async req=>{
       const match=String(body.data||'').match(/^data:image\/(png|jpeg|webp|gif);base64,([A-Za-z0-9+/=]+)$/);if(!match)throw new AppError('僅支援 PNG、JPG、WebP、GIF');
       let bytes;try{bytes=Uint8Array.from(atob(match[2]),c=>c.charCodeAt(0));}catch{throw new AppError('圖片格式無效');}
       const valid=match[1]==='png'?hex(bytes.slice(0,8))==='89504e470d0a1a0a':match[1]==='jpeg'?hex(bytes.slice(0,3))==='ffd8ff':match[1]==='gif'?bytes.length>=14&&['GIF87a','GIF89a'].includes(new TextDecoder().decode(bytes.slice(0,6)))&&(bytes[6]||bytes[7])&&(bytes[8]||bytes[9])&&bytes.at(-1)===0x3b:new TextDecoder().decode(bytes.slice(0,4))==='RIFF'&&new TextDecoder().decode(bytes.slice(8,12))==='WEBP';
-      if(!valid||!bytes.length||bytes.length>1400000)throw new AppError('圖片格式無效或超過 1.4 MB');
+      const limit=match[1]==='gif'?2000000:1400000;
+      if(!valid||!bytes.length||bytes.length>limit)throw new AppError('圖片格式無效或超過 '+limit/1000000+' MB');
       const name=crypto.randomUUID()+'.'+(match[1]==='jpeg'?'jpg':match[1]);
       const uploaded=await fetch(base+'/storage/v1/object/ccbaby-products/'+name,{method:'POST',headers:{apikey:service,Authorization:'Bearer '+service,'Content-Type':'image/'+match[1],'Cache-Control':'3600'},body:bytes});
       if(!uploaded.ok)throw new AppError('圖片上傳失敗，請稍後再試',503);
