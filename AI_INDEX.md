@@ -6,7 +6,7 @@
 
 網站保留原登入、購物車、預購成立／追加／修改、採購與分配流程；不新增付款回報、實收／退款紀錄、24 小時自動取消、付款順序排序或採購付款閘門。付款、退款與寄件順序由店主在 LINE 人工核對及作業，預購資料成立不代表已付款。
 
-網站與 Edge 發布狀態、驗證見 [最新交接](docs/HANDOFF.md)；舊版到台後付款文字及 LINE 原生設定紀錄為歷史。程式入口沿用 customer app.js、domain/customer-care.mjs、domain/line-notifications.mjs 及管理 order-card.js，未新增檔案角色
+已發布 Edge v24／Pages 8ad2919，139 項測試、四寬 UI、45 檔及正式唯讀通過；具體驗證見 [最新交接](docs/HANDOFF.md)；舊版到台後付款文字及 LINE 原生設定紀錄為歷史。程式入口沿用 customer app.js、domain/customer-care.mjs、domain/line-notifications.mjs 及管理 order-card.js，未新增檔案角色
 
 ## 0.3.24 LINE 訂單通知（已發布並啟用）
 
@@ -36,7 +36,7 @@ LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200�
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-09（Asia/Taipei）｜版本：0.3.24
+更新：2026-11-10（Asia/Taipei）｜版本：0.3.25
 
 品牌名稱已確認為 **CCBABY**。
 

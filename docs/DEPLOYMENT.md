@@ -1,5 +1,11 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.25 預購規則發布 — 2026-11-10
+
+main 83a3370、Pages 8ad291938ce17ae39ef36518a5351c84e6a2e5c5／[run 42752548428](https://github.com/SeanChen0427/CC/actions/runs/42752548428) success，Edge v24 ACTIVE、verify_jwt=false 保留，22 個 Edge 來源與 45 個公開檔案逐位元符合成品。只更新預購付款文案、人工匯款提醒條件及圖卡金額，不改 SQL、RPC、LINE 設定／憑證、角色授權或活動日期
+
+139 項測試、51 模組語法／建置及四寬 UI 通過；正式 health／管理唯讀／兩份匯款提醒與錯誤角色拒絕通過，隨即登出。正常商品上架早於 Edge 發布，最新 revision 156／data MD5 44af841293df002573e537220e92633e／37 商品／2 預購／open 保持，沒有正式示範單或發訊；舊通知原文不改寫與補發。詳細流程及邊界見 D-46／HANDOFF
+
 ## 0.3.24 LINE 發訊設定（正式發布／啟用見 HANDOFF）
 
 Edge v22 ACTIVE；Pages 58a9486cf1640b15ef2c474a564d3403051177eb／[run 42500024196](https://github.com/SeanChen0427/CC/actions/runs/42500024196) success。正式 9 個重點檔及 22 個 Edge 來源一致，health 200，發訊 configured=true；發布及啟用後 revision 91／MD5 4e7fcb6ba7137f6002adb030a0259877 保留。使用者明確同意後已簽發並保存 Token、啟用開關；正式店主 API 取得 available=true、limit=200、used=0、remaining=200，未發真實測試訊息或補發歷史通知

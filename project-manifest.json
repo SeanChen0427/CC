@@ -15,7 +15,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42500024196
+    "pagesRun": 42752548428
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -327,7 +327,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.24",
+    "lastLiveFrontendVersion": "0.3.25",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -432,9 +432,9 @@
   "brandName": "CCBABY",
   "testData": {
     "localCleared": true,
-    "productionProducts": 16,
+    "productionProducts": 37,
     "productionCustomers": 3,
-    "productionPreorders": 1,
+    "productionPreorders": 2,
     "automaticSeed": false
   },
   "uiPreferences": {
@@ -970,6 +970,28 @@
     "automaticPaymentTracking": false,
     "automaticOrderExpiry": false,
     "nativeLineSettingsChanged": false,
-    "status": "verification_in_progress"
+    "status": "live_verified",
+    "integrationTestsPassed": 139,
+    "syntaxModules": 51,
+    "viewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "cartReloadPreorderAppendAndAdminChecked": true,
+    "sourceCommit": "83a3370",
+    "pagesCommit": "8ad291938ce17ae39ef36518a5351c84e6a2e5c5",
+    "pagesRun": 42752548428,
+    "edgeVersion": 24,
+    "edgeFilesCompared": 22,
+    "livePublicFilesCompared": 45,
+    "liveOwnerPolicyChecked": true,
+    "anonymousLineRedirectChecked": true,
+    "productionBusinessWrites": false,
+    "businessRevisionAtVerification": 156,
+    "businessHashAtVerification": "44af841293df002573e537220e92633e",
+    "concurrentOwnerProductSavePreserved": true,
+    "physicalIPhoneChecked": false
   }
 }
