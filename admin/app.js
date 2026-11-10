@@ -1,19 +1,19 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.29';
-import { art } from './product-art.js?v=0.3.29';
-import { mountImageEditor } from './image-editor.js?v=0.3.29';
-import { editorPricing } from './product-pricing.js?v=0.3.29';
-import { mountSizePricing } from './size-pricing.js?v=0.3.29';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.29';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.29';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.29';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.29';
-import { mountProductCost } from './product-cost.js?v=0.3.29';
-import { exportProductExcel } from './product-export.js?v=0.3.29';
-import { mountBrowsing } from './browsing.js?v=0.3.29';
-import { mountMerchandising } from './merchandising.js?v=0.3.29';
-import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.29';
-import { youtubeVideo } from './youtube.js?v=0.3.29';
-import { productLink } from './product-link.js?v=0.3.29';
+import { request, config, cloud, download } from './runtime.js?v=0.3.30';
+import { art } from './product-art.js?v=0.3.30';
+import { mountImageEditor } from './image-editor.js?v=0.3.30';
+import { editorPricing } from './product-pricing.js?v=0.3.30';
+import { mountSizePricing } from './size-pricing.js?v=0.3.30';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.30';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.30';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.30';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.30';
+import { mountProductCost } from './product-cost.js?v=0.3.30';
+import { exportProductExcel } from './product-export.js?v=0.3.30';
+import { mountBrowsing } from './browsing.js?v=0.3.30';
+import { mountMerchandising } from './merchandising.js?v=0.3.30';
+import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.30';
+import { youtubeVideo } from './youtube.js?v=0.3.30';
+import { productShareLink } from './product-link.js?v=0.3.30';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -376,8 +376,9 @@ document.addEventListener('click',async event=>{
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
     if(action==='copy-product-link'){
-      if(target.disabled||!state.data.products.some(p=>p.id===id&&p.active))return;
-      const url=productLink(config.customerURL,id);
+      const product=state.data.products.find(p=>p.id===id&&p.active);
+      if(target.disabled||!product)return;
+      const url=productShareLink(config.customerURL,product,config.productPreviewURL);
       try{await navigator.clipboard.writeText(url);toast('商品連結已複製');}
       catch{
         showModal(`<h2>複製商品連結</h2><label class="form-field">商品連結<input id="product-share-link" type="text" readonly value="${esc(url)}"></label><button class="button" data-action="close">完成</button>`,true);
