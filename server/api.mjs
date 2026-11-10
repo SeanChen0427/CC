@@ -19,6 +19,7 @@ import { notificationCareData,queueNotification,orderNoticeForSend } from '../do
 import { createLineMessaging } from './line-messaging.mjs';
 import { dispatchLineNotification } from './line-delivery.mjs';
 import { previewProductId, productPreview } from '../domain/product-preview.mjs';
+import { browsingControlInput, acceptsBrowsing } from '../domain/browsing-controls.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -237,9 +238,11 @@ export async function api({ store, req, role, path, method, body, session, local
   if(path==='/api/customer/browsing'&&method==='POST'){
     const rows=validateBrowsing(body,session,store.catalog());
     return store.transaction(()=>{
+      const control=store.get('SELECT * FROM browsing_controls WHERE customer_id=?',session.subject);
+      if(control?.excluded)return {ok:true};
       if(store.get('SELECT COUNT(*) AS n FROM browsing_events WHERE customer_id=? AND received_at>?',session.subject,new Date(Date.now()-60000).toISOString()).n>200)throw new AppError('瀏覽回報較多，請稍後再試',429);
       store.run('DELETE FROM browsing_events WHERE at<?',new Date(Date.now()-180*86400000).toISOString());
-      for(const row of rows){
+      for(const row of rows.filter(row=>acceptsBrowsing(row,control))){
         const old=store.get('SELECT data FROM browsing_events WHERE customer_id=? AND id=?',session.subject,row.id);
         const data=old?{...JSON.parse(old.data),activeMs:Math.max(JSON.parse(old.data).activeMs,row.activeMs)}:row;
         store.run('INSERT INTO browsing_events(customer_id,id,at,received_at,data) VALUES(?,?,?,?,?) ON CONFLICT(customer_id,id) DO UPDATE SET data=excluded.data,received_at=excluded.received_at',session.subject,row.id,data.at,now(),JSON.stringify(data));
@@ -247,11 +250,29 @@ export async function api({ store, req, role, path, method, body, session, local
       return {ok:true};
     });
   }
+  if(path==='/api/admin/browsing/control'&&method==='POST'){
+    requireBrowsingRole(session,'admin');
+    const input=browsingControlInput(body);
+    return store.transaction(()=>{
+      if(!store.get('SELECT id FROM customers WHERE id=?',input.customerId))throw new AppError('找不到客戶',404);
+      const old=store.get('SELECT * FROM browsing_controls WHERE customer_id=?',input.customerId)||{excluded:0,version:0,accept_after:'',cleared_at:null};
+      if(old.version!==input.version)throw new AppError('瀏覽設定已更新，請重新載入後再操作',409);
+      let cutoff=old.accept_after,clearedAt=old.cleared_at,deleted=0;
+      if(input.action==='clear'){
+        const latest=store.get('SELECT MAX(at) AS at FROM browsing_events WHERE customer_id=?',input.customerId).at;
+        cutoff=[now(),old.accept_after,latest||''].sort().at(-1);clearedAt=now();
+        deleted=store.run('DELETE FROM browsing_events WHERE customer_id=?',input.customerId).changes;
+      }else if(old.excluded&&!input.excluded)cutoff=[now(),old.accept_after].sort().at(-1);
+      store.run('INSERT INTO browsing_controls VALUES(?,?,?,?,?,?) ON CONFLICT(customer_id) DO UPDATE SET excluded=excluded.excluded,version=excluded.version,accept_after=excluded.accept_after,cleared_at=excluded.cleared_at,updated_at=excluded.updated_at',input.customerId,input.action==='exclusion'?Number(input.excluded):old.excluded,old.version+1,cutoff,clearedAt,now());
+      return {ok:true,deleted};
+    });
+  }
   if(path==='/api/admin/browsing'&&method==='GET'){
     requireBrowsingRole(session,'admin');
     const {days,customerId,before}=browsingQuery(query),since=new Date(Date.now()-days*86400000).toISOString();
     const events=store.all('SELECT * FROM browsing_events WHERE at>=?',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id,receivedAt:r.received_at}));
-    const people=browsingPeople(summarizeBrowsing(events),store.all('SELECT id,display_name,name FROM customers'),store.orders());
+    const controls=store.all('SELECT c.id AS customerId,coalesce(b.excluded,0) AS excluded,coalesce(b.version,0) AS version,(SELECT COUNT(*) FROM browsing_events e WHERE e.customer_id=c.id) AS recordCount FROM customers c LEFT JOIN browsing_controls b ON b.customer_id=c.id');
+    const people=browsingPeople(summarizeBrowsing(events),store.all('SELECT id,display_name,name FROM customers'),store.orders(),controls);
     const context=browsingContext(store.campaign(),store.orders());
     if(!customerId)return {people,days,retentionDays:180,context};
     const person=people.find(p=>p.customerId===customerId);
@@ -262,7 +283,7 @@ export async function api({ store, req, role, path, method, body, session, local
   if(path==='/api/admin/merchandising'&&method==='GET'){
     requireBrowsingRole(session,'admin');
     const {days}=browsingQuery(query),since=new Date(Date.now()-days*86400000).toISOString();
-    const events=store.all('SELECT * FROM browsing_events WHERE at>=?',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id}));
+    const events=store.all('SELECT e.* FROM browsing_events e LEFT JOIN browsing_controls c ON c.customer_id=e.customer_id WHERE e.at>=? AND coalesce(c.excluded,0)=0',since).map(r=>({...JSON.parse(r.data),customerId:r.customer_id}));
     return merchandising(store.catalog(true),store.orders(),productSignals(events),store.merchandisingSettings(),days);
   }
   if(path==='/api/admin/product-order'&&method==='PUT'){

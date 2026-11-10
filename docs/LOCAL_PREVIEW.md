@@ -1,5 +1,11 @@
 # 本機測試版操作說明
 
+## 0.3.31 瀏覽管理驗證
+
+管理「瀏覽紀錄」→ 開啟會員 → 排除／恢復統計，或清除紀錄 → 核對帳號與總筆數 → 勾選確認 → 清除。要重新開始測試可恢復計入後重新整理客戶網站。只會清除選定帳號全部保存的觀察，與目前 7／30／180 天篩選無關
+
+`tests/browsing-controls.test.mjs` 驗證帳號隔離、清除確認、版本、佇列重送、排除／恢復、排序排除及重啟保存；cloud-entry 驗證實際 Edge 路由。`node scripts/build-browsing-control-test.mjs` 建置忽略的 .local/browsing-control-trial.sql，使用獨立 schema／函式與假身分進行 PostgreSQL 驗證，整批 rollback，不讀寫正式 store／會員／事件。不要直接將 tests/browsing-controls.sql 的檢查片段當成正式資料清理腳本
+
 ## 0.3.30 商品詢問縮圖驗證
 
 `npm run build:preview` 產生忽略的 .local/product-preview-build，僅含 Vercel 預覽服務所需公開檔案。正式預覽設定在 deployment.json 的 productPreviewURL；未設時本機／舊版沿用原 hash。`tests/product-preview.test.mjs` 覆蓋匿名四欄投影、HTML 轉義、下架／失敗／非法路徑與新網址版本；cloud-entry 執行實際 Edge handler，全部測試 160 項通過。隔離 CUA 以 /tmp 種子資料驗證詢問、四寬、購物車重載、送單 KR26-0007 與追加同編號，管理一致 3 件／1,770；未清空 .local 或向真實客戶發訊

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.30",
+  "documentVersion": "0.3.31",
   "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -109,7 +109,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_accept_product_thumbnail_in_official_account_mobile_and_web",
+  "nextStep": "owner_configure_browsing_test_accounts",
   "lineEntryFunnel": {
     "status": "live_menu_and_replies_configured",
     "publicationHandledBy": "agent_after_owner_image_upload",
@@ -193,7 +193,7 @@
   "verification": {
     "syntax": "npm run check",
     "integration": "npm test",
-    "integrationTestsPassed": 160,
+    "integrationTestsPassed": 163,
     "browserChecked": true,
     "mobileViewport": 390,
     "xlsxStructureChecked": true,
@@ -439,7 +439,7 @@
     "liveLoginBootstrapAuthorizationChecked": true,
     "liveLoginPerformanceFilesChecked": true,
     "liveConcurrentOwnerChangePreserved": true,
-    "syntaxModules": 59,
+    "syntaxModules": 61,
     "liveLoginAnimationChecked": true
   },
   "brandName": "CCBABY",
@@ -677,8 +677,22 @@
       "apps/admin-web/browsing.js",
       "domain/browsing.mjs",
       "tests/browsing.test.mjs",
-      "supabase/migrations/20261107164621_ccbaby_browsing.sql"
-    ]
+      "supabase/migrations/20261107164621_ccbaby_browsing.sql",
+      "domain/browsing-controls.mjs",
+      "tests/browsing-controls.test.mjs",
+      "tests/browsing-controls.sql",
+      "scripts/build-browsing-control-test.mjs",
+      "supabase/migrations/20261110143206_ccbaby_browsing_controls.sql"
+    ],
+    "accountControls": true,
+    "adminClearByCustomer": true,
+    "excludeFutureRecording": true,
+    "excludedFromBrowsingTotals": true,
+    "excludedFromMerchandisingSignals": true,
+    "clearAllRetainedEventsForSelectedAccount": true,
+    "preclearReplayGuard": true,
+    "explicitClearConfirmation": true,
+    "settingsVersionGuard": true
   },
   "lineLoginRecovery": {
     "status": "live",
@@ -1261,5 +1275,29 @@
     "sourceCommit": "edd4b5c",
     "pagesCommit": "b617805378d265483ab3f5abb266cac6bffe30c9",
     "pagesRun": 42826974315
+  },
+  "browsingAccountControls": {
+    "decision": "D-52",
+    "status": "pages_release_in_progress",
+    "edgeVersion": 29,
+    "migrationVersion": "20261110143206",
+    "productionAccountsCleared": 0,
+    "productionAccountsExcluded": 0,
+    "businessRevisionUnchanged": true,
+    "verification": {
+      "integrationTestsPassed": 163,
+      "syntaxModules": 61,
+      "postgresIsolatedRollbackPassed": true,
+      "viewports": [
+        320,
+        390,
+        768,
+        1440
+      ],
+      "clearConfirmationAndCancelChecked": true,
+      "accountExclusionClearRestoreAndPeerPreservationChecked": true,
+      "pageErrors": 0,
+      "liveEdgeSourcesVerified": 25
+    }
   }
 }

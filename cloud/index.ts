@@ -11,6 +11,7 @@ import { merchandising } from '../domain/merchandising.mjs';
 import { createLineMessaging } from '../server/line-messaging.mjs';
 import { dispatchLineNotification } from '../server/line-delivery.mjs';
 import { previewProductId, productPreview } from '../domain/product-preview.mjs';
+import { browsingControlInput } from '../domain/browsing-controls.mjs';
 
 const base = Deno.env.get('SUPABASE_URL');
 const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -136,13 +137,22 @@ Deno.serve(async req=>{
       const q=browsingQuery(new URL(req.url).searchParams);
       const result=await rpc('ccbaby_browsing_read',{p_hash:hash,p_days:q.days,p_customer:q.customerId,p_before_at:q.before?.at||null,p_before_id:q.before?.id||null});
       if(result.unauthorized)throw new AppError('請重新登入',401);
-      const people=browsingPeople(result.metrics,state.data.customers,orders(state.data));
+      const people=browsingPeople(result.metrics,state.data.customers,orders(state.data),result.controls||[]);
       const context=browsingContext(state.data.campaign,orders(state.data));
       if(!q.customerId)return json({people,days:q.days,retentionDays:180,context});
       const person=people.find(p=>p.customerId===q.customerId);
       if(!person)throw new AppError('找不到客戶',404);
       const events=result.events.slice(0,200),last=events.at(-1);
       return json({person,days:q.days,retentionDays:180,context,interests:result.interests,events,nextCursor:result.events.length>200?last.at+'|'+last.id:null});
+    }
+    if(path==='admin/browsing/control'&&method==='POST'){
+      requireBrowsingRole(state.session,'admin');
+      const input=browsingControlInput(body);
+      const result=await rpc('ccbaby_browsing_manage',{p_hash:hash,p_customer:input.customerId,p_version:input.version,p_action:input.action,p_excluded:input.excluded,p_confirm:input.confirm});
+      if(result.unauthorized)throw new AppError('請重新登入',401);
+      if(result.notFound)throw new AppError('找不到客戶',404);
+      if(result.conflict)throw new AppError('瀏覽設定已更新，請重新載入後再操作',409);
+      return json(result);
     }
     if(path==='admin/merchandising'&&method==='GET'){
       requireBrowsingRole(state.session,'admin');

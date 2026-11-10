@@ -1,5 +1,9 @@
 # 跨 AI 工具共用索引
 
+## 0.3.31 瀏覽紀錄管理（D-52，發布中）
+
+按帳號清除、排除／恢復瀏覽統計；原瀏覽頁內操作，商品排序觀察同步排除，會員／訂單不動。163 項測試、61 模組語法及四寬通過，migration／Edge v29 已發布；Pages 見 [交接](docs/HANDOFF.md)。程式：[管理驗證](domain/browsing-controls.mjs)、[介面](apps/admin-web/browsing.js)、[migration](supabase/migrations/20261110143206_ccbaby_browsing_controls.sql)、[測試](tests/browsing-controls.test.mjs)、[PostgreSQL 隔離驗證建置](scripts/build-browsing-control-test.mjs)／[檢查片段](tests/browsing-controls.sql)，實際帳號由店主自行設定
+
 ## 0.3.30 商品詢問網址縮圖（D-51，已發布）
 
 商品詢問與管理複製共用預覽網址，Vercel OGP 接回原 LINE 驗證／商品視窗。公開僅上架商品編號／名稱／首圖，160 項測試及四寬／購物／追加通過；Edge v28／Vercel READY／Pages b617805 已發布，正式 50 檔核對一致，見 [交接](docs/HANDOFF.md)。程式：[連結](shared/product-link.js)、[最少投影](domain/product-preview.mjs)、[預覽服務](services/product-preview/preview.mjs)、[建置](scripts/build-product-preview.mjs)、[驗證](tests/product-preview.test.mjs)；操作／來源見 [CUSTOMER_CARE](docs/CUSTOMER_CARE.md)，部署見 [DEPLOYMENT](docs/DEPLOYMENT.md)。官方帳號兩個收訊端縮圖尚待實機驗收
@@ -60,7 +64,7 @@ LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200�
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-10（Asia/Taipei）｜版本：0.3.30
+更新：2026-11-10（Asia/Taipei）｜版本：0.3.31
 
 品牌名稱已確認為 **CCBABY**。
 

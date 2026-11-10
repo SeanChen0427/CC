@@ -1,5 +1,11 @@
 # 架構地圖與樹狀圖
 
+## 0.3.31 瀏覽管理（D-52）
+
+管理 browsing.js 的指定客戶 → POST admin/browsing/control → domain/browsing-controls.mjs 驗證 customerId／version／action／confirm／excluded → service_role-only ccbaby_browsing_manage → 私有 browsing_controls 與該客戶 browsing_events，單一交易，不呼叫 ccbaby_commit。SQL 再核對店主／會員／版本；customer 寫入與管理共用該帳號控制列鎖，清除建立 accept_after，延遲舊事件不重建，排除時不保存新回報
+
+browsing_read 附控制版本及保存筆數 → browsingPeople → 管理總覽排除、已排除篩選與復原。merchandising_read 對被排除帳號觀察作 anti-join；有效預購資料仍沿用原規則。本機 browsing_controls／browsing_events 以 SQLite transaction 對齊。無新外部服務，Vercel 商品預覽保持原版
+
 ## 0.3.30 商品詢問網址縮圖（D-51）
 
 原商品詢問／管理複製 → shared/product-link.js 的 productShareLink → `https://ccbaby-share.vercel.app/p/商品ID?v=封面名稱版本`。Vercel `services/product-preview/api/product.js` → preview.mjs → Supabase `GET public/product-preview/ID` → 原 service_role-only ccbaby_load → domain/product-preview.mjs 明確投影四欄 → OGP HTML。爬蟲可直接讀 head；人由同源 open.js 返回原 `#product/ID`，再走既有 LINE 驗證與 showProduct。沒有另一套商品介面

@@ -1,5 +1,13 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.31 瀏覽紀錄管理（D-52，Pages 發布中）
+
+Migration `20261110143206_ccbaby_browsing_controls.sql` 已套用，檔名對齊雲端 migration history；新增私有 browsing_controls、service_role-only ccbaby_browsing_manage，替換原 browsing_write／read 及 merchandising_read。RLS 預設拒絕、anon／authenticated／PUBLIC 無新權限，管理 RPC 再查有效 owner session。無正式資料刪除／帳號排除、無業務 revision 提交，不變 LINE／Auth／Storage／Vercel
+
+Edge v29 ACTIVE、verify_jwt=false 沿用 opaque session，25 來源逐位元符合本機；相對 v28 只變 index.ts／browsing.mjs／新增 browsing-controls.mjs。163 項測試、61 模組語法及 PostgreSQL 獨立 schema 回滾驗證通過。正式 revision 226、業務 MD5 871669f5c29141add1b98b293e556ca7、287 筆觀察 MD5 6985dab55b1256b06543fd87aefd68aa 保持，沒有會員設定變更。安全 advisor 僅多一筆刻意私有表的 [RLS 無 policy 資訊](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)，原密碼保護提示保持，未改 Auth
+
+發布順序為 migration → Edge → Pages，舊前端相容新增回應。回復時先回前端／Edge，保留私有控制表與設定；不得為回版刪除正式觀察或解除店主已設的排除
+
 ## 0.3.30 商品詢問網址縮圖（D-51，已發布）
 
 原 GitHub Pages 客戶／管理入口及 LINE callback 不變。新增公開唯讀 `ccbaby-api/public/product-preview/商品ID`，只投影 id／code／name／image，Edge v28 ACTIVE、verify_jwt=false 沿用，24 個來源逐位元符合本機；不改 SQL／Storage／session／LINE 設定。原完整 catalog 仍要求客戶登入

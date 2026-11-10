@@ -66,10 +66,11 @@ export function summarizeBrowsing(events) {
   }
   return [...grouped.values()].map(p=>({...p,visits:p.visits.size}));
 }
-export function browsingPeople(metrics,customers,orders) {
+export function browsingPeople(metrics,customers,orders,controls=[]) {
   return customers.map(c=>{
     const m=metrics.find(p=>p.customerId===c.id);
-    return {customerId:c.id,displayName:c.display_name,name:c.name||'',visits:0,pageViews:0,productViews:0,activeMs:0,cartAdds:0,submits:0,lastSeen:null,...m,hasPreorder:orders.some(o=>o.customer_id===c.id&&o.quantity>0)};
+    const control=controls.find(p=>p.customerId===c.id);
+    return {customerId:c.id,displayName:c.display_name,name:c.name||'',visits:0,pageViews:0,productViews:0,activeMs:0,cartAdds:0,submits:0,lastSeen:null,...m,browsingExcluded:Boolean(control?.excluded),browsingVersion:control?.version||0,browsingRecordCount:control?.recordCount||0,hasPreorder:orders.some(o=>o.customer_id===c.id&&o.quantity>0)};
   }).sort((a,b)=>(b.lastSeen||'').localeCompare(a.lastSeen||''));
 }
 export function browsingContext(campaign,orders) {

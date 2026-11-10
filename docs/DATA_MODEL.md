@@ -1,5 +1,13 @@
 # 資料模型與報表規則
 
+## 0.3.31 觀察資料管理（D-52）
+
+新增私有 browsing_controls：customer_id 主鍵、excluded（預設 false）、version、accept_after、cleared_at、updated_at。不更動原 JSONB 商品／會員／預購文件，不加入其業務備份；由資料庫層備份獨立觀察資料與設定。本機對應 SQLite 表，以會員外鍵保護
+
+清除只刪該 customer_id 的 browsing_events，保留控制列與時間界線阻擋舊事件重送；時間界線至少涵蓋所有被清除事件的 occurred_at，包含允許的客戶時間偏差。恢復計入也更新接受界線，避免排除期間暫存回報補回。設定版本與列鎖阻擋舊畫面重複操作／交錯回報
+
+管理讀取仍可查看已排除帳號的保留歷史，但預設列表、彙總及商品瀏覽排序訊號不納入；實際預購仍為正式訂單來源。設定表 RLS 開啟、無公開政策；anon／authenticated／PUBLIC 無表或管理 RPC 權限，service_role 依原 owner session 核對後才操作
+
 ## 0.3.30 商品預覽公開邊界（D-51）
 
 無新資料表／欄位／RPC。匿名 `public/product-preview/ID` 只回上架商品 `{id,code,name,image}`；image 僅能是目前首圖且符合既有商品 Storage 路徑，沒有合法首圖時為 null。下架／不存在及非法完整 ID 回 404，讀取不建立會員／session、不提交 revision。未公開商品目錄、描述、售價、規格、進價、sourceUrl、客戶或預購。圖片原已公開讀取，此次新增編號／名稱的最少公開預覽，以 D-51 取代 D-49「不新增公開商品 API」在這項需求內的限制。預購仍用原登入及後端價格快照規則

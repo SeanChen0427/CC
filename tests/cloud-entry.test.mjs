@@ -8,12 +8,14 @@ import { productGifData, productGifOfSize } from './fixtures/product-gif.mjs';
 // No network request or real session is created by this test.
 const originalFetch=globalThis.fetch,originalDeno=globalThis.Deno;
 const env={SUPABASE_URL:'https://backend.test',SUPABASE_SERVICE_ROLE_KEY:'test-service',LINE_CHANNEL_ID:'test-channel',LINE_CHANNEL_SECRET:'test-secret'};
-let handler,s,events,sessions,failStartup,nonce,revision,commitConflict,uploaded;
+let handler,s,events,sessions,failStartup,nonce,revision,commitConflict,uploaded,controlResult,controlCall;
 const digest=value=>createHash('sha256').update(value).digest('hex');
 globalThis.Deno={env:{get:key=>env[key]},serve:fn=>{handler=fn;}};
 globalThis.fetch=async(url,options={})=>{
   const path=new URL(url).pathname,body=options.body?JSON.parse(String(options.body).startsWith('{')?options.body:'{}'):{};
   events.push(path);
+  if(path==='/rest/v1/rpc/ccbaby_browsing_manage'){controlCall=body;return Response.json(controlResult);}
+  if(path==='/rest/v1/rpc/ccbaby_browsing_read')return Response.json({metrics:[],events:[],interests:[],controls:[{customerId:'fixture-person',excluded:true,version:4,recordCount:2}]});
   if(path.startsWith('/storage/v1/object/ccbaby-products/')){uploaded={path,type:options.headers['Content-Type'],bytes:Buffer.from(options.body)};return Response.json({Key:path});}
   if(path==='/oauth2/v2.1/token')return Response.json({id_token:'test-id-token'});
   if(path==='/oauth2/v2.1/verify')return Response.json({sub:'test-person',name:'Verified member',nonce,aud:'test-channel',iss:'https://access.line.me'});
@@ -37,9 +39,25 @@ globalThis.fetch=async(url,options={})=>{
 };
 await import('../cloud/index.ts');
 after(()=>{globalThis.fetch=originalFetch;if(originalDeno===undefined)delete globalThis.Deno;else globalThis.Deno=originalDeno;});
-beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';revision=1;commitConflict=null;uploaded=null;});
+beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;nonce='test-nonce';revision=1;commitConflict=null;uploaded=null;controlResult={ok:true,deleted:2};controlCall=null;});
 const invoke=(path,{body,token,role='customer',method=body?'POST':'GET'}={})=>handler(new Request('https://backend.test/functions/v1/ccbaby-api/'+path,{method,headers:{Origin:'https://ccbaby.beecharge.live','Content-Type':'application/json','x-ccbaby-role':role,...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined}));
 const credentials={code:'test-code',verifier:'v'.repeat(43),nonce:'test-nonce'};
+
+test('actual browsing control handler requires owner and confirmation, maps database conflicts and never commits orders',async()=>{
+  sessions.set(digest('owner'),{role:'admin',subject:'test-owner'});
+  sessions.set(digest('member'),{role:'customer',subject:'fixture-person'});upsertCustomer(s,{id:'fixture-person',display_name:'測試'});
+  const body={customerId:'fixture-person',version:0,action:'clear',confirm:true};
+  assert.equal((await invoke('admin/browsing/control',{body,role:'admin'})).status,401);
+  assert.equal((await invoke('admin/browsing/control',{body,token:'member'})).status,403);
+  assert.equal((await invoke('admin/browsing/control',{body:{...body,confirm:false},token:'owner',role:'admin'})).status,400);assert.equal(controlCall,null);
+  const before=JSON.stringify(s);
+  const response=await invoke('admin/browsing/control',{body:{...body,orderId:999},token:'owner',role:'admin'});
+  assert.equal(response.status,200);assert.deepEqual(controlCall,{p_hash:digest('owner'),p_customer:'fixture-person',p_version:0,p_action:'clear',p_excluded:null,p_confirm:true});
+  assert.equal(revision,1);assert.equal(JSON.stringify(s),before);assert.ok(!events.includes('/rest/v1/rpc/ccbaby_commit'));
+  for(const [result,status] of [[{conflict:true},409],[{notFound:true},404],[{unauthorized:true},401]]){controlResult=result;assert.equal((await invoke('admin/browsing/control',{body,token:'owner',role:'admin'})).status,status);}
+  const listing=await invoke('admin/browsing',{token:'owner',role:'admin'});assert.equal(listing.status,200);
+  const person=(await listing.json()).people[0];assert.equal(person.browsingExcluded,true);assert.equal(person.browsingVersion,4);assert.equal(person.browsingRecordCount,2);
+});
 
 test('anonymous product preview returns only active product identity and cover without a session or revision write',async()=>{
   const image='https://backend.test/storage/v1/object/public/ccbaby-products/abc-def.gif';
