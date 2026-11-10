@@ -1,4 +1,4 @@
-const TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
 const LIMIT = 1400000;
 
 function readDataURL(blob) {
@@ -11,11 +11,12 @@ function readDataURL(blob) {
 }
 
 export async function prepareUpload(file) {
-  const inferred = /\.(jpe?g)$/i.test(file.name) ? 'image/jpeg' : /\.png$/i.test(file.name) ? 'image/png' : /\.webp$/i.test(file.name) ? 'image/webp' : '';
+  const inferred = /\.(jpe?g)$/i.test(file.name) ? 'image/jpeg' : /\.png$/i.test(file.name) ? 'image/png' : /\.webp$/i.test(file.name) ? 'image/webp' : /\.gif$/i.test(file.name) ? 'image/gif' : '';
   const type = file.type || inferred;
-  if (!TYPES.has(type)) throw new Error('請使用 JPG、PNG 或 WebP 照片');
+  if (!TYPES.has(type)) throw new Error('請使用 JPG、PNG、WebP 或 GIF 照片');
   if (file.size > 20000000) throw new Error('原始照片需小於 20 MB');
   if (!file.size) throw new Error('照片是空檔案，請重新選取');
+  if (type === 'image/gif' && file.size > LIMIT) throw new Error('GIF 需在 1.4 MB 以內，請先壓縮後再上傳以保留動畫');
   const source = URL.createObjectURL(file);
   const image = new Image();
   try {
@@ -25,7 +26,8 @@ export async function prepareUpload(file) {
       image.onerror = () => { clearTimeout(timeout); reject(new Error('無法開啟照片，請另存為 JPG 或 PNG')); };
       image.src = source;
     });
-    if (file.size <= LIMIT && Math.max(image.naturalWidth, image.naturalHeight) <= 2000) {
+    // Keep every GIF frame and its timing, including images wider than 2000px.
+    if (type === 'image/gif' || (file.size <= LIMIT && Math.max(image.naturalWidth, image.naturalHeight) <= 2000)) {
       return readDataURL(file.type ? file : new Blob([file], {type}));
     }
     const canvas = document.createElement('canvas');
