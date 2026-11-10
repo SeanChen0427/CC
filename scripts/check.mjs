@@ -8,7 +8,7 @@ function files(directory) {
     return entry.isDirectory() ? files(path) : /\.(mjs|js|ts)$/.test(path) ? [path] : [];
   });
 }
-const sources = ['apps', 'server', 'domain', 'scripts', 'shared', 'cloud'].flatMap(files);
+const sources = ['apps', 'server', 'domain', 'scripts', 'shared', 'cloud', 'services'].flatMap(files);
 for (const file of sources) {
   const result = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
   if (result.status !== 0) {

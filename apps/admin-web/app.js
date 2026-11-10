@@ -13,7 +13,7 @@ import { mountBrowsing } from './browsing.js';
 import { mountMerchandising } from './merchandising.js';
 import { mountCustomerCare,renderCareReminders } from './customer-care.js';
 import { youtubeVideo } from './youtube.js';
-import { productLink } from './product-link.js';
+import { productShareLink } from './product-link.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -376,8 +376,9 @@ document.addEventListener('click',async event=>{
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
     if(action==='copy-product-link'){
-      if(target.disabled||!state.data.products.some(p=>p.id===id&&p.active))return;
-      const url=productLink(config.customerURL,id);
+      const product=state.data.products.find(p=>p.id===id&&p.active);
+      if(target.disabled||!product)return;
+      const url=productShareLink(config.customerURL,product,config.productPreviewURL);
       try{await navigator.clipboard.writeText(url);toast('商品連結已複製');}
       catch{
         showModal(`<h2>複製商品連結</h2><label class="form-field">商品連結<input id="product-share-link" type="text" readonly value="${esc(url)}"></label><button class="button" data-action="close">完成</button>`,true);

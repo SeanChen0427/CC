@@ -8,7 +8,7 @@ import { youtubeVideo } from './youtube.js';
 import { mountBrowsingTracker } from './browsing.js';
 import { categoryCounts as countCategories } from './product-categories.js';
 import { lineContactMessage,lineContactURL } from './line-contact.js';
-import { linkedProductId } from './product-link.js';
+import { linkedProductId, productShareLink } from './product-link.js';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -174,7 +174,7 @@ async function showLineContact({productId,orderId,orderCode}={}){
   const data=await api('customer/line-contact',{method:'POST',body:{}});
   const product=state.products.find(p=>p.id===productId);
   const order=state.orders.find(o=>o.id===orderId)||(orderCode?{code:orderCode}:null);
-  const context={product,order};
+  const context={product,order,productURL:product?productShareLink(config.customerURL,product,config.productPreviewURL):undefined};
   const message=lineContactMessage(data.contactCode,context),url=lineContactURL(data.contactCode,context);
   setModal(`<div class="modal-copy line-contact-copy"><div class="eyebrow">TALK WITH CCBABY</div><h2>${order?'和店主聯繫這份預購':'讓店主幫你一起選'}</h2><p>開啟 LINE 後，確認文字並按下傳送，我們就能在同一個聊天室回覆與確認後續進度</p><p>可先告訴我們毛孩的品種與性別，方便協助挑選；其他美妝代購也歡迎截圖私訊</p>${data.contactCode?`<div class="line-contact-code"><small>你的會員聯繫碼</small><strong>${esc(data.contactCode)}</strong></div>`:''}<p class="line-contact-message" id="line-contact-draft">${esc(message)}</p><button class="secondary-button" data-action="copy-line-contact">複製詢問文字</button><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">開啟 LINE，確認後傳送</a><p class="fine-print">如 LINE 提示加入好友，請先加入 CCBABY · 若電腦無法開啟，請在手機 LINE 加入 @445yxcey，再貼上詢問文字 · 網站預購請以送出成功為準；截圖下單請在官方帳號確認</p>${product?`<button class="secondary-button" data-action="product-return" data-id="${product.id}">返回商品</button>`:'<button class="secondary-button" data-action="close">返回選購</button>'}</div>`,'modal-small');
 }

@@ -1,5 +1,9 @@
 # 本機測試版操作說明
 
+## 0.3.30 商品詢問縮圖驗證
+
+`npm run build:preview` 產生忽略的 .local/product-preview-build，僅含 Vercel 預覽服務所需公開檔案。正式預覽設定在 deployment.json 的 productPreviewURL；未設時本機／舊版沿用原 hash。`tests/product-preview.test.mjs` 覆蓋匿名四欄投影、HTML 轉義、下架／失敗／非法路徑與新網址版本；cloud-entry 執行實際 Edge handler，全部測試 160 項通過。隔離 CUA 以 /tmp 種子資料驗證詢問、四寬、購物車重載、送單 KR26-0007 與追加同編號，管理一致 3 件／1,770；未清空 .local 或向真實客戶發訊
+
 ## 0.3.29 GIF 每張 2 MB
 
 商品管理 → 新增／編輯 → 選取或拖入 GIF，每張最多 2 MB（含上限），保留動畫。2 MB 以上先壓縮，與其他照片仍合計最多 8 張；一般照片原圖 20 MB 自動縮圖規則保留。發布後重新整理後台取得新限制，測試只在臨時 seed:true 環境進行

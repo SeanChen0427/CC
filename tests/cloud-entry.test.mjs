@@ -41,6 +41,22 @@ beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;no
 const invoke=(path,{body,token,role='customer',method=body?'POST':'GET'}={})=>handler(new Request('https://backend.test/functions/v1/ccbaby-api/'+path,{method,headers:{Origin:'https://ccbaby.beecharge.live','Content-Type':'application/json','x-ccbaby-role':role,...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined}));
 const credentials={code:'test-code',verifier:'v'.repeat(43),nonce:'test-nonce'};
 
+test('anonymous product preview returns only active product identity and cover without a session or revision write',async()=>{
+  const image='https://backend.test/storage/v1/object/public/ccbaby-products/abc-def.gif';
+  s.products.push({id:9,code:'GD09',name:'外套',active:true,images:[image],sourceUrl:'private-source',cost:'private-cost'});
+  const before=JSON.stringify(s);
+  const result=await handler(new Request('https://backend.test/functions/v1/ccbaby-api/public/product-preview/9'));
+  assert.equal(result.status,200);assert.deepEqual(await result.json(),{id:9,code:'GD09',name:'外套',image});
+  assert.equal(JSON.stringify(s),before);assert.equal(revision,1);assert.equal(sessions.size,0);
+  assert.deepEqual(events,['/rest/v1/rpc/ccbaby_load']);
+  assert.equal((await invoke('catalog')).status,401);
+  s.products[0].active=false;assert.equal((await invoke('public/product-preview/9')).status,404);
+  const count=events.length;
+  for(const id of ['0','09','9/extra','9007199254740992']) assert.equal((await invoke('public/product-preview/'+id)).status,404);
+  assert.equal(events.length,count);
+  assert.equal((await invoke('public/product-preview/9',{body:{id:9}})).status,401);
+});
+
 test('actual GIF handler verifies role, preserves bytes and rejects invalid content before Storage',async()=>{
   const token='gif-owner';sessions.set(digest(token),{role:'admin',subject:'test-owner'});
   assert.equal((await invoke('admin/upload',{body:{data:productGifData},role:'admin'})).status,401);

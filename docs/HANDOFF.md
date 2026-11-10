@@ -1,5 +1,16 @@
 # 最新交接狀態
 
+## 0.3.30 商品詢問網址縮圖 — 2026-11-10（Edge／Vercel 已發布，Pages 發布中）
+
+- 店主偏好傳網址即有縮圖，確認手機官方帳號 App／電腦後台都會收訊，明確指示「那就上架吧」（D-51）。詢問原文字自動帶一個商品網址，管理複製也用此網址，點擊仍接回原 LINE 驗證及相同商品視窗
+- shared/product-link.js 的 productShareLink 提供 id 與封面／名稱版本；未設預覽網址時回原 hash。公開 Edge route 僅回 `{id,code,name,image}`，上架商品才可讀；圖片白名單、HTML 轉義與固定目的地，未公開完整目錄、售價規格、會員、預購、來源或進價
+- GitHub Pages 靜態＋Supabase 預設網域 HTML 限制，使 OGP 由獨立小型 Vercel 服務提供；主站不搬家、不變 DNS／LINE。Node24／sin1／七個明確公開檔案，無新套件或秘密。服務規則／重發與回復方式見 DEPLOYMENT
+- 160 項測試全部通過、59 模組語法／兩份建置／diff 通過。CUA 詢問 320／390／768／1440px 無橫向溢出、390px 視覺通過；詢問與管理複製成功提示，LINE 預填與畫面共用文字。剪貼簿工具未讀出內容，不把提示當成跨裝置剪貼簿驗收
+- 隔離 CUA 會員登入、選規格、購物車 2 件重載保存、送出 KR26-0007，再由原 #product/1 加 1 件沿用編號，管理查驗 3 件／1,770 一致；管理登入／查單／登出及零頁面錯誤通過。只用 /tmp 虛構資料，沒有正式送單或 LINE 發訊
+- Edge v28 ACTIVE／verify_jwt=false，24 個來源逐位元符合本機；只有 index.ts／line-contact.js／新 product-preview.mjs 相對 v27 變動。Vercel `dpl_HFCMkS8QvTiNnpgkKapfpijUP53M` production READY，GD09 id=1 的 OGP 首圖／名稱正確；正式分享人點擊已回原 LINE 登入確認頁，未交換真實 OAuth code
+- 正式唯讀基準 revision 211／48 商品／7 會員／2 預購／2 通知／open，期間正常營運更新為 revision 217，保留最新資料，不能把完整 MD5 變動稱為部署前後相同。新路由只讀 ccbaby_load，未執行正式業務提交；最終 subset／來源及 Pages 核對待補
+- 尚待：Pages 發布與正式檔案核對、清理隔離服務／分頁、更新本節。手機官方帳號 App／電腦後台的實際收訊縮圖與實體 iPhone 回站尚未驗收，不以 OGP HTTP 成功冒稱實機通過
+
 ## 0.3.29 GIF 大小調整 — 2026-11-10（已發布）
 
 - 店主回報 GIF 都在 2M 內，本次依 D-50 把單張 GIF 上限改為 2,000,000 bytes；其他圖片輸出 1.4 MB、原圖 20 MB 與 8 張相簿保留

@@ -17,3 +17,19 @@ export function productLink(customerURL, id) {
   url.hash = 'product/' + id;
   return url.href;
 }
+
+// A new URL after a cover/name edit lets LINE fetch a fresh preview.
+export function productShareLink(customerURL, product, previewURL) {
+  const destination = productLink(customerURL, product.id);
+  if (!previewURL) return destination;
+  const url = new URL(previewURL);
+  if (url.protocol !== 'https:' || url.username || url.password) throw new Error('商品連結無效');
+  let version = 2166136261;
+  for (const char of JSON.stringify([product.code, product.name, product.images?.[0] || ''])) {
+    version = Math.imul(version ^ char.charCodeAt(0), 16777619) >>> 0;
+  }
+  url.pathname = url.pathname.replace(/\/$/, '') + '/p/' + product.id;
+  url.search = '?v=' + version.toString(36);
+  url.hash = '';
+  return url.href;
+}

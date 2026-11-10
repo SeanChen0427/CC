@@ -10,6 +10,7 @@ import { validateBrowsing, browsingQuery, requireBrowsingRole, browsingPeople, b
 import { merchandising } from '../domain/merchandising.mjs';
 import { createLineMessaging } from '../server/line-messaging.mjs';
 import { dispatchLineNotification } from '../server/line-delivery.mjs';
+import { previewProductId, productPreview } from '../domain/product-preview.mjs';
 
 const base = Deno.env.get('SUPABASE_URL');
 const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -82,6 +83,11 @@ Deno.serve(async req=>{
     if((path.startsWith('admin/')&&role!=='admin')||(path.startsWith('customer/')&&role!=='customer'))throw new AppError('請使用對應入口',403);
     if(path==='customer/line/config'&&method==='GET')return json({lineConfigured,lineChannelId:lineConfigured?lineId:null,requiresLogin:true});
     if(path==='customer/login')throw new AppError('請使用 LINE 登入',403);
+    if(path.startsWith('public/product-preview/')&&method==='GET'){
+      const id=previewProductId(path.slice('public/product-preview/'.length));
+      const state=await rpc('ccbaby_load',{p_hash:'',p_role:'customer'});
+      return json(productPreview(state.data.products,id,imagePrefix));
+    }
     if(path==='customer/line/exchange'&&method==='POST'){
       if(!lineConfigured)throw new AppError('LINE 登入準備中，開放時間將另行公告',503);
       const code=text(body.code,'登入識別',2048),verifier=text(body.verifier,'登入驗證',128),nonce=text(body.nonce,'登入驗證',128);

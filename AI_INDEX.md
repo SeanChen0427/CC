@@ -1,5 +1,9 @@
 # 跨 AI 工具共用索引
 
+## 0.3.30 商品詢問網址縮圖（D-51，發布中）
+
+商品詢問與管理複製共用預覽網址，Vercel OGP 接回原 LINE 驗證／商品視窗。公開僅上架商品編號／名稱／首圖，160 項測試及四寬／購物／追加通過；Edge v28／Vercel READY，Pages 見 [交接](docs/HANDOFF.md)。程式：[連結](shared/product-link.js)、[最少投影](domain/product-preview.mjs)、[預覽服務](services/product-preview/preview.mjs)、[建置](scripts/build-product-preview.mjs)、[驗證](tests/product-preview.test.mjs)；操作／來源見 [CUSTOMER_CARE](docs/CUSTOMER_CARE.md)，部署見 [DEPLOYMENT](docs/DEPLOYMENT.md)。官方帳號兩個收訊端縮圖尚待實機驗收
+
 ## 0.3.29 GIF 上限調整為 2 MB（D-50，已發布）
 
 依店主實際檔案大小，GIF 原檔上限從 1.4 MB 提高為 2 MB，原動畫及相簿功能保留；154 項測試、54 模組語法及實際 2 MB 上傳／動畫／購物回歸通過，Edge v27／Pages 589321a 已發布；正式 50 檔／23 後端來源一致，見 [交接](docs/HANDOFF.md)。沿用 image-upload.js、image-editor.js、Edge／本機上傳入口與既有 GIF 測試，不新增程式路徑
@@ -56,7 +60,7 @@ LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200�
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-10（Asia/Taipei）｜版本：0.3.29
+更新：2026-11-10（Asia/Taipei）｜版本：0.3.30
 
 品牌名稱已確認為 **CCBABY**。
 

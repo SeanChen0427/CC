@@ -1,5 +1,13 @@
 # LINE 一對一聯繫與預購服務
 
+## 0.3.30 商品詢問網址縮圖（D-51）
+
+客戶照原本按「用 LINE 詢問這款」→ 訊息帶商品編號、名稱與一個預覽網址 → 在 LINE 確認傳送。店主可由網址預覽辨識首圖；點網址仍進原商品視窗。後台「複製連結」也使用相同預覽形式，不要求額外貼照片。首圖／名稱變更後，重新產生的連結自帶新版本；舊 hash 仍可使用
+
+預覽只公開上架商品編號／名稱／首圖，完整選購仍需 LINE 登入；有照片才提供商品圖。LINE 縮圖受平台設定、抓取與快取影響，沒有縮圖時仍可點網址；手機官方帳號 App 與電腦後台的實際收訊顯示尚待驗收，不保證所有版本均顯示。
+
+來源：[LINE 網址預覽 FAQ](https://developers.line.biz/en/faq/)、[開啟官方帳號並預填文字](https://developers.line.biz/en/docs/messaging-api/using-line-url-scheme/#opening-a-chat-screen-with-a-line-official-account)、[Supabase HTML 限制](https://supabase.com/docs/guides/functions/limits)。本次不操作 LINE 原生設定或替客戶傳訊息
+
 ## 0.3.25 現行服務規則（D-46）
 
 依 2026-11-10 店主新版歡迎詞（D-46），付款改為下單後 24 小時內在 LINE 人工確認，確認付款後才安排採購，依付款順序寄出，預計 11/30 起陸續出貨。缺貨可選擇退款或更換款式；客戶需自行確認尺寸，不直接比照過往尺寸，並同意下單規則。連線／結單日期沿用後台設定，本次不修改。

@@ -18,6 +18,7 @@ import { publicPromotion,planPromotion } from '../domain/promotion.mjs';
 import { notificationCareData,queueNotification,orderNoticeForSend } from '../domain/line-notifications.mjs';
 import { createLineMessaging } from './line-messaging.mjs';
 import { dispatchLineNotification } from './line-delivery.mjs';
+import { previewProductId, productPreview } from '../domain/product-preview.mjs';
 
 const now = () => new Date().toISOString();
 const cookieName = role => `sp_${role}`;
@@ -139,6 +140,9 @@ function importPreview(store, csv) {
 
 export async function api({ store, req, role, path, method, body, session, localDir, credentialPath, query=new URLSearchParams(), lineMessaging=localMessaging }) {
   if (path === '/api/health') return { ok: true, role, database: 'sqlite', localOnly: true };
+  if (path.startsWith('/api/public/product-preview/') && method === 'GET') {
+    return productPreview(store.catalog(),previewProductId(path.slice('/api/public/product-preview/'.length)),'/uploads/');
+  }
   if (path.startsWith('/api/admin/') && role !== 'admin') throw new AppError('此入口不提供管理功能', 403);
   if (path.startsWith('/api/customer/') && role !== 'customer') throw new AppError('此入口不提供客戶登入功能', 403);
   if (path === '/api/catalog' && role === 'customer' && method === 'GET') {

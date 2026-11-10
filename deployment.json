@@ -2,6 +2,7 @@
   "apiURL": "https://tukluknvmbsbsdzawmjf.supabase.co/functions/v1/ccbaby-api",
   "publishableKey": "sb_publishable_PEQYN4yWxjtUcCTh_TMoOQ_JH22vgbA",
   "customerURL": "https://ccbaby.beecharge.live/",
+  "productPreviewURL": "https://ccbaby-share.vercel.app/",
   "adminURL": "https://ccbaby.beecharge.live/admin/",
   "customDomain": "ccbaby.beecharge.live"
 }

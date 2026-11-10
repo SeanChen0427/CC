@@ -1,5 +1,11 @@
 # 架構地圖與樹狀圖
 
+## 0.3.30 商品詢問網址縮圖（D-51）
+
+原商品詢問／管理複製 → shared/product-link.js 的 productShareLink → `https://ccbaby-share.vercel.app/p/商品ID?v=封面名稱版本`。Vercel `services/product-preview/api/product.js` → preview.mjs → Supabase `GET public/product-preview/ID` → 原 service_role-only ccbaby_load → domain/product-preview.mjs 明確投影四欄 → OGP HTML。爬蟲可直接讀 head；人由同源 open.js 返回原 `#product/ID`，再走既有 LINE 驗證與 showProduct。沒有另一套商品介面
+
+preview 服務沒有服務密鑰或業務寫入；固定上游與圖片路徑，不接受任意轉址／圖片 host，轉義 HTML。noindex、no-referrer、CSP 與 60 秒 CDN 快取，錯誤不快取。新產品／換圖不用重發主站；新生成連結的版本讓 LINE 可重新抓取。GitHub Pages 主站與 Supabase 私有表／RPC 權限保持；本機同路徑 JSON 使用 SQLite 只讀。建置 `scripts/build-product-preview.mjs` 僅挑選服務公開程式／設定至忽略的 .local/product-preview-build，不上傳 .local 其他內容
+
 ## 0.3.29 GIF 2 MB 傳輸
 
 image-upload.js 保留 GIF 原檔，上限 2,000,000 bytes；image-editor.js 同步顯示 2 MB。Edge／本機 admin/upload 依 MIME 使用 GIF 2 MB／其他圖片 1.4 MB，角色與檔案驗證沿用；只有管理上傳 JSON 上限提高為 2,800,000 bytes，其他路由維持 2,200,000 bytes。本機超限時排空剩餘輸入並回 413，避免中途關閉連線而失去錯誤訊息。Storage file_size_limit 改 2 MB，無新 schema／RPC／資料欄位；單品分享與客端 UI 不變
