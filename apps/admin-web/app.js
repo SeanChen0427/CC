@@ -12,6 +12,7 @@ import { exportProductExcel } from './product-export.js';
 import { mountBrowsing } from './browsing.js';
 import { mountMerchandising } from './merchandising.js';
 import { mountCustomerCare,renderCareReminders } from './customer-care.js';
+import { youtubeVideo } from './youtube.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -211,6 +212,8 @@ function showProductEditor(id){
     <section id="size-pricing" class="size-pricing wide" aria-label="尺寸加價設定"></section>
     <section id="product-cost" class="purchase-cost wide" aria-label="商品進價設定"></section>
     <label class="field">無照片時的示意圖<select name="kind">${[['vest','背心'],['coat','外套'],['bag','提袋'],['bowl','食碗'],['bed','睡墊'],['toy','玩具'],['scarf','領巾']].map(([key,label])=>`<option value="${key}" ${p?.kind===key?'selected':''}>${label}</option>`).join('')}</select></label><label class="field">示意圖色調<input name="tone" type="color" value="${p?.tone||'#b9a38b'}"></label>
+    <label class="field wide">商品影片連結（選填）<input name="videoUrl" type="url" inputmode="url" maxlength="2048" value="${esc(p?.videoUrl||'')}" placeholder="https://www.youtube.com/shorts/…" autocomplete="off"><small class="field-help">貼上 YouTube 或 Shorts 分享連結，客戶就能點「看影片」</small></label>
+    <label class="field" id="video-layout-field">影片比例<select name="videoLayout"><option value="vertical" ${p?.videoLayout!=='horizontal'?'selected':''}>直式 9:16</option><option value="horizontal" ${p?.videoLayout==='horizontal'?'selected':''}>橫式 16:9</option></select></label><div class="field" id="video-preview-field"><a id="product-video-preview" class="text-button" target="_blank" rel="noopener noreferrer" hidden>在 YouTube 預覽 ↗</a><small class="field-help" id="product-video-help"></small></div>
     <label class="field wide">韓國商品連結（選填）<input name="sourceUrl" type="url" inputmode="url" maxlength="2048" value="${esc(p?.sourceUrl||'')}" placeholder="https://" autocomplete="off"><small class="field-help">供你後續查找，匯出表格會一併帶入</small></label>
     <label class="field wide">標籤（選填）<input name="badge" maxlength="20" value="${esc(p?.badge||'')}" placeholder="例如 NEW 或編輯推薦"></label><label class="field wide">商品說明<textarea name="description" maxlength="3000">${esc(p?.description||'')}</textarea></label></div><div class="error" id="product-error" role="alert"></div><div class="form-actions"><button type="button" class="text-button" data-action="discard-product-draft">放棄草稿</button><button type="button" class="button light" data-action="close">稍後繼續</button><button class="button" type="submit">儲存商品 ${icon('check')}</button></div></form>`);
   const form=$('#product-form');
@@ -219,6 +222,13 @@ function showProductEditor(id){
     if(name==='category'&&value&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));
     input.value=value;
   }
+  const previewVideo=()=>{
+    const value=form.elements.videoUrl.value,video=youtubeVideo(value),link=$('#product-video-preview');
+    $('#video-layout-field').hidden=!value.trim();$('#video-preview-field').hidden=!value.trim();link.hidden=!video;
+    if(video)link.href=video.url;else link.removeAttribute('href');
+    $('#product-video-help').textContent=video?'影片需允許嵌入；公開與不公開皆可':value.trim()?'請貼完整的 YouTube 或 Shorts HTTPS 連結':'';
+  };
+  form.elements.videoUrl.addEventListener('input',previewVideo);previewVideo();
   const sizePricing=mountSizePricing($('#size-pricing'),{sizesInput:form.elements.sizes,priceInput:form.elements.price,sizeSurcharges:draft?.sizeSurcharges||pricing.sizeSurcharges});
   let productCost=mountProductCost($('#product-cost'),{variants:p?.variants||[],exchangeRate:state.data.costSettings?.exchangeRate,sizesInput:form.elements.sizes,draft:draft?.productCost});
   let watcher,missingPhotos=draft?.pendingCount||0,saving=false;
@@ -329,7 +339,7 @@ function showProductExport(){
 }
 
 function showImport(){
-  showModal(`<div class="eyebrow">BUILD YOUR COLLECTION</div><h2>批次匯入商品</h2><p>上傳 UTF-8 CSV，或直接貼上內容，可從 Excel 另存為 CSV 後使用</p><div class="page-note">僅新增商品，請使用未用過的編號；可先匯出既有商品當作填寫範例</div><details class="import-guide"><summary>查看欄位填寫方式</summary><div class="table-scroll"><table><thead><tr><th>CSV 欄位</th><th>填寫方式</th></tr></thead><tbody><tr><td>code / name / category</td><td>商品編號／名稱／分類，必填</td></tr><tr><td>price</td><td>基本售價，台幣整數</td></tr><tr><td>colors / sizes</td><td>顏色／尺寸，多個項目以逗號分隔</td></tr><tr><td>extra:尺寸名稱</td><td>該尺寸加價，例如 extra:2XL 填 50；可自行新增尺寸欄</td></tr><tr><td>description / badge</td><td>商品說明／標籤，選填</td></tr><tr><td>sourceUrl</td><td>韓國商品連結，選填完整 http 或 https 網址</td></tr><tr><td>active</td><td>true 上架／false 下架，空白預設上架</td></tr><tr><td>kind / tone</td><td>示意圖類型／色碼，沿用範例或留白</td></tr><tr><td>images / imageBindings</td><td>既有照片／綁定的 JSON 陣列，沿用匯出內容或留白</td></tr></tbody></table></div><p class="settings-foot">含逗號、換行或雙引號的內容由 Excel 另存 CSV 自動處理；進價請在新增後填寫，XLSX 請先另存 CSV UTF-8</p></details><input id="csv-file" type="file" accept=".csv,text/csv" aria-label="上傳 CSV"><label class="field">CSV 內容<textarea id="csv-text" class="import-text" placeholder='code,name,category,price,colors,sizes&#10;NEW001,日常背心,毛孩衣著,590,"奶油白,燕麥棕","S,M,L"'></textarea></label><div id="import-result"></div><div class="form-actions"><button class="button light" data-action="export-products">匯出既有商品</button><button class="button light" data-action="csv-template">下載範本</button><button class="button" id="preview-import">預覽並檢查</button><button class="button" id="commit-import" hidden>確認匯入</button></div>`);
+  showModal(`<div class="eyebrow">BUILD YOUR COLLECTION</div><h2>批次匯入商品</h2><p>上傳 UTF-8 CSV，或直接貼上內容，可從 Excel 另存為 CSV 後使用</p><div class="page-note">僅新增商品，請使用未用過的編號；可先匯出既有商品當作填寫範例</div><details class="import-guide"><summary>查看欄位填寫方式</summary><div class="table-scroll"><table><thead><tr><th>CSV 欄位</th><th>填寫方式</th></tr></thead><tbody><tr><td>code / name / category</td><td>商品編號／名稱／分類，必填</td></tr><tr><td>price</td><td>基本售價，台幣整數</td></tr><tr><td>colors / sizes</td><td>顏色／尺寸，多個項目以逗號分隔</td></tr><tr><td>extra:尺寸名稱</td><td>該尺寸加價，例如 extra:2XL 填 50；可自行新增尺寸欄</td></tr><tr><td>description / badge</td><td>商品說明／標籤，選填</td></tr><tr><td>sourceUrl</td><td>韓國商品連結，選填完整 http 或 https 網址</td></tr><tr><td>videoUrl / videoLayout</td><td>商品影片 HTTPS 連結；比例填 vertical 直式或 horizontal 橫式</td></tr><tr><td>active</td><td>true 上架／false 下架，空白預設上架</td></tr><tr><td>kind / tone</td><td>示意圖類型／色碼，沿用範例或留白</td></tr><tr><td>images / imageBindings</td><td>既有照片／綁定的 JSON 陣列，沿用匯出內容或留白</td></tr></tbody></table></div><p class="settings-foot">含逗號、換行或雙引號的內容由 Excel 另存 CSV 自動處理；進價請在新增後填寫，XLSX 請先另存 CSV UTF-8</p></details><input id="csv-file" type="file" accept=".csv,text/csv" aria-label="上傳 CSV"><label class="field">CSV 內容<textarea id="csv-text" class="import-text" placeholder='code,name,category,price,colors,sizes&#10;NEW001,日常背心,毛孩衣著,590,"奶油白,燕麥棕","S,M,L"'></textarea></label><div id="import-result"></div><div class="form-actions"><button class="button light" data-action="export-products">匯出既有商品</button><button class="button light" data-action="csv-template">下載範本</button><button class="button" id="preview-import">預覽並檢查</button><button class="button" id="commit-import" hidden>確認匯入</button></div>`);
   $('#csv-file').addEventListener('change',async e=>{if(e.target.files[0]){$('#csv-text').value=await e.target.files[0].text();$('#commit-import').hidden=true;}});
   $('#csv-text').addEventListener('input',()=>{$('#commit-import').hidden=true;$('#import-result').innerHTML='';});
   $('#preview-import').addEventListener('click',async()=>{

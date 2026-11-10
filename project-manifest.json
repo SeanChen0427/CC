@@ -1,11 +1,24 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.25",
+  "documentVersion": "0.3.26",
   "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
   "implementationStarted": true,
+  "productVideoResearch": {
+    "date": "2026-11-10",
+    "status": "researched_not_implemented",
+    "reference": "https://liff.line.me/2012275055-yxwegxrc",
+    "evidence": "public_html_and_frontend_module",
+    "referencePlaybackVerified": false,
+    "physicalLineBrowserVerified": false,
+    "recommendedProvider": "youtube",
+    "recommendedVideosPerProduct": 1,
+    "applicationFilesChanged": false,
+    "productionBusinessWrites": false,
+    "documentation": "docs/UI_REFERENCE_AUDIT.md"
+  },
   "deployment": {
     "provider": "GitHub Pages + Supabase",
     "repository": "https://github.com/SeanChen0427/CC",
@@ -96,7 +109,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_phone_receipt_acceptance_on_new_order_no_historical_resends",
+  "nextStep": "publish_product_video_then_verify_production",
   "lineEntryFunnel": {
     "status": "live_menu_and_replies_configured",
     "publicationHandledBy": "agent_after_owner_image_upload",
@@ -993,5 +1006,53 @@
     "businessHashAtVerification": "44af841293df002573e537220e92633e",
     "concurrentOwnerProductSavePreserved": true,
     "physicalIPhoneChecked": false
+  },
+  "productVideo": {
+    "decision": "D-47",
+    "status": "verified_ready_for_deployment",
+    "provider": "youtube",
+    "videosPerProduct": 1,
+    "defaultLayout": "vertical",
+    "layouts": [
+      "vertical",
+      "horizontal"
+    ],
+    "loadOnClick": true,
+    "unloadOnClose": true,
+    "productSelectionPreservedByIndependentDialog": true,
+    "ownerDraftAndProductTransfer": true,
+    "cloudDdlRequired": false,
+    "productionBusinessWrites": false,
+    "physicalIPhoneChecked": false,
+    "sourcePaths": [
+      "shared/youtube.js",
+      "apps/customer-web/product-video.js",
+      "tests/product-video.test.mjs"
+    ],
+    "integrationTestsPassed": 145,
+    "syntaxModules": 53,
+    "builtFiles": 50,
+    "uiVerification": "passed_isolated_cua_iab",
+    "browserEnableRequested": false,
+    "previewServerStopped": false,
+    "cardControls": {
+      "desktop": "large_text_buttons",
+      "mobile": "same_size_circle_play_left_of_existing_plus",
+      "mobileMaxWidth": 760
+    },
+    "temporaryAdminLoginExplicitlyApproved": true,
+    "detailButtonPlacement": "right_of_price_same_row",
+    "viewports": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "liveDemoVideoPlayed": true,
+    "verticalAndHorizontalChecked": true,
+    "selectionAndScrollRetainedChecked": true,
+    "iframeRemovedOnCloseChecked": true,
+    "cartReloadPreorderAppendAndAdminChecked": true,
+    "pageErrors": 0
   }
 }

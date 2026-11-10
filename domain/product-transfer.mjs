@@ -17,6 +17,8 @@ const fields = [
   ['images','照片網址','選填，JSON 陣列，最多 8 張；沿用本站既有照片，留白可稍後上傳'],
   ['imageBindings','顏色照片綁定','選填，JSON 陣列，例如 [{"color":"白","url":"照片網址"}]；留白為獨立相簿'],
   ['sourceUrl','韓國商品連結','選填，完整 http 或 https 網址，最多 2048 字；僅供店主採購記錄'],
+  ['videoUrl','商品影片連結','選填，完整 YouTube 或 Shorts HTTPS 連結，最多 2048 字；客戶可觀看'],
+  ['videoLayout','影片比例','選填，vertical 直式、horizontal 橫式；空白預設直式'],
 ];
 const fixedHeaders = fields.map(([key]) => key);
 const required = fixedHeaders.slice(0, 6);
@@ -31,7 +33,7 @@ export function productTable(products) {
     const values = {code:p.code, name:p.name, category:p.category, price:pricing.basePrice,
       colors:[...new Set(variants.map(v => v.color))].join(','), sizes:ownSizes.join(','),
       description:p.description || '', badge:p.badge || '', active:p.active ? 'true' : 'false',
-      kind:p.kind, tone:p.tone, images:JSON.stringify(p.images || []), imageBindings:JSON.stringify(p.imageBindings || []), sourceUrl:p.sourceUrl || ''};
+      kind:p.kind, tone:p.tone, images:JSON.stringify(p.images || []), imageBindings:JSON.stringify(p.imageBindings || []), sourceUrl:p.sourceUrl || '', videoUrl:p.videoUrl || '', videoLayout:p.videoLayout || 'vertical'};
     for (const size of sizes) values['extra:' + size] = ownSizes.includes(size) ? pricing.sizeSurcharges.find(e => e.size === size)?.extra || 0 : '';
     return headers.map(key => values[key]);
   });
@@ -75,15 +77,16 @@ export function productSheets(products) {
   const table = productTable(products);
   const displayRows = productDisplayRows(products);
   const sourceLinks = (rows,col) => rows.flatMap((p,index) => p.sourceUrl ? [{row:index + 1,col,url:p.sourceUrl}] : []);
+  const videoLinks = (rows,col) => rows.flatMap((p,index) => p.videoUrl ? [{row:index + 1,col,url:p.videoUrl}] : []);
   const variantRows = products.flatMap(p => activeVariants(p).map(v => ({p,v})));
   return [
-    {name:'商品清單', formatted:true, rowHeight:114, widths:[23,18,30,18,22,22,19,19,19,16,12,30,40],links:sourceLinks(displayRows.map(row=>row.product),12),
-      rows:[['商品圖','商品編號','商品名稱','分類','顏色','尺寸／規格','售價（台幣）','單件進價（韓幣）','單件進價（台幣）','採用匯率','上架狀態','進價說明','韓國商品連結'],
+    {name:'商品清單', formatted:true, rowHeight:114, widths:[23,18,30,18,22,22,19,19,19,16,12,30,40,40,12],links:[...sourceLinks(displayRows.map(row=>row.product),12),...videoLinks(displayRows.map(row=>row.product),13)],
+      rows:[['商品圖','商品編號','商品名稱','分類','顏色','尺寸／規格','售價（台幣）','單件進價（韓幣）','單件進價（台幣）','採用匯率','上架狀態','進價說明','韓國商品連結','商品影片連結','影片比例'],
         ...displayRows.map(({product:p,price,cost,colors,sizes}) => {
           return ['',p.code,p.name,p.category,colors.join('、'),sizes.join('、'),price,
-            cost?.unitKrw ?? '',unitCostTwd(cost) ?? '',cost?.exchangeRate ?? '',p.active?'上架':'下架','',p.sourceUrl || ''];
+            cost?.unitKrw ?? '',unitCostTwd(cost) ?? '',cost?.exchangeRate ?? '',p.active?'上架':'下架','',p.sourceUrl || '',p.videoUrl || '',p.videoUrl?(p.videoLayout==='horizontal'?'橫式':'直式'):''];
         })]},
-    {name:'匯入底稿', rows:table,links:sourceLinks(products,table[0].indexOf('sourceUrl'))},
+    {name:'匯入底稿', rows:table,links:[...sourceLinks(products,table[0].indexOf('sourceUrl')),...videoLinks(products,table[0].indexOf('videoUrl'))]},
     {name:'欄位說明', rows:[['欄位','中文名稱','填寫方式'], ...fields,
       ...table[0].filter(key => key.startsWith('extra:')).map(key => [key,key.slice(6)+' 尺寸加價','選填，0～100000 的整數；空白視為 0，沒有該尺寸的商品請留白']),
       ['操作流程','批量新增','複製匯入底稿列 → 改成新商品編號 → 編輯 → 另存 CSV UTF-8 → CSV 批次匯入 → 預覽並檢查 → 確認匯入'],
@@ -112,6 +115,7 @@ export function previewProductImport(csv, validate, exists) {
       if (cells.length !== headers.length) throw new AppError('欄位數量不符，含逗號或換行的內容請用雙引號包住');
       const p = Object.fromEntries(headers.map((key,i) => [key,decodeCell(cells[i])]));
       p.kind ||= 'vest'; p.tone ||= '#b9a38b';
+      p.videoLayout ||= 'vertical';
       if (p.active !== undefined && !['','true','false','1','0'].includes(p.active.trim().toLowerCase())) throw new AppError('active 請填 true 或 false');
       p.active = !['false','0'].includes(p.active?.trim().toLowerCase());
       for (const key of ['images','imageBindings']) {

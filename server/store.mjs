@@ -123,6 +123,12 @@ export function openStore(filename, { seed = false, password, credentialPath } =
   if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'source_url')) {
     db.exec("ALTER TABLE products ADD COLUMN source_url TEXT NOT NULL DEFAULT ''");
   }
+  if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'video_url')) {
+    db.exec("ALTER TABLE products ADD COLUMN video_url TEXT NOT NULL DEFAULT ''");
+  }
+  if (!db.prepare('PRAGMA table_info(products)').all().some(column => column.name === 'video_layout')) {
+    db.exec("ALTER TABLE products ADD COLUMN video_layout TEXT NOT NULL DEFAULT 'vertical'");
+  }
   if (!db.prepare('PRAGMA table_info(procurement)').all().some(column => column.name === 'cost')) {
     db.exec('ALTER TABLE procurement ADD COLUMN cost TEXT');
   }
@@ -172,8 +178,8 @@ export function openStore(filename, { seed = false, password, credentialPath } =
       const products = this.all(`SELECT * FROM products ${includeInactive ? '' : 'WHERE active=1'} ORDER BY id`);
       const variants = this.all('SELECT * FROM variants ORDER BY id');
       const costs=includeInactive?this.all('SELECT variant_id,cost,version FROM procurement'):[];
-      return products.map(({source_url,...p}) => ({
-        ...p, ...(includeInactive ? {sourceUrl:source_url || ''} : {}), active: Boolean(p.active), images: JSON.parse(p.images), imageBindings: JSON.parse(p.image_bindings),
+      return products.map(({source_url,video_url,video_layout,...p}) => ({
+        ...p, videoUrl:video_url || '', videoLayout:video_layout || 'vertical', ...(includeInactive ? {sourceUrl:source_url || ''} : {}), active: Boolean(p.active), images: JSON.parse(p.images), imageBindings: JSON.parse(p.image_bindings),
         ...(p.pricing ? JSON.parse(p.pricing) : {}),
         variants: variants.filter(v => v.product_id === p.id && (includeInactive || v.active))
           .map(v => {const row=costs.find(r=>r.variant_id===v.id);return { ...v, active: Boolean(v.active),...(includeInactive?{cost:row?.cost?JSON.parse(row.cost):null,costVersion:row?.version || 0}:{}) };}),

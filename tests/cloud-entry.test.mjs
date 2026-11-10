@@ -39,6 +39,23 @@ beforeEach(()=>{s=emptyState();events=[];sessions=new Map();failStartup=false;no
 const invoke=(path,{body,token,role='customer',method=body?'POST':'GET'}={})=>handler(new Request('https://backend.test/functions/v1/ccbaby-api/'+path,{method,headers:{Origin:'https://ccbaby.beecharge.live','Content-Type':'application/json','x-ccbaby-role':role,...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined}));
 const credentials={code:'test-code',verifier:'v'.repeat(43),nonce:'test-nonce'};
 
+test('actual video handler preserves concurrent edits, protects writes and returns video only through verified catalog',async()=>{
+  const token='test-video-owner',customerToken='test-video-customer';
+  sessions.set(digest(token),{role:'admin',subject:'test-owner'});
+  sessions.set(digest(customerToken),{role:'customer',subject:'video-person'});upsertCustomer(s,{id:'video-person',display_name:'測試'});
+  const product={code:'VIDEO',name:'影片商品',category:'衣著',price:590,colors:'白',sizes:'S',kind:'vest',sourceUrl:'https://private.example/purchase',videoUrl:'https://youtu.be/M7lc1UVf-VE?si=share',videoLayout:'horizontal'};
+  assert.equal((await invoke('admin/products',{body:product,role:'admin'})).status,401);
+  assert.equal((await invoke('admin/products',{body:product,token:customerToken,role:'customer'})).status,403);
+  commitConflict='other';
+  assert.equal((await invoke('admin/products',{body:product,token,role:'admin'})).status,200);
+  assert.equal(s.products.length,1);assert.equal(s.campaign.description,'另一筆正常活動編輯');assert.equal(s.products[0].videoUrl,'https://www.youtube.com/watch?v=M7lc1UVf-VE');
+  const publicResult=await invoke('customer/bootstrap',{token:customerToken});assert.equal(publicResult.status,200);
+  const catalog=(await publicResult.json()).catalog;assert.equal(catalog.products[0].videoLayout,'horizontal');assert.doesNotMatch(JSON.stringify(catalog),/sourceUrl|private.example/);
+  const before=JSON.stringify(s),beforeRevision=revision;
+  assert.equal((await invoke('admin/products',{body:{...product,id:1,videoUrl:'https://youtube.com.evil.test/shorts/M7lc1UVf-VE'},token,role:'admin'})).status,400);
+  assert.equal(JSON.stringify(s),before);assert.equal(revision,beforeRevision);
+});
+
 test('fast LINE login verifies identity before loading startup and returns a usable opaque session',async()=>{
   const response=await invoke('customer/line/exchange',{body:{...credentials,includeStartup:true}}),data=await response.json();
   assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');

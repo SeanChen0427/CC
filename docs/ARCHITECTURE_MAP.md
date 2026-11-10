@@ -1,5 +1,13 @@
 # 架構地圖與樹狀圖
 
+## 0.3.26 商品影片（D-47）
+
+管理商品 app.js 的 videoUrl／videoLayout → product-draft.js 白名單草稿 → domain/validation.mjs 與 shared/youtube.js 驗證／正規化 → 原 admin/products 與 revision 提交 → 雲端私有 JSONB 商品或本機 products.video_url／video_layout → 受保護 catalog／bootstrap → customer app.js 的卡片及詳情按鈕 → product-video.js 獨立 native dialog／YouTube iframe。
+
+播放器不替換原商品 modal；只在點擊後設定 iframe src，關閉時移除 iframe／dialog 並恢復捲動鎖定，hashchange／pagehide 與原商品關閉一起清理。影片主機只由合法 ID 自行組合，不接受任意 iframe；本機僅客戶入口精確允許 youtube-nocookie.com 的 frame-src，播放器單獨提供來源 origin 的 Referrer，其他資源及管理入口仍受原限制。YouTube 上傳由店主操作，沒有新的 API、Storage 或認證設定
+
+domain/product-transfer.mjs 的商品清單與匯入底稿帶連結／比例，連結為 Excel 超連結；原來源欄位置及採買／預購表不變。scripts/build-pages.mjs 把 shared/youtube.js 複製兩入口；實作驗證與發布見 HANDOFF
+
 ## 0.3.25 文案與人工付款時序（D-46）
 
 客戶商品／購物車／送單成功／我的預購／說明／頁尾 → LINE 人工確認下單後 24 小時內付款 → 店主人工安排採購 → 既有採買／分配 → arrived＋本人買到後逐筆通知交付。

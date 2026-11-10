@@ -1,4 +1,4 @@
-const fields = ['code', 'name', 'category', 'active', 'price', 'colors', 'sizes', 'kind', 'tone', 'badge', 'description', 'sourceUrl'];
+const fields = ['code', 'name', 'category', 'active', 'price', 'colors', 'sizes', 'kind', 'tone', 'badge', 'description', 'sourceUrl', 'videoUrl', 'videoLayout'];
 const idKey = id => id == null ? 'new' : String(id);
 
 // Keep product drafts in this tab only; never persist credentials or customer data.

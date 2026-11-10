@@ -1,4 +1,4 @@
-import { AppError, text, integer, contact, assertOpen, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory, productSourceUrl } from '../domain/validation.mjs';
+import { AppError, text, integer, contact, assertOpen, validateProcurement, validateImageBindings, validateSizeSurcharges, validateNewCategory, productSourceUrl, productVideoUrl, productVideoLayout } from '../domain/validation.mjs';
 import { previewProductImport } from '../domain/product-transfer.mjs';
 import { categoryNames } from '../shared/product-categories.js';
 import { validateExchangeRate, validateCost } from '../domain/costing.mjs';
@@ -22,7 +22,7 @@ function required(session, role) {
 export function catalog(s, all = false) {
   return s.products.filter(p => all || p.active).map(p => {
     const {sourceUrl,...fields}=p;
-    return { ...fields, ...(all ? {sourceUrl:sourceUrl || ''} : {}), variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)).map(v => {
+    return { ...fields, videoUrl:p.videoUrl || '', videoLayout:p.videoLayout || 'vertical', ...(all ? {sourceUrl:sourceUrl || ''} : {}), variants: s.variants.filter(v => v.product_id === p.id && (all || v.active)).map(v => {
     if(!all)return v;
     const row=s.procurement.find(r=>r.variant_id===v.id);
     return {...v,cost:row?.cost || null,costVersion:row?.version || 0};
@@ -60,7 +60,7 @@ export function validateProduct(input, imagePrefix) {
   if (images.length > 8 || images.some(x => typeof x !== 'string' || !imagePrefix || !x.startsWith(imagePrefix) || !/^[a-f0-9-]+\.(png|jpg|webp)$/.test(x.slice(imagePrefix.length)))) throw new AppError('商品圖片位置無效');
   const imageBindings = validateImageBindings(input.imageBindings, images, colors);
   const sizeSurcharges = validateSizeSurcharges(input, sizes, price);
-  return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, sourceUrl:productSourceUrl(input.sourceUrl), kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
+  return { code, name, category, price, basePrice:price, sizeSurcharges, colors, sizes, sourceUrl:productSourceUrl(input.sourceUrl), videoUrl:productVideoUrl(input.videoUrl), videoLayout:productVideoLayout(input.videoLayout), kind: input.kind, tone, description: String(input.description || '').slice(0,3000), badge: String(input.badge || '').slice(0,20), active: input.active !== false && input.active !== 'false', images, imageBindings };
 }
 function saveProduct(s, input, imagePrefix) {
   const p = validateProduct(input, imagePrefix), id = input.id ? integer(Number(input.id), '商品識別', 1000000, 1) : next(s, 'products');
@@ -68,6 +68,8 @@ function saveProduct(s, input, imagePrefix) {
   const old = s.products.find(x => x.id === id);
   if (input.id && !old) throw new AppError('找不到商品', 404);
   p.sourceUrl ??= old?.sourceUrl || '';
+  p.videoUrl ??= old?.videoUrl || '';
+  p.videoLayout ??= old?.videoLayout || 'vertical';
   const previous=s.variants.filter(v=>v.product_id===id);
   const costs=planProductCosts(input.costUpdate,previous,s.procurement,s.costSettings,p.sizes);
   const { colors, sizes, price, ...fields } = p;

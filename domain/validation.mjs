@@ -1,8 +1,24 @@
+import { youtubeVideo } from '../shared/youtube.js';
+
 export class AppError extends Error {
   constructor(message, status = 400) {
     super(message);
     this.status = status;
   }
+}
+
+export function productVideoUrl(value) {
+  if (value === undefined) return undefined;
+  if (typeof value === 'string' && !value.trim()) return '';
+  const video = youtubeVideo(value);
+  if (!video) throw new AppError('商品影片請貼完整的 YouTube 或 Shorts HTTPS 連結');
+  return video.url;
+}
+
+export function productVideoLayout(value) {
+  if (value === undefined) return undefined;
+  if (!['vertical', 'horizontal'].includes(value)) throw new AppError('影片比例請選直式或橫式');
+  return value;
 }
 
 export function productSourceUrl(value) {

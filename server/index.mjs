@@ -25,7 +25,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Referrer-Policy', 'same-origin');
       res.setHeader('Cache-Control', 'no-store');
-      res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+      res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-src " + (role==='customer'?'https://www.youtube-nocookie.com':"'none'") + "; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
       try {
         const actualPort = server.address().port;
         const hosts = [`127.0.0.1:${actualPort}`, `localhost:${actualPort}`];
@@ -36,6 +36,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
         }
         const sharedFiles={'/runtime.js':'shared/runtime.js','/line-auth.js':'shared/line-auth.js','/product-art.js':'server/art.mjs','/product-gallery.js':'shared/product-gallery.js','/product-pricing.js':'shared/product-pricing.js','/product-categories.js':'shared/product-categories.js',...(role==='admin'?{'/costing.js':'shared/costing.js','/product-costing.js':'shared/product-costing.js'}:{})};
         sharedFiles['/line-contact.js']='shared/line-contact.js';
+        sharedFiles['/youtube.js']='shared/youtube.js';
         if (sharedFiles[url.pathname]) {
           res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(await readFile(join(ROOT,sharedFiles[url.pathname])));return;
         }

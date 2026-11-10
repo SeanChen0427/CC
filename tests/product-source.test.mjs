@@ -37,7 +37,7 @@ for(const engine of ['cloud','sqlite'])test(`${engine}: private source URLs pers
     await run('admin/import','POST',{csv,commit:true});
     admin=await run('admin/state');assert.equal(admin.products.find(p=>p.code==='SOURCECOPY').sourceUrl,sourceUrl);
     const sheets=productSheets(admin.products);
-    assert.equal(sheets[0].rows[0].at(-1),'韓國商品連結');assert.equal(sheets[0].rows[1].at(-1),sourceUrl);
+    assert.equal(sheets[0].rows[0][12],'韓國商品連結');assert.equal(sheets[0].rows[1][12],sourceUrl);
     assert.equal(sheets[3].rows[1].at(-1),sourceUrl);
     assert.equal(reportSheets(admin.campaign,admin.orders,admin.report)[1].rows[1].at(-1),sourceUrl);
     const file=productWorkbook(admin.products);

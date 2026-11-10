@@ -6,7 +6,7 @@ function memoryStorage() {
   const values = new Map();
   return { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), values };
 }
-const sample = (id = null) => ({ id, fields: { code: 'D01', name: '尚未上架', price: '', colors: '白,黑', sizes: 'S,3XL', description: '查完資料繼續填', sourceUrl: 'https://example.test/product/123?color=white&size=M' },
+const sample = (id = null) => ({ id, fields: { code: 'D01', name: '尚未上架', price: '', colors: '白,黑', sizes: 'S,3XL', description: '查完資料繼續填', sourceUrl: 'https://example.test/product/123?color=white&size=M', videoUrl:'https://youtu.be/M7lc1UVf-VE?si=draft',videoLayout:'horizontal' },
   sizeSurcharges: [{ size: 'S', extra: 0 }, { size: '3XL', extra: '120' }], images: ['https://example.test/2.jpg', 'https://example.test/1.jpg'],
   imageBindings: [{ color: '黑', url: 'https://example.test/1.jpg' }], bindingEnabled: true, pendingCount: 1 });
 
