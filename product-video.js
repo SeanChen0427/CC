@@ -1,4 +1,4 @@
-import { youtubeVideo } from './youtube.js?v=0.3.27';
+import { youtubeVideo } from './youtube.js?v=0.3.28';
 
 let current = null;
 export function closeProductVideo() { current?.close(); }

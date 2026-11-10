@@ -1,18 +1,19 @@
-import { request, config, cloud, download } from './runtime.js?v=0.3.27';
-import { art } from './product-art.js?v=0.3.27';
-import { mountImageEditor } from './image-editor.js?v=0.3.27';
-import { editorPricing } from './product-pricing.js?v=0.3.27';
-import { mountSizePricing } from './size-pricing.js?v=0.3.27';
-import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.27';
-import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.27';
-import { mountPurchaseCost } from './purchase-cost.js?v=0.3.27';
-import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.27';
-import { mountProductCost } from './product-cost.js?v=0.3.27';
-import { exportProductExcel } from './product-export.js?v=0.3.27';
-import { mountBrowsing } from './browsing.js?v=0.3.27';
-import { mountMerchandising } from './merchandising.js?v=0.3.27';
-import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.27';
-import { youtubeVideo } from './youtube.js?v=0.3.27';
+import { request, config, cloud, download } from './runtime.js?v=0.3.28';
+import { art } from './product-art.js?v=0.3.28';
+import { mountImageEditor } from './image-editor.js?v=0.3.28';
+import { editorPricing } from './product-pricing.js?v=0.3.28';
+import { mountSizePricing } from './size-pricing.js?v=0.3.28';
+import { categoryNames, categoryCounts } from './product-categories.js?v=0.3.28';
+import { unitCostTwd, costTotal, costSummary } from './costing.js?v=0.3.28';
+import { mountPurchaseCost } from './purchase-cost.js?v=0.3.28';
+import { createProductDrafts, watchProductDraft } from './product-draft.js?v=0.3.28';
+import { mountProductCost } from './product-cost.js?v=0.3.28';
+import { exportProductExcel } from './product-export.js?v=0.3.28';
+import { mountBrowsing } from './browsing.js?v=0.3.28';
+import { mountMerchandising } from './merchandising.js?v=0.3.28';
+import { mountCustomerCare,renderCareReminders } from './customer-care.js?v=0.3.28';
+import { youtubeVideo } from './youtube.js?v=0.3.28';
+import { productLink } from './product-link.js?v=0.3.28';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
 const money = value => 'NT$ '+Number(value).toLocaleString('en-US');
@@ -151,7 +152,7 @@ function renderTable(){
   const body=rows.slice(0,state.limit).map(row=>{
     if(view==='products'){
       const prices=row.variants.filter(v=>v.active).map(v=>v.price);
-      return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)}</small></span></div></td><td>${esc(row.category)}</td><td class="money">${money(Math.min(...prices))}</td><td>${prices.length} 種</td><td><span class="pill ${row.active?'':'gray'}">${row.active?'上架中':'已下架'}</span></td><td><button class="text-button" data-action="edit-product" data-id="${row.id}">編輯</button></td></tr>`;
+      return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)}</small></span></div></td><td>${esc(row.category)}</td><td class="money">${money(Math.min(...prices))}</td><td>${prices.length} 種</td><td><span class="pill ${row.active?'':'gray'}">${row.active?'上架中':'已下架'}</span></td><td><button class="text-button" data-action="edit-product" data-id="${row.id}">編輯</button><button class="text-button" data-action="copy-product-link" data-id="${row.id}" ${row.active?'':'disabled'}>複製連結</button></td></tr>`;
     }
     if(view==='customers') return `<tr><td><div class="customer-cell"><span class="avatar">${esc(row.name.slice(-1))}</span><span><strong>${esc(row.name)}</strong><small>LINE：${esc(row.customer.display_name)}</small></span></div></td><td class="number">${esc(row.code)}</td><td>${row.quantity} 件</td><td class="money">${money(row.total)}</td><td>${row.phone?esc(row.phone):'<span class="muted">示範資料未填</span>'}</td><td><span class="pill">${labels[state.data.campaign.status]}</span></td><td><button class="text-button" data-action="order" data-id="${row.id}">查看明細</button></td></tr>`;
     return `<tr><td><div class="table-product"><img src="${photo(row)}" alt=""><span><strong>${esc(row.name)}</strong><small>${esc(row.code)} · ${esc(row.color)} / ${esc(row.size)}</small></span></div></td><td class="number">${row.demand}</td><td class="number">${row.bought}</td><td><span class="pill ${row.remaining?'gray':''}">${row.remaining}</span></td><td><span class="${row.shortage?'pill rose':'muted'}">${row.shortage}</span></td><td class="cost-cell"><small>單件進價 ${row.cost?krw(row.cost.unitKrw)+' ／ '+costMoney(unitCostTwd(row.cost)):'未填'}</small><small>預購售價 ${saleRange(row)}</small><small>${row.unallocated?'尚有 '+row.unallocated+' 件待分配':esc(row.note)||'—'}</small></td><td><button class="text-button" data-action="procure" data-id="${row.variant_id}">記錄進價／採買</button><button class="text-button" data-action="demand" data-id="${row.variant_id}">看需求</button></td></tr>`;
@@ -374,6 +375,16 @@ document.addEventListener('click',async event=>{
     if(action==='delete-order'){showDeleteOrder(id);return;}
     if(action==='new-product'){showProductEditor();return;}
     if(action==='edit-product'){showProductEditor(id);return;}
+    if(action==='copy-product-link'){
+      if(target.disabled||!state.data.products.some(p=>p.id===id&&p.active))return;
+      const url=productLink(config.customerURL,id);
+      try{await navigator.clipboard.writeText(url);toast('商品連結已複製');}
+      catch{
+        showModal(`<h2>複製商品連結</h2><label class="form-field">商品連結<input id="product-share-link" type="text" readonly value="${esc(url)}"></label><button class="button" data-action="close">完成</button>`,true);
+        $('#product-share-link').select();
+      }
+      return;
+    }
     if(action==='import'){showImport();return;}
     if(action==='export-products'){showProductExport();return;}
     if(action==='products-xlsx'||action==='products-csv'){
