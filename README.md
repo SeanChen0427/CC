@@ -2,7 +2,7 @@
 
 ## 0.3.26 商品影片
 
-新增／編輯商品可選填 YouTube／Shorts 連結與直橫比例；客戶點「看影片」在站內播放，關閉後接著選購。影片保存／草稿／商品 CSV 與 Excel 已接入；驗證及發布進度見 [HANDOFF](docs/HANDOFF.md)。
+新增／編輯商品可選填 YouTube／Shorts 連結與直橫比例；客戶點「看影片」在站內播放，關閉後接著選購。影片保存／草稿／商品 CSV 與 Excel 已接入；Edge v25／Pages 2b88e81 已上線，145 項測試與四寬 UI 通過，詳見 [HANDOFF](docs/HANDOFF.md)。
 
 ## 0.3.25 預購說明更新
 

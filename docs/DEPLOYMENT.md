@@ -1,5 +1,13 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.26 商品影片發布 — 2026-11-10
+
+main 66834cd；Pages 2b88e819373d35248ed8a924f7c01ea999e52a53／[run 42761781482](https://github.com/SeanChen0427/CC/actions/runs/42761781482) success；Edge v25 ACTIVE、verify_jwt=false，23 個相對來源逐位元符合本機。48 個正式公開檔案與 dist 一致，另含 CNAME／.nojekyll 共 50 個建置檔。
+
+商品新增選填 videoUrl／videoLayout，沿用原私有 JSONB／revision，沒有雲端 DDL、RPC、Storage、LINE 或登入設定更動。部署依賴新增 shared/youtube.js，靜態新增兩入口共用 youtube.js 與客戶 product-video.js。舊商品讀取空白預設，不回寫；舊請求省略保留影片，明確空白清除。
+
+145 項測試、53 模組語法／建置與 CUA 四寬／影片播放／草稿／原購物流程通過。正式 health、店主 API、影片預設及 CSV 欄位、錯誤角色／網址拒絕通過並登出；客戶匿名轉 LINE、管理登入頁核對通過，未交換真實 OAuth code。發布前後 revision 163／data MD5 16007e9e251207006474a22f8f70bb8a 相同，40 商品／2 預購／2 通知／open，沒有正式商品／預購寫入或發訊。實體 iPhone LINE 播放尚待驗收，具體證據見 HANDOFF
+
 ## 0.3.25 預購規則發布 — 2026-11-10
 
 main 83a3370、Pages 8ad291938ce17ae39ef36518a5351c84e6a2e5c5／[run 42752548428](https://github.com/SeanChen0427/CC/actions/runs/42752548428) success，Edge v24 ACTIVE、verify_jwt=false 保留，22 個 Edge 來源與 45 個公開檔案逐位元符合成品。只更新預購付款文案、人工匯款提醒條件及圖卡金額，不改 SQL、RPC、LINE 設定／憑證、角色授權或活動日期

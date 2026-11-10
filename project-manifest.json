@@ -28,7 +28,7 @@
     "edgeFunction": "ccbaby-api",
     "status": "live",
     "customDomain": "ccbaby.beecharge.live",
-    "pagesRun": 42752548428
+    "pagesRun": 42761781482
   },
   "entryDocuments": [
     "AI_INDEX.md",
@@ -109,7 +109,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "publish_product_video_then_verify_production",
+  "nextStep": "owner_add_actual_youtube_links_and_accept_iphone_line_playback",
   "lineEntryFunnel": {
     "status": "live_menu_and_replies_configured",
     "publicationHandledBy": "agent_after_owner_image_upload",
@@ -340,7 +340,7 @@
     "liveProductSourceChecked": true,
     "liveProductSourceBusinessDataUnchanged": true,
     "liveProductSourceProductCount": 16,
-    "lastLiveFrontendVersion": "0.3.25",
+    "lastLiveFrontendVersion": "0.3.26",
     "newProductColorsLiveChecked": false,
     "pagesTimeoutDiagnosed": true,
     "pagesTimeoutRootCauseOfficiallyConfirmed": false,
@@ -1009,7 +1009,7 @@
   },
   "productVideo": {
     "decision": "D-47",
-    "status": "verified_ready_for_deployment",
+    "status": "live_verified",
     "provider": "youtube",
     "videosPerProduct": 1,
     "defaultLayout": "vertical",
@@ -1032,9 +1032,9 @@
     "integrationTestsPassed": 145,
     "syntaxModules": 53,
     "builtFiles": 50,
-    "uiVerification": "passed_isolated_cua_iab",
+    "uiVerification": "passed_isolated_cua_iab_and_live_entries",
     "browserEnableRequested": false,
-    "previewServerStopped": false,
+    "previewServerStopped": true,
     "cardControls": {
       "desktop": "large_text_buttons",
       "mobile": "same_size_circle_play_left_of_existing_plus",
@@ -1053,6 +1053,18 @@
     "selectionAndScrollRetainedChecked": true,
     "iframeRemovedOnCloseChecked": true,
     "cartReloadPreorderAppendAndAdminChecked": true,
-    "pageErrors": 0
+    "pageErrors": 0,
+    "sourceCommit": "66834cd",
+    "pagesCommit": "2b88e819373d35248ed8a924f7c01ea999e52a53",
+    "pagesRun": 42761781482,
+    "edgeVersion": 25,
+    "edgeFilesCompared": 23,
+    "livePublicFilesCompared": 48,
+    "businessRevisionAtVerification": 163,
+    "businessHashAtVerification": "16007e9e251207006474a22f8f70bb8a",
+    "liveOwnerApiChecked": true,
+    "liveAnonymousLineRedirectChecked": true,
+    "liveValidProductOrOrderWrites": false,
+    "formalApiVerificationExplicitlyApproved": true
   }
 }

@@ -2,7 +2,7 @@
 
 ## 0.3.26 商品影片（D-47）
 
-已授權製作上架，管理可填選用 YouTube 連結與比例，客戶卡片／詳情按需開啟獨立播放器。最新驗證及發布進度見 [交接](docs/HANDOFF.md)；網址規則 [shared/youtube.js](shared/youtube.js)、前端播放 [product-video.js](apps/customer-web/product-video.js)、保存／相容驗證 [tests/product-video.test.mjs](tests/product-video.test.mjs)。下方保留研究階段與舊版紀錄
+已發布 Edge v25／Pages 2b88e81，145 項測試與四寬 UI／播放／購物流程通過，正式 48 檔及 23 個後端來源一致。管理可填 YouTube 連結與比例；手機卡片維持圓圈＋並在左側加播放鍵，桌面文字按鈕，詳情影片在價格右側。最新驗證及發布進度見 [交接](docs/HANDOFF.md)；網址規則 [shared/youtube.js](shared/youtube.js)、前端播放 [product-video.js](apps/customer-web/product-video.js)、保存／相容驗證 [tests/product-video.test.mjs](tests/product-video.test.mjs)。下方保留研究階段與舊版紀錄
 
 ## 商品影片研究（2026-11-10，尚未實作）
 
