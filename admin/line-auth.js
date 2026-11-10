@@ -1,4 +1,4 @@
-import { customerReturnHash } from './product-link.js?v=0.3.28';
+import { customerReturnHash } from './product-link.js?v=0.3.29';
 // Short-lived login attempts only. Website sessions remain in sessionStorage.
 const prefix='ccbaby.line.attempt.v2.';
 const legacyKey='ccbaby.line.pending';
