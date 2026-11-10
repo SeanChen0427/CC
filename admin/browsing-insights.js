@@ -48,7 +48,7 @@ export function analyzeJourney({person,interests=[],events=[],campaign,orders,no
     facts.push(`所選期間曾加購 ${person.cartAdds} 次`,'目前沒有有效預購');
     choose('cart_help',recent?80:60,recent?'優先了解':'可準備協助','曾加購，先了解是否需要協助','先確認商品規格與送單方式，視需要做一次簡短詢問',['準備關注商品的規格與商品資訊','如可聯繫，詢問尺寸或預購操作是否需要幫忙']);
     const item=focus[0]?.productName;
-    result.draft=`嗨～${item?'這期「'+item+'」':'這期選物'}如果有尺寸、商品細節或預購操作想確認，都可以問我，我可以幫你整理資訊；商品需在網站送出後才會成立預購，目前不用先付款`;
+    result.draft=`嗨～${item?'這期「'+item+'」':'這期選物'}如果有尺寸、商品細節或預購操作想確認，都可以問我，我可以幫你整理資訊；商品需在網站送出後才會成立預購，下單後 24 小時內須透過 LINE 完成付款，確認付款後才安排採購`;
   }else if(selection&&now-time(selection.at)<=3*day){
     facts.push(`近期曾選擇${selection.action==='select_size'?'尺寸':'顏色'}${selection.option?'「'+selection.option+'」':''}`,'所選期間尚無加購紀錄');
     choose('spec_help',55,'可準備協助','已選過規格，可準備商品說明','先整理該款的尺寸、材質與照片，視需要提供選擇協助',['確認商品說明與尺寸資訊齊全','若客戶詢問，優先回應這款的規格']);

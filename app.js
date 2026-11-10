@@ -1,11 +1,11 @@
-import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.24';
-import { art } from './product-art.js?v=0.3.24';
-import { enterCustomerSite } from './entry.js?v=0.3.24';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.24';
-import { mountGallery } from './gallery.js?v=0.3.24';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.24';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.24';
-import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.24';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.25';
+import { art } from './product-art.js?v=0.3.25';
+import { enterCustomerSite } from './entry.js?v=0.3.25';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.25';
+import { mountGallery } from './gallery.js?v=0.3.25';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.25';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.25';
+import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.25';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -121,15 +121,15 @@ function renderHeader() {
   $('#bottom-nav').innerHTML = [['shop','grid','選購'],['cart','bag','購物車'],['orders','list','我的預購']].map(([id, image, name]) =>
     `<a href="#${id}" class="${tab === id ? 'active' : ''}">${icon(image)}<span>${name}</span>${id === 'cart' && count ? `<b class="count">${count}</b>` : ''}</a>`).join('');
 }
-const footer = () => `<footer class="footer"><strong>CCBABY</strong><span>韓國親自選物・為日常留一點喜歡</span><span>${config.demoMode ? '本機示範版 / 原創商品示意圖' : '先預購・到台後再通知付款'}</span>${state.user?'<div class="browsing-note"><span>本站記錄瀏覽與選購操作，供店主了解需求</span><button class="text-button" type="button" data-action="browsing-privacy">了解紀錄用途</button></div>':''}</footer>`;
+const footer = () => `<footer class="footer"><strong>CCBABY</strong><span>韓國親自選物・為毛孩帶回喜歡</span><span>下單後 24 小時內付款・確認付款後安排採購</span>${config.demoMode ? '<span>本機示範版 / 原創商品示意圖</span>' : ''}<button class="text-button" type="button" data-action="about">預購與下單須知</button>${state.user?'<div class="browsing-note"><span>本站記錄瀏覽與選購操作，供店主了解需求</span><button class="text-button" type="button" data-action="browsing-privacy">了解紀錄用途</button></div>':''}</footer>`;
 
 function renderShop() {
   const close = date(state.campaign.closesAt);
   $('#main').innerHTML = `<div class="page">
-    <section class="hero"><div><div class="eyebrow">CURATED IN KOREA / CCBABY</div><h1>把喜歡的先收進清單</h1><div class="hero-description">從首爾帶回的生活小細節， 這一趟，讓我們幫你一起帶回來</div><div class="hero-foot"><span class="pill"><i></i>${state.campaign.status==='draft' ? '本期選物準備中' : openForOrders() ? '本期預購開放中' : '本期已結單'}</span><span>${state.campaign.status==='draft' ? '開放時間將另行公告' : '預計 '+close+' 結單'}</span></div></div>
+    <section class="hero"><div><div class="eyebrow">CURATED IN KOREA / CCBABY</div><h1>把喜歡的先收進清單</h1><div class="hero-description">一起挑選喜歡的韓國毛孩選物，由我們親飛韓國帶回</div><div class="hero-foot"><span class="pill"><i></i>${state.campaign.status==='draft' ? '本期選物準備中' : openForOrders() ? '本期預購開放中' : '本期已結單'}</span><span>${state.campaign.status==='draft' ? '開放時間將另行公告' : '預計 '+close+' 結單'}</span></div></div>
       ${state.products.length ? `<div class="hero-art" aria-hidden="true"><div class="hero-photo"><img src="${photo(state.products[0])}" alt=""></div><div class="hero-photo second"><img src="${photo(state.products[Math.min(2,state.products.length-1)])}" alt=""></div><div class="collection-seal">CURATED IN<b>SEOUL</b>WITH LOVE</div></div>` : `<div class="hero-art"><div class="coming-soon"><strong>CCBABY</strong><span>OUR NEXT LITTLE JOURNEY</span></div></div>`}
     </section>
-    <div class="service-strip"><div>${icon('heart')}韓國親自挑選</div><div>${icon('bag')}先預購，不用先付款</div><div>${icon('box')}到台後通知付款</div></div>
+    <div class="service-strip"><div>${icon('heart')}韓國親自挑選</div><div>${icon('bag')}下單後 24 小時內付款</div><div>${icon('box')}11/30 起陸續出貨</div></div>
     <div class="catalog-layout"><aside class="category-sidebar"><div class="sidebar-title">EXPLORE THE EDIT</div><div id="desktop-categories">${categories()}</div><div class="sidebar-note">一年一趟的韓國選物， 喜歡的款式先記下， 由我們親自為你尋找</div></aside>
       <section><div class="catalog-top"><div class="catalog-title"><h2 id="category-heading">${esc(state.category)}<small>${state.products.length} ITEMS</small></h2><p>一點質感，剛剛好的日常</p></div><label class="search" aria-label="搜尋商品">${icon('search')}<input id="search" placeholder="搜尋名稱或商品編號" value="${esc(state.search)}" autocomplete="off"></label></div>
       <div class="mobile-filter" id="mobile-categories">${[['全部選物',0],...categoryCounts()].map(([name]) => `<button data-action="category" data-category="${esc(name)}" class="${name === state.category ? 'active' : ''}">${esc(name)}</button>`).join('')}</div>
@@ -171,7 +171,7 @@ async function showLineContact({productId,orderId,orderCode}={}){
   const order=state.orders.find(o=>o.id===orderId)||(orderCode?{code:orderCode}:null);
   const context={product,order};
   const message=lineContactMessage(data.contactCode,context),url=lineContactURL(data.contactCode,context);
-  setModal(`<div class="modal-copy line-contact-copy"><div class="eyebrow">TALK WITH CCBABY</div><h2>${order?'和店主聯繫這份預購':'讓店主幫你一起選'}</h2><p>開啟 LINE 後，確認文字並按下傳送，我們就能在同一個聊天室回覆與確認後續進度</p>${data.contactCode?`<div class="line-contact-code"><small>你的會員聯繫碼</small><strong>${esc(data.contactCode)}</strong></div>`:''}<p class="line-contact-message" id="line-contact-draft">${esc(message)}</p><button class="secondary-button" data-action="copy-line-contact">複製詢問文字</button><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">開啟 LINE，確認後傳送</a><p class="fine-print">如 LINE 提示加入好友，請先加入 CCBABY · 若電腦無法開啟，請在手機 LINE 加入 @445yxcey，再貼上詢問文字 · 預購以網站送出成功為準</p>${product?`<button class="secondary-button" data-action="product-return" data-id="${product.id}">返回商品</button>`:'<button class="secondary-button" data-action="close">返回選購</button>'}</div>`,'modal-small');
+  setModal(`<div class="modal-copy line-contact-copy"><div class="eyebrow">TALK WITH CCBABY</div><h2>${order?'和店主聯繫這份預購':'讓店主幫你一起選'}</h2><p>開啟 LINE 後，確認文字並按下傳送，我們就能在同一個聊天室回覆與確認後續進度</p><p>可先告訴我們毛孩的品種與性別，方便協助挑選；其他美妝代購也歡迎截圖私訊</p>${data.contactCode?`<div class="line-contact-code"><small>你的會員聯繫碼</small><strong>${esc(data.contactCode)}</strong></div>`:''}<p class="line-contact-message" id="line-contact-draft">${esc(message)}</p><button class="secondary-button" data-action="copy-line-contact">複製詢問文字</button><a class="primary-button" href="${esc(url)}" target="_blank" rel="noopener noreferrer">開啟 LINE，確認後傳送</a><p class="fine-print">如 LINE 提示加入好友，請先加入 CCBABY · 若電腦無法開啟，請在手機 LINE 加入 @445yxcey，再貼上詢問文字 · 網站預購請以送出成功為準；截圖下單請在官方帳號確認</p>${product?`<button class="secondary-button" data-action="product-return" data-id="${product.id}">返回商品</button>`:'<button class="secondary-button" data-action="close">返回選購</button>'}</div>`,'modal-small');
 }
 
 function showProduct(id, retain = false) {
@@ -210,12 +210,12 @@ function renderCart() {
   }
   const total = state.cart.reduce((sum,i) => sum+i.expectedPrice*i.quantity,0);
   $('#main').innerHTML = `<div class="sub-page"><div class="page-heading"><div><div class="eyebrow">YOUR LITTLE COLLECTION</div><h1>我的購物車</h1><p>${cartCount()} 件小小喜歡，等我們一起帶回來</p></div><a href="#shop" class="secondary-button">繼續選購 ${icon('arrow')}</a></div>
-    <div class="notice">${icon('clock')}<div>商品仍在購物車中，尚未正式預購， 送出後我們才會收到採買需求，現在不用付款</div></div>
+    <div class="notice">${icon('clock')}<div>商品仍在購物車中，尚未正式預購， 送出後我們才會收到預購，請於下單後 24 小時內透過 LINE 完成付款，確認付款後才安排採購</div></div>
     <div class="cart-layout"><div class="cart-list">${state.cart.map(item=>{
       const pair=getItem(item.variantId), p=pair?.product;
       return `<div class="cart-row"><div class="cart-image">${p?`<img src="${photo(p,pair.variant.color)}" alt="${esc(p.name)}">`:''}</div><div class="cart-info"><div class="product-code">${esc(p?.code || '已更新商品')}</div><h3>${esc(p?.name || '此商品已停止預購')}</h3><p>${esc(pair?.variant.color)} / ${esc(pair?.variant.size)}</p><span class="cart-price">${money(item.expectedPrice)}</span></div><div class="cart-row-side"><div class="quantity"><button data-action="cart-qty" data-id="${item.variantId}" data-delta="-1" aria-label="減少商品數量">−</button><span>${item.quantity}</span><button data-action="cart-qty" data-id="${item.variantId}" data-delta="1" aria-label="增加商品數量">＋</button></div><button class="text-button" data-action="remove" data-id="${item.variantId}">移除</button></div></div>`;
     }).join('')}</div>
-    <form class="order-summary" id="submit-form"><h2>預購確認</h2><div class="summary-line"><span>商品件數</span><span>${cartCount()} 件</span></div><div class="summary-line"><span>付款方式</span><span>到台後另行通知</span></div><div class="summary-total"><span>預估商品小計</span><strong>${money(total)}</strong></div><label class="form-field">聯絡姓名<input name="name" required maxlength="40" autocomplete="name" value="${esc(state.user.name)}" placeholder="方便我們聯絡你的姓名"></label><label class="form-field">手機號碼<input name="phone" required inputmode="tel" autocomplete="tel" maxlength="20" value="${esc(state.user.phone)}" placeholder="09 開頭的手機號碼"></label><div class="error-message" id="submit-error" role="alert"></div><button class="primary-button" type="submit" ${!openForOrders()?'disabled':''}>${openForOrders()?'送出預購・目前不用付款':'本期已結單'} ${icon('arrow')}</button><p class="fine-print">此為預購登記，實際供貨依韓國現場採購結果為準，運費與收件資訊將另外確認，現在不收款</p><button class="text-button" type="button" data-action="line-contact">選購有問題，用 LINE 找店主 →</button></form></div>${footer()}</div>`;
+    <form class="order-summary" id="submit-form"><h2>預購確認</h2><div class="summary-line"><span>商品件數</span><span>${cartCount()} 件</span></div><div class="summary-line"><span>付款方式</span><span>下單後 24 小時內付款</span></div><div class="summary-total"><span>預估商品小計</span><strong>${money(total)}</strong></div><label class="form-field">聯絡姓名<input name="name" required maxlength="40" autocomplete="name" value="${esc(state.user.name)}" placeholder="方便我們聯絡你的姓名"></label><label class="form-field">手機號碼<input name="phone" required inputmode="tel" autocomplete="tel" maxlength="20" value="${esc(state.user.phone)}" placeholder="09 開頭的手機號碼"></label><div class="error-message" id="submit-error" role="alert"></div><button class="primary-button" type="submit" ${!openForOrders()?'disabled':''}>${openForOrders()?'送出預購':'本期已結單'} ${icon('arrow')}</button><p class="fine-print">下單即同意預購規則，請先自行確認尺寸，恕不接受退換貨；喊單後請勿棄單或失聯，違者將備案處理</p><button class="text-button" type="button" data-action="about">查看完整預購與下單須知 →</button><p class="fine-print">缺貨可選擇退款或更換款式，運費與收件資訊於 LINE 另行確認</p><button class="text-button" type="button" data-action="line-contact">選購有問題，用 LINE 找店主 →</button></form></div>${footer()}</div>`;
   $('#submit-form').addEventListener('submit', submitOrder);
   if (state.contactDraft) {
     $('#submit-form').elements.namedItem('name').value = state.contactDraft.name;
@@ -242,7 +242,7 @@ async function submitOrder(event) {
     saved=true;observe('submit_success',{quantity:result.added});
     state.cart=[];saveCart();state.pending=null;state.contactDraft=null;
     state.user=(await api('me')).user;renderCart();
-    setModal(`<div class="modal-copy"><div class="success-mark">${icon('check')}</div><div class="eyebrow">SAVED FOR YOUR NEXT JOURNEY</div><h2>預購已送出</h2><p>已記下這次的 ${result.added} 件選物，目前不用付款，商品到台後再另行通知</p><div class="success-code">${esc(result.code)}</div><p>謝謝你的預購，我們會依實際採買結果安排，並在到台後聯絡付款與交付</p><button class="primary-button" data-action="line-contact" data-order-id="${result.orderId}" data-order-code="${esc(result.code)}">用 LINE 詢問這份預購</button><p class="fine-print">有問題可直接在官方帳號留言，預購明細也能隨時在網站查看</p><button class="secondary-button" data-action="view-orders">查看我的預購 ${icon('arrow')}</button></div>`,'modal-small');
+    setModal(`<div class="modal-copy"><div class="success-mark">${icon('check')}</div><div class="eyebrow">SAVED FOR YOUR NEXT JOURNEY</div><h2>預購已送出</h2><p>已記下這次的 ${result.added} 件選物，請於下單後 24 小時內透過 LINE 完成付款</p><div class="success-code">${esc(result.code)}</div><p>確認付款後才安排採購，依付款順序寄出，預計 11/30 起陸續出貨；缺貨可選擇退款或更換款式</p><button class="primary-button" data-action="line-contact" data-order-id="${result.orderId}" data-order-code="${esc(result.code)}">用 LINE 確認付款與預購</button><p class="fine-print">有問題可直接在官方帳號留言，預購明細也能隨時在網站查看</p><button class="secondary-button" data-action="view-orders">查看我的預購 ${icon('arrow')}</button></div>`,'modal-small');
   } catch(error) { if(!saved)observe('submit_failure');if ($('#submit-error')) $('#submit-error').textContent=error.message; else toast(error.message);button.disabled=false;button.innerHTML='重新送出預購 '+icon('arrow'); }
   finally {state.submitting=false;}
 }
@@ -261,8 +261,8 @@ async function renderOrders() {
     const labels={open:'預購已收到',closed:'已結單',purchasing:'韓國採購中',arrived:'商品已到台',archived:'本期已完成'};
     $('#main').innerHTML=`<div class="sub-page"><div class="page-heading"><div><div class="eyebrow">SAVED WITH LOVE</div><h1>我的預購</h1><p>喜歡的選物，和這一趟的每個進度</p></div><a href="#shop" class="secondary-button">繼續追加 ${icon('plus')}</a></div>
       ${orders.length?orders.map(o=>`<article class="order-card"><div class="order-card-head"><div><div class="order-code">${esc(o.code)}</div><div class="order-time">${date(o.created_at)} 建立 · 最近更新 ${date(o.updated_at)}</div></div><span class="status-chip">${labels[state.campaign.status]||'已預購'}</span></div>
-      ${o.items.map(i=>`<div class="order-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>${i.bought?`已分配買到 ${i.bought} 件`:'等待採購／分配'}${i.shortage?` · 確認缺貨 ${i.shortage} 件`:''}</small></div><div class="order-item-side"><span>${money(i.price*i.quantity)}</span>${openForOrders()?` <button class="text-button" data-action="edit-item" data-id="${i.id}">修改數量</button>`:''}</div></div>`).join('')}<div class="order-card-foot"><span>共 ${o.quantity} 件・預估商品小計</span><strong>${money(o.total)}</strong></div><div class="order-line-contact"><button class="secondary-button" data-action="line-contact" data-order-id="${o.id}" data-order-code="${esc(o.code)}">用 LINE 詢問這份預購</button></div></article>`).join(''):`<div class="empty-state">${icon('list')}<h2>尚未送出預購</h2><p>你還沒有送出本期預購，去挑幾件喜歡的吧</p><a href="#shop" class="primary-button">查看本期選物 ${icon('arrow')}</a></div>`}
-      <div class="contact-card"><div><h3>聯絡與收件資料</h3><p>${esc(state.user.name||'聯絡姓名尚未填寫')}${state.user.phone?' · '+esc(state.user.phone):''}</p><p>${esc(state.user.delivery||'收件資訊可以稍後再補齊')}</p></div><button class="text-button" data-action="profile">編輯資料</button></div><p class="fine-print">預購不代表保證供貨，實際採購結果將顯示於品項下方，付款由店主於到台後另行聯絡</p>${footer()}</div>`;
+      ${o.items.map(i=>`<div class="order-item"><div>${esc(i.product_name)}<small>${esc(i.product_code)} · ${esc(i.color)} / ${esc(i.size)} · ${i.quantity} 件</small><small>${i.bought?`已分配買到 ${i.bought} 件`:'等待採購／分配'}${i.shortage?` · 確認缺貨 ${i.shortage} 件`:''}</small></div><div class="order-item-side"><span>${money(i.price*i.quantity)}</span>${openForOrders()?` <button class="text-button" data-action="edit-item" data-id="${i.id}">修改數量</button>`:''}</div></div>`).join('')}<div class="order-card-foot"><span>共 ${o.quantity} 件・預估商品小計</span><strong>${money(o.total)}</strong></div><div class="order-line-contact"><button class="secondary-button" data-action="line-contact" data-order-id="${o.id}" data-order-code="${esc(o.code)}">用 LINE 確認付款與預購</button></div></article>`).join(''):`<div class="empty-state">${icon('list')}<h2>尚未送出預購</h2><p>你還沒有送出本期預購，去挑幾件喜歡的吧</p><a href="#shop" class="primary-button">查看本期選物 ${icon('arrow')}</a></div>`}
+      <div class="contact-card"><div><h3>聯絡與收件資料</h3><p>${esc(state.user.name||'聯絡姓名尚未填寫')}${state.user.phone?' · '+esc(state.user.phone):''}</p><p>${esc(state.user.delivery||'收件資訊可以稍後再補齊')}</p></div><button class="text-button" data-action="profile">編輯資料</button></div><p class="fine-print">下單後 24 小時內須完成付款，確認付款後才安排採購；依付款順序寄出，預計 11/30 起陸續出貨，缺貨可選擇退款或更換款式。付款、尺寸或商品問題，請直接在 LINE 官方帳號留言</p>${footer()}</div>`;
   }catch(error){if(cloud&&!state.user)return;$('#main').innerHTML=`<div class="empty-state"><h2>暫時無法讀取預購</h2><p>${esc(error.message)}</p><button class="secondary-button" data-action="retry">再試一次</button></div>`;}
 }
 
@@ -342,7 +342,7 @@ document.addEventListener('click', async event => {
     if(action==='view-orders'){modal.close();if(route()==='orders')renderOrders();else location.hash='orders';return;}
     if(action==='retry'){render();return;}
     if(action==='about'){observe('about');
-      event.preventDefault();setModal(`<div class="modal-copy"><div class="eyebrow">A LITTLE NOTE</div><h2>預購說明</h2><p>先把喜歡的商品加入購物車，確認顏色、尺寸與數量後送出預購</p><p>我們會依照清單在韓國採買，實際款式與數量依現場供貨為準，商品到台後才會聯絡付款與交付方式</p><div class="notice">本期結單：${date(state.campaign.closesAt)}，結單前可追加與調整；結單後如需異動，請聯絡店主</div><button class="primary-button" data-action="close">知道了</button></div>`,'modal-small');return;
+      event.preventDefault();setModal(`<div class="modal-copy"><div class="eyebrow">A LITTLE NOTE</div><h2>預購說明</h2><p>歡迎加入 CCBABY 🤍 一起挑選喜歡的韓國毛孩選物</p><h3>韓國連線預購</h3><ol class="preorder-rules"><li>已上架商品可先預購，確認顏色、尺寸與數量後，由購物車送出，我們將親飛韓國帶回</li><li>連線期間會有限時動態連線，可截圖至 LINE 官方帳號私訊下單；其他美妝代購也歡迎截圖詢問</li><li>下單後 24 小時內須完成付款，才會安排採購，依付款順序寄出；收款資料與總額請在 LINE 確認</li><li>韓國商品可能斷貨，可選擇退款或更換其他款式，建議提前準備備案</li><li>預計 11/30 起陸續出貨</li></ol><h3>下單前請務必確認</h3><ol class="preorder-rules"><li>韓國款式版型不同，請勿直接比照以往購買尺寸</li><li>尺寸請自行確認後再下單，恕不接受退換貨</li><li>下單即同意以上規則，喊單後請勿棄單或失聯，違者將備案處理</li></ol><p>可先提供毛孩品種與性別，方便我們協助挑選；尺寸或商品有問題，直接在 LINE 官方帳號留言就好</p><div class="notice">本期結單：${date(state.campaign.closesAt)}，結單前可追加與調整；結單後如需異動，請聯絡店主</div><button class="primary-button" data-action="close">知道了</button></div>`,'modal-small');return;
     }
     if(action==='zoom'){observe('zoom');
       const p=state.products.find(p=>p.id===state.selection.id);
@@ -350,7 +350,7 @@ document.addEventListener('click', async event => {
       setModal(`<img class="zoom-image" src="${esc(p.images?.[state.selection.photoIndex] || photo(p))}" alt="${esc(p.name)}放大圖"><button class="secondary-button" data-action="back-product" style="margin:15px">返回商品</button>`);return;
     }
     if(action==='back-product'){showProduct(state.selection.id,true);return;}
-    if(action==='size'&&!config.demoMode){observe('size_guide');setModal(`<div class="modal-copy"><div class="eyebrow">SIZE GUIDE</div><h2>尺寸選擇</h2><p>各款尺寸請以商品說明為準，若不確定尺寸，請透過 LINE 聯絡我們協助挑選</p><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;}
+    if(action==='size'&&!config.demoMode){observe('size_guide');setModal(`<div class="modal-copy"><div class="eyebrow">SIZE GUIDE</div><h2>尺寸選擇</h2><p>韓國款式版型不同，請勿直接比照以往購買尺寸，請依各款商品說明自行確認後再下單，恕不接受退換貨</p><p>可透過 LINE 提供毛孩品種與性別，讓我們協助挑選；尺寸或商品有問題，直接在官方帳號留言就好</p><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;}
     if(action==='size'){observe('size_guide');
       setModal(`<div class="modal-copy"><div class="eyebrow">SIZE REFERENCE / CM</div><h2>尺寸選擇</h2><p>本機示範尺寸表，正式上架時請替換為各款實際尺寸</p><table class="size-table"><thead><tr><th>尺寸</th><th>胸圍</th><th>背長</th></tr></thead><tbody><tr><td>S</td><td>33</td><td>23</td></tr><tr><td>M</td><td>39</td><td>28</td></tr><tr><td>L</td><td>43</td><td>30</td></tr><tr><td>XL</td><td>48</td><td>35</td></tr></tbody></table><button class="secondary-button" data-action="back-product">返回商品</button></div>`,'modal-small');return;
     }
