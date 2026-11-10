@@ -1,3 +1,4 @@
+import { customerReturnHash } from './product-link.js';
 // Short-lived login attempts only. Website sessions remain in sessionStorage.
 const prefix='ccbaby.line.attempt.v2.';
 const legacyKey='ccbaby.line.pending';
@@ -41,7 +42,7 @@ export function takeLineAttempt(state,{session,local,now=Date.now()}){
   // A marker prevents the original tab from reusing its copy after a new tab consumed it.
   set(local,key,JSON.stringify({consumed:true,at:pending.at}));remove(session,key);
   if(parse(get(session,legacyKey))?.state===state)remove(session,legacyKey);
-  return {...pending,returnHash:['#shop','#cart','#orders'].includes(pending.returnHash)?pending.returnHash:''};
+  return {...pending,returnHash:customerReturnHash(pending.returnHash)};
 }
 export function markBrowserLineLogin(session){set(session,recoveryKey,'1');}
 export function browserLineLoginNeeded(session,search=''){return get(session,recoveryKey)==='1'||new URLSearchParams(search).get('login')==='browser';}

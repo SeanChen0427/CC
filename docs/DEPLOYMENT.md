@@ -1,5 +1,9 @@
 # GitHub Pages 與 Supabase 部署
 
+## 0.3.28 單品分享（發布驗證中）
+
+本次僅發布靜態前端，兩入口共用 product-link.js，Edge v26、私有資料、RPC、Storage 與 LINE 設定沿用。部署版本與測試結果見 HANDOFF。使用者已明確授權直接上架；還原點 tag `checkpoint/before-product-links-0.3.27`／main 9827d64／gh-pages e052d6c。若要求回上一版，依 tag 還原本次來源並重新建置／發布，或以該 Pages 成品建立新還原提交；不得回復正式資料庫或以強制推送破壞歷史
+
 ## 0.3.27 商品 GIF（已發布）
 
 商品照片後端與靜態前端同時更新；Storage 的 ccbaby-products 僅在既有 allowed_mime_types 追加 image/gif，file_size_limit 保持 1400000、public 與角色權限保持。這是 bucket 格式設定，不新增資料表、RPC 或公開寫入權限；Edge v26 ACTIVE、23 來源一致；Pages e052d6c／[run 42817276423](https://github.com/SeanChen0427/CC/actions/runs/42817276423) success，48 公開檔案與 dist 一致。發布前後 revision 201／MD5 ce4ae7a9ba69f2ad00c85ecc30e8f354 保持，詳見 HANDOFF

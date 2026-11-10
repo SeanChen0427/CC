@@ -1,5 +1,9 @@
 # 跨 AI 工具共用索引
 
+## 0.3.28 單品分享連結（D-49，發布驗證中）
+
+後台商品清單增加複製連結，`#product/商品ID` 在 LINE 驗證後直接開啟既有商品視窗；客端 HTML／CSS 與原商品模板不變，不建立獨立商品頁。共用 [連結白名單](shared/product-link.js)、[登入及連結驗證](tests/product-link.test.mjs)；實際結果見 [交接](docs/HANDOFF.md)。還原點 `checkpoint/before-product-links-0.3.27` 已推送 GitHub，來源 `9827d64`／Pages `e052d6c`，回復不還原業務資料
+
 ## 0.3.27 商品 GIF（D-48，已發布）
 
 商品照片新增 GIF 原檔動畫保留，單張 1.4 MB、共 8 張；148 項測試及四寬 UI／動畫／購物流程通過，Edge v26／Pages e052d6c 已發布；正式 48 檔及 23 個後端來源一致，詳見 [交接](docs/HANDOFF.md)。入口沿用 [上傳準備](apps/admin-web/image-upload.js)、[相簿管理](apps/admin-web/image-editor.js)、cloud/index.ts／server/api.mjs；新增 [上傳驗證](tests/image-upload.test.mjs) 與 [雙影格測試圖](tests/fixtures/product-gif.mjs)，實際 Edge handler 沿用 tests/cloud-entry.test.mjs
@@ -48,7 +52,7 @@ LINE 圖片尺寸：正式 PNG 為 2500×843，預覽已修正為合法的 1200�
 
 頁首常駐提示移至共用頁尾，會員選單保留說明入口；完整用途說明與觀察行為沿用。頂部優先留給優惠資訊，本次未提供優惠內容、不建立促銷規則。120 項測試及隔離購物流程通過，Pages 1b34694／run 42449286082 success，正式 13 檔核對通過，Edge 沿用 v20；詳見 HANDOFF
 
-更新：2026-11-10（Asia/Taipei）｜版本：0.3.27
+更新：2026-11-10（Asia/Taipei）｜版本：0.3.28
 
 品牌名稱已確認為 **CCBABY**。
 

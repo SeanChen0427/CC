@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "projectName": "CCBABY 韓國年度預購網站",
-  "documentVersion": "0.3.27",
+  "documentVersion": "0.3.28",
   "updatedAt": "2026-11-10",
   "timezone": "Asia/Taipei",
   "phase": "live_line_login_enabled",
@@ -109,7 +109,7 @@
     "salesPlaybook": "docs/SALES_PLAYBOOK.md",
     "customerCare": "docs/CUSTOMER_CARE.md"
   },
-  "nextStep": "owner_add_actual_youtube_links_and_accept_iphone_line_playback",
+  "nextStep": "verify_and_publish_product_share_preserving_existing_customer_modal",
   "lineEntryFunnel": {
     "status": "live_menu_and_replies_configured",
     "publicationHandledBy": "agent_after_owner_image_upload",
@@ -1117,5 +1117,53 @@
     "liveAnonymousLineRedirectChecked": true,
     "liveValidProductOrOrderWrites": false,
     "formalApiVerificationExplicitlyApproved": true
+  },
+  "productSharing": {
+    "decision": "D-49",
+    "status": "implemented_verifying_release",
+    "hashFormat": "#product/<positive_safe_integer_id>",
+    "adminCopyOnly": true,
+    "standaloneProductPage": false,
+    "customerHtmlCssAndDialogTemplateChanged": false,
+    "existingLineAuthRequired": true,
+    "backendChanged": false,
+    "sourcePaths": [
+      "shared/product-link.js",
+      "shared/runtime.js",
+      "shared/line-auth.js",
+      "apps/customer-web/app.js",
+      "apps/admin-web/app.js",
+      "tests/product-link.test.mjs"
+    ],
+    "verification": {
+      "integrationTestsPassed": 154,
+      "syntaxModules": 54,
+      "viewports": [
+        320,
+        390,
+        768,
+        1440
+      ],
+      "linkedAndOrdinaryDialogHtmlIdentical": true,
+      "physicalIPhoneChecked": false,
+      "productionBusinessWrites": false,
+      "cartReloadPreorderAppendAndAdminChecked": true,
+      "sameOrderCodeAfterAppend": true,
+      "quantityAfterAppend": 3,
+      "totalAfterAppend": 1770,
+      "videoPlaybackReturnAndProductSwitchChecked": true,
+      "hiddenMissingAndClosedProductChecked": true,
+      "pageErrors": 0,
+      "builtFiles": 52
+    },
+    "rollback": {
+      "version": "0.3.27",
+      "tag": "checkpoint/before-product-links-0.3.27",
+      "sourceCommit": "9827d644a017951af36e61774cce2ecf6c3f2f1c",
+      "pagesCommit": "e052d6c2b379a4a26d4f3df336a59a64d5c15e4a",
+      "edgeVersion": 26,
+      "tagPushed": true,
+      "preserveCurrentBusinessData": true
+    }
   }
 }

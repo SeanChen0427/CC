@@ -8,6 +8,7 @@ import { youtubeVideo } from './youtube.js';
 import { mountBrowsingTracker } from './browsing.js';
 import { categoryCounts as countCategories } from './product-categories.js';
 import { lineContactMessage,lineContactURL } from './line-contact.js';
+import { linkedProductId } from './product-link.js';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -279,6 +280,15 @@ function render() {
   else renderShop();
 }
 
+function openLinkedProduct() {
+  if(!state.ready||(cloud&&!state.user))return;
+  const id=linkedProductId(location.hash);
+  if(id===null)return;
+  if(state.products.some(p=>p.id===id)){showProduct(id);return;}
+  history.replaceState(null,'',location.pathname+location.search+'#shop');
+  toast('商品目前無法查看，請看看其他選物');
+}
+
 document.addEventListener('click', async event => {
   const target=event.target.closest('[data-action]');
   if(!target)return;
@@ -384,9 +394,14 @@ document.addEventListener('click', async event => {
 document.addEventListener('keydown',event=>{
   if(event.key==='Enter'&&event.target.matches('.product-photo'))showProduct(Number(event.target.dataset.id));
 });
-modal.addEventListener('close',()=>{closeProductVideo();if(!modal.open)browsing?.view(route());state.gallery?.dispose();state.gallery=null;});
+modal.addEventListener('close',()=>{
+  if(modal.open)return;
+  closeProductVideo();
+  if(state.ready&&linkedProductId(location.hash)!==null)history.replaceState(null,'',location.pathname+location.search+'#shop');
+  browsing?.view(route());state.gallery?.dispose();state.gallery=null;
+});
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
-window.addEventListener('hashchange',()=>{modal.close();render();window.scrollTo(0,0);});
+window.addEventListener('hashchange',()=>{closeProductVideo();modal.close();render();openLinkedProduct();window.scrollTo(0,0);});
 window.addEventListener('pageshow',event=>{
   if(event.persisted&&cloud&&!state.user){state.authRedirecting=false;renderAuthGate('請使用 LINE 登入後繼續');}
 });
@@ -400,7 +415,7 @@ try {
     login:channelId=>startLineLogin(channelId,{replace:true}),
     ready:(catalog,me)=>{
       state.products=catalog.products;state.categories=catalog.categories||[];state.campaign=catalog.campaign;state.promotion=catalog.promotion;state.user=me.user;state.profiles=me.profiles||[];state.lineConfigured=catalog.lineConfigured;state.lineChannelId=catalog.lineChannelId;
-      if(state.user)startBrowsing();state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();void browsing?.flush();
+      if(state.user)startBrowsing();state.ready=true;document.body.classList.remove('auth-pending');loadCart();render();openLinkedProduct();void browsing?.flush();
     },
   });
 }catch(error){

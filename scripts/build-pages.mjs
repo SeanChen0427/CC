@@ -21,6 +21,7 @@ for(const role of ['customer','admin']){
   cpSync(join(root,'shared/product-categories.js'),join(target,'product-categories.js'));
   cpSync(join(root,'shared/line-contact.js'),join(target,'line-contact.js'));
   cpSync(join(root,'shared/youtube.js'),join(target,'youtube.js'));
+  cpSync(join(root,'shared/product-link.js'),join(target,'product-link.js'));
   if(role==='admin')cpSync(join(root,'shared/costing.js'),join(target,'costing.js'));
   if(role==='admin')cpSync(join(root,'shared/product-costing.js'),join(target,'product-costing.js'));
   cpSync(join(root,'server/art.mjs'),join(target,'product-art.js'));

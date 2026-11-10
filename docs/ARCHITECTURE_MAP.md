@@ -1,5 +1,9 @@
 # 架構地圖與樹狀圖
 
+## 0.3.28 單品分享入口（D-49）
+
+admin app.js → shared/product-link.js → 設定 customerURL + #product/ID → 原 customer entry／runtime LINE 驗證 → 原 catalog／bootstrap → app.js 的 openLinkedProduct → 原 showProduct，背景仍是 renderShop。沒有新增頁面、API 或資料欄位；普通圖卡不改 hash。關閉／加購時 replaceState 到 #shop，避免新增多餘返回步驟；hashchange 開啟其他分享商品時，過時 close 事件不清掉新相簿。分享 hash 與原 #shop／#cart／#orders 由同一白名單供 runtime／line-auth 使用，無效值不作任意導向。build-pages 與本機 server 共用檔案映射都追加 product-link.js；Edge v26 沿用
+
 ## 0.3.27 商品 GIF（D-48）
 
 image-editor.js 接受 image/gif，多選／拖入沿用原佇列；image-upload.js 讀圖後原封保留 GIF data URL，單張 1.4 MB，不走 canvas 縮圖。cloud/index.ts／server/api.mjs 驗證檔頭、尺寸、結尾及大小，Storage 僅追加 GIF MIME；cloud/core.mjs／本機驗證允許既有受限來源的 .gif URL，本機靜態服務回 image/gif。商品 images／imageBindings 與草稿資料結構不變，客戶原生 img 播放，商品匯出繼續產生靜態 JPEG 縮圖。驗證見 tests/image-upload.test.mjs、tests/cloud-entry.test.mjs；無業務 DDL／新 RPC

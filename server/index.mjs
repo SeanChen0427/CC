@@ -37,6 +37,7 @@ export async function startApp({ directory = join(ROOT, '.local'), customerPort 
         const sharedFiles={'/runtime.js':'shared/runtime.js','/line-auth.js':'shared/line-auth.js','/product-art.js':'server/art.mjs','/product-gallery.js':'shared/product-gallery.js','/product-pricing.js':'shared/product-pricing.js','/product-categories.js':'shared/product-categories.js',...(role==='admin'?{'/costing.js':'shared/costing.js','/product-costing.js':'shared/product-costing.js'}:{})};
         sharedFiles['/line-contact.js']='shared/line-contact.js';
         sharedFiles['/youtube.js']='shared/youtube.js';
+        sharedFiles['/product-link.js']='shared/product-link.js';
         if (sharedFiles[url.pathname]) {
           res.setHeader('Content-Type','text/javascript; charset=utf-8');res.end(await readFile(join(ROOT,sharedFiles[url.pathname])));return;
         }
