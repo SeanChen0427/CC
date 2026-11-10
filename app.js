@@ -1,11 +1,13 @@
-import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.25';
-import { art } from './product-art.js?v=0.3.25';
-import { enterCustomerSite } from './entry.js?v=0.3.25';
-import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.25';
-import { mountGallery } from './gallery.js?v=0.3.25';
-import { mountBrowsingTracker } from './browsing.js?v=0.3.25';
-import { categoryCounts as countCategories } from './product-categories.js?v=0.3.25';
-import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.25';
+import { request, config, cloud, hasSession, lineLogin, finishLineLogin, browserLineLoginRequired } from './runtime.js?v=0.3.26';
+import { art } from './product-art.js?v=0.3.26';
+import { enterCustomerSite } from './entry.js?v=0.3.26';
+import { imageForColor, photoIndexForColor } from './product-gallery.js?v=0.3.26';
+import { mountGallery } from './gallery.js?v=0.3.26';
+import { openProductVideo, closeProductVideo } from './product-video.js?v=0.3.26';
+import { youtubeVideo } from './youtube.js?v=0.3.26';
+import { mountBrowsingTracker } from './browsing.js?v=0.3.26';
+import { categoryCounts as countCategories } from './product-categories.js?v=0.3.26';
+import { lineContactMessage,lineContactURL } from './line-contact.js?v=0.3.26';
 const $ = selector => document.querySelector(selector);
 const money = n => 'NT$ ' + Number(n).toLocaleString('en-US');
 const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]);
@@ -22,6 +24,7 @@ const paths = {
   box: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10M7.5 4.5l9 5"/>',
   heart: '<path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 00-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 000-7.8Z"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  play: '<circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4V8Z"/>',
 };
 const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.bag}</svg>`;
 const state = { products: [], campaign: null, user: null, profiles: [], category: '全部選物', search: '', limit: 24, cart: [], orders: [], selection: null, submitting: false, pending: null, contactDraft: null, lineConfigured: false, lineChannelId: null };
@@ -55,6 +58,7 @@ async function api(path, options = {}) {
 }
 
 function renderAuthGate(message, { loading=false, reload=false } = {}) {
+  closeProductVideo();
   state.ready=false;
   document.body.classList.add('auth-pending');
   if(modal.open)modal.close();
@@ -150,7 +154,7 @@ function renderGrid() {
     return `<article class="product-card" style="animation-delay:${Math.min(index,8)*25}ms">
       <div class="product-photo" data-action="product" data-id="${p.id}" role="button" tabindex="0" aria-label="查看 ${esc(p.name)}"><img src="${photo(p)}" alt="${esc(p.name)}示意圖" loading="lazy">${p.badge ? `<span class="product-badge">${esc(p.badge)}</span>` : ''}</div>
       <div class="product-code">${esc(p.code)} / ${esc(p.category)}</div><h3>${esc(p.name)}</h3><div class="product-meta">${[...new Set(p.variants.map(v => v.color))].map(esc).join(' · ')}</div>
-      <div class="product-bottom"><span class="product-price">${price}</span><button class="quick-add" data-action="product" data-id="${p.id}" aria-label="選擇 ${esc(p.name)} 規格">${icon('plus')}</button></div></article>`;
+      <div class="product-bottom"><span class="product-price">${price}</span><div class="product-card-actions">${youtubeVideo(p.videoUrl)?`<button class="product-video-button" data-action="video" data-id="${p.id}" aria-label="觀看 ${esc(p.name)} 影片">${icon('play')}<span class="product-action-label">看介紹影片</span></button>`:''}<button class="primary-button product-order-button" data-action="product" data-id="${p.id}" aria-label="選擇 ${esc(p.name)} 規格">${icon('plus')}<span class="product-action-label">選規格預購</span></button></div></div></article>`;
   }).join('') || (!state.products.length ? `<div class="empty-state grid-empty">${icon('heart')}<h2>本期選物準備中</h2><p>我們正在整理這次的韓國選物， 開放預購時會再通知大家</p></div>` : `<div class="empty-state grid-empty">${icon('search')}<h2>${emptyCategory?'這個分類尚未上架商品':'找不到符合的商品'}</h2><p>${emptyCategory?'可以先看看其他分類的選物':'換個關鍵字，或試著搜尋商品編號'}</p><button class="secondary-button" data-action="clear-search">查看全部商品</button></div>`);
   $('#load-more').innerHTML = filtered.length > state.limit
     ? `<div class="load-more-wrap"><button class="secondary-button" data-action="more">繼續看看 ${icon('arrow')}</button><p class="collection-end">已顯示 ${Math.min(filtered.length,state.limit)} / ${filtered.length} 件選物</p></div>`
@@ -188,7 +192,7 @@ function showProduct(id, retain = false) {
   const images = product.images?.length ? product.images : [photo(product)];
   selected.photoIndex = Math.max(0, Math.min(selected.photoIndex || 0, images.length - 1));
   setModal(`<div class="product-dialog"><div class="product-gallery"><div class="product-main-image" role="region" aria-label="商品照片${images.length>1?'，可左右滑動':''}" tabindex="0">${images.map((url,i)=>`<button class="gallery-slide" type="button" data-action="zoom" data-index="${i}" aria-label="放大商品照片 ${i+1}"><img src="${esc(url)}" alt="${esc(product.name)} 照片 ${i+1}" draggable="false" ${i!==selected.photoIndex?'loading="lazy"':''}></button>`).join('')}</div><div class="gallery-progress" ${images.length<2?'hidden':''}><span>左右滑動</span><output class="gallery-count" aria-live="polite">${selected.photoIndex+1} / ${images.length}</output></div><div class="image-thumbs">${images.map((url,i) => `<button class="${i===selected.photoIndex?'selected':''}" data-action="photo" data-index="${i}" aria-label="查看商品照片 ${i+1}" aria-pressed="${i===selected.photoIndex}"><img src="${esc(url)}" alt="商品照片 ${i+1}"></button>`).join('')}</div></div>
-    <div class="product-detail"><div class="eyebrow">${esc(product.code)} · ${esc(product.category)}</div><h2>${esc(product.name)}</h2><div class="detail-price">${money(variant?.price ?? Math.min(...product.variants.map(v=>v.price)))}<small>預購參考售價</small></div>
+    <div class="product-detail"><div class="eyebrow">${esc(product.code)} · ${esc(product.category)}</div><h2>${esc(product.name)}</h2><div class="detail-price-row"><div class="detail-price">${money(variant?.price ?? Math.min(...product.variants.map(v=>v.price)))}<small>預購參考售價</small></div>${youtubeVideo(product.videoUrl)?`<button class="product-video-button detail-video-button" data-action="video" data-id="${product.id}">${icon('play')}看介紹影片</button>`:''}</div>
     <p class="detail-description">${esc(product.description)}</p><button class="text-button line-contact-button" data-action="line-contact" data-product-id="${product.id}">用 LINE 詢問這款 →</button>
     <div class="option-label">顏色 <span>${esc(selected.color || '請選擇')}</span></div><div class="options">${colors.map(color => `<button class="option ${selected.color===color?'selected':''}" data-action="option" data-option="color" data-value="${esc(color)}">${esc(color)}</button>`).join('')}</div>
     <div class="option-label">尺寸／規格 ${['vest','coat'].includes(product.kind)?'<button class="text-button" data-action="size">尺寸參考</button>':''}</div><div class="options">${sizes.map(size => `<button class="option ${selected.size===size?'selected':''}" data-action="option" data-option="size" data-value="${esc(size)}">${esc(size)}</button>`).join('')}</div>
@@ -289,6 +293,11 @@ document.addEventListener('click', async event => {
     if(action==='copy-line-contact'){try{await navigator.clipboard.writeText($('#line-contact-draft').textContent);toast('詢問文字已複製');}catch{toast('請長按上方詢問文字後複製');}return;}
     if(action==='product-return'){showProduct(Number(target.dataset.id),true);return;}
     if(action==='close'){modal.close();return;}
+    if(action==='video'){
+      const product=state.products.find(p=>p.id===Number(target.dataset.id));
+      if(!product||!openProductVideo(product,{returnLabel:modal.open?'返回商品':'返回選購'}))toast('影片連結已更新，請重新載入商品');
+      return;
+    }
     if(action==='category'){
       state.category=target.dataset.category;observe('category',{category:state.category});state.limit=24;modal.close();renderShop();return;
     }
@@ -375,7 +384,7 @@ document.addEventListener('click', async event => {
 document.addEventListener('keydown',event=>{
   if(event.key==='Enter'&&event.target.matches('.product-photo'))showProduct(Number(event.target.dataset.id));
 });
-modal.addEventListener('close',()=>{if(!modal.open)browsing?.view(route());state.gallery?.dispose();state.gallery=null;});
+modal.addEventListener('close',()=>{closeProductVideo();if(!modal.open)browsing?.view(route());state.gallery?.dispose();state.gallery=null;});
 modal.addEventListener('click',event=>{if(event.target===modal){const box=modal.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)modal.close();}});
 window.addEventListener('hashchange',()=>{modal.close();render();window.scrollTo(0,0);});
 window.addEventListener('pageshow',event=>{
